@@ -1,309 +1,478 @@
+# -*- coding: utf-8 -*-
 """
-Hiring Post Approval Bot
-=========================
+Telegram Job Posting Bot (Persistent Modern Contact Buttons + Optional Info/Photo)
+======================================================================================
+Bot សម្រាប់ជួយ Admin ទម្លាក់ព័ត៌មានការងារទៅកាន់ Telegram Channel
+ដោយភ្ជាប់ Inline Buttons "Contact" (មាន Icon/ពណ៌ Emoji) ដោយស្វ័យប្រវត្តិ។
 
-Flow:
-1. An employer sends a job posting message to the bot (private chat).
-2. The bot forwards it to the ADMIN with "Approve" / "Reject" buttons.
-3. If the admin approves, the bot posts the job to the public CAREER_CHANNEL
-   and notifies the employer it was published.
-4. If the admin rejects, the employer is notified their post was declined
-   (optionally with a reason).
+លក្ខណៈពិសេស:
+    - Contact Buttons ត្រូវបានកំណត់ *តែម្តង* ហើយប្រើប្រាស់ជាប់រហូតគ្រប់ post
+      (កែប្រែពេលក្រោយបានគ្រប់ពេល ដោយប្រើ /setcontact ម្តងទៀត)
+    - ដាក់ច្រើនប៊ូតុងជាជួរដូចគ្នាបាន (រហូតដល់ 3 ក្នុងមួយជួរ) ដោយប្រើសញ្ញា |
+    - អាចដាក់ Icon (Emoji) និង "ពណ៌" (តាមរយៈ style:color -> បំប្លែងទៅជារង្វង់ Emoji ពណ៌
+      ព្រោះ Telegram Bot API មិនអនុញ្ញាតឱ្យប្តូរពណ៌ផ្ទៃខាងក្រោយប៊ូតុងពិតប្រាកដទេ)
+    - ពេលបង្ហោះការងារថ្មី: ព័ត៌មានការងារ និង/ឬ រូបភាព ត្រូវផ្ញើក្នុង *សារតែមួយ*
+      (ផ្ញើរូបភាពជាមួយ Caption, ឬផ្ញើតែអត្ថបទ, ឬផ្ញើតែរូបភាព)
+    - ព័ត៌មានការងារវែងៗ (ច្រើនជាង Telegram Caption Limit) ត្រូវបានគាំទ្រដោយស្វ័យប្រវត្តិ៖
+      ប្រសិនបើមានរូបភាព ហើយអត្ថបទវែងជាង 1024 តួ (Caption limit របស់ Telegram) ->
+      រូបភាពនឹងផ្ញើដោយគ្មាន Caption រួចអត្ថបទពេញលេញនឹងផ្ញើជាសារបន្ទាប់ភ្លាមៗ
+      (ភ្ជាប់ Contact Buttons ទៅសារអត្ថបទនោះជំនួសវិញ)។
 
-Requirements:
-    pip install python-telegram-bot==21.4 --break-system-packages
+របៀបប្រើប្រាស់ /setcontact (សម្រាប់ Admin ក្នុង Private Chat ជាមួយ Bot):
 
-Setup:
-    1. Create a bot via @BotFather on Telegram, get the BOT_TOKEN.
-    2. Get your admin numeric user id (message @userinfobot to find it).
-    3. Create/choose your career channel, add the bot as an ADMIN of that
-       channel (needs "Post Messages" permission), and get the channel's
-       @username or its numeric chat id (e.g. -1001234567890).
-    4. Fill in config.py (see config.py.example) or set environment variables.
-    5. Run: python bot.py
+    /setcontact
+    Button text 1 - http://www.example.com/
+    Button text 2 - http://www.example2.com/
+
+    អាចដាក់ពណ៌ (បំប្លែងទៅជារង្វង់ Emoji ពណ៌):
+    /setcontact
+    Button text 1 - http://www.example.com/ - style:green
+    Button text 2 - http://www.example2.com/ - style:blue
+    Button text 3 - http://www.example3.com/ - style:red
+
+    ដាក់ច្រើនប៊ូតុងក្នុងជួរតែមួយ (រហូតដល់ 3) ដោយប្រើ |:
+    /setcontact
+    Button text 1 - http://www.example.com/ | Button text 2 - http://www.example2.com/
+    Button text 3 - http://www.example3.com/ - style:red
+
+    ពណ៌ដែលគាំទ្រ: green, blue, red, yellow, orange, purple, black, white
+
+    /post        -> ចាប់ផ្តើមបង្ហោះការងារថ្មី (ផ្ញើព័ត៌មាន/រូបភាព ក្នុងសារតែមួយ)
+    /cancel      -> បោះបង់ការបញ្ចូលព័ត៌មាន
+    /showcontact -> មើល Contact បច្ចុប្បន្នដែលកំពុងប្រើ
+
+តម្រូវការ:
+    pip install python-telegram-bot==21.*
 """
 
+import json
 import logging
-from dataclasses import dataclass, field
-from typing import Dict, Optional
-
-from telegram import (
-    Update,
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    Message,
-)
-from telegram.constants import ParseMode
+import os
+import re
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
-    Application,
     ApplicationBuilder,
     CommandHandler,
-    MessageHandler,
-    CallbackQueryHandler,
+    ConversationHandler,
     ContextTypes,
+    MessageHandler,
     filters,
 )
 
-import config
+# ------------------------------------------------------------------
+# ការកំណត់រចនាសម្ព័ន្ធ (CONFIG) - ត្រូវកែតម្លៃទាំងនេះ
+# ------------------------------------------------------------------
+BOT_TOKEN = "8684591169:AAFaLx0qR5b3T7ZaCOk04yvUo8Bp5l5nQVE"          # ទទួលបានពី @BotFather (កុំចែករំលែក token ជាសាធារណៈ!)
+CHANNEL_ID = "@careercentertest"          # ឧ. "@jobs_kh" ឬ "-1001234567890"
+ADMIN_IDS = [1147056937]                        # Telegram user id របស់ Admin (អាចដាក់ច្រើននាក់)
 
-# --------------------------------------------------------------------------
+# Contact លំនាំដើម (Rows នីមួយៗគឺជាមួយជួរ, រៀងក្នុងជួរអាចមានច្រើនប៊ូតុង)
+DEFAULT_CONTACT_ROWS = [
+    [{"label": "📞 ទាក់ទង", "url": "https://t.me/your_username"}],
+]
+
+# ឯកសារសម្រាប់រក្សាទុក Contact ជាអចិន្ត្រៃយ៍ (មិនបាត់ទោះបើ restart bot)
+CONTACT_STORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
+
+# ពណ៌ដែលគាំទ្រ -> បំប្លែងទៅជារង្វង់ Emoji ពណ៌ (Telegram Bot API មិនអនុញ្ញាតប្តូរពណ៌ប៊ូតុងពិតទេ)
+STYLE_EMOJI = {
+    "green": "🟢",
+    "blue": "🔵",
+    "red": "🔴",
+    "yellow": "🟡",
+    "orange": "🟠",
+    "purple": "🟣",
+    "black": "⚫️",
+    "white": "⚪️",
+}
+
+MAX_BUTTONS_PER_ROW = 3
+
+# --- Telegram Bot API hard limits (used to support longer job descriptions) ---
+TELEGRAM_CAPTION_LIMIT = 1024   # limit for photo/video caption text
+TELEGRAM_MESSAGE_LIMIT = 4096   # limit for a plain text message
+
+# ------------------------------------------------------------------
 # Logging
-# --------------------------------------------------------------------------
+# ------------------------------------------------------------------
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
 
-
-# --------------------------------------------------------------------------
-# In-memory store for pending submissions.
-# Key = submission id (int, auto-incrementing).
-# For production use, swap this for a small database (SQLite, etc.) so
-# pending posts survive a bot restart.
-# --------------------------------------------------------------------------
-@dataclass
-class Submission:
-    submission_id: int
-    employer_chat_id: int
-    employer_name: str
-    original_message_id: int
-    # Copy of the content so we can re-post it into the channel even if the
-    # employer deletes their original message.
-    text: Optional[str] = None
-    caption: Optional[str] = None
-    photo_file_id: Optional[str] = None
-    document_file_id: Optional[str] = None
-    document_file_name: Optional[str] = None
-    status: str = "pending"  # pending | approved | rejected
-
-
-class Store:
-    def __init__(self) -> None:
-        self._data: Dict[int, Submission] = {}
-        self._next_id = 1
-
-    def add(self, sub: "Submission") -> int:
-        sub.submission_id = self._next_id
-        self._data[self._next_id] = sub
-        self._next_id += 1
-        return sub.submission_id
-
-    def get(self, submission_id: int) -> Optional[Submission]:
-        return self._data.get(submission_id)
-
-
-store = Store()
-
-
-# --------------------------------------------------------------------------
-# Helpers
-# --------------------------------------------------------------------------
-def admin_keyboard(submission_id: int) -> InlineKeyboardMarkup:
-    return InlineKeyboardMarkup(
-        [
-            [
-                InlineKeyboardButton("✅ Approve", callback_data=f"approve:{submission_id}"),
-                InlineKeyboardButton("❌ Reject", callback_data=f"reject:{submission_id}"),
-            ]
-        ]
-    )
+# ------------------------------------------------------------------
+# States សម្រាប់ ConversationHandler (/post)
+# ------------------------------------------------------------------
+CONTENT, CONFIRM = range(2)
 
 
 def is_admin(user_id: int) -> bool:
-    return user_id == config.ADMIN_CHAT_ID
+    return user_id in ADMIN_IDS
 
 
-# --------------------------------------------------------------------------
-# Command handlers
-# --------------------------------------------------------------------------
+# ------------------------------------------------------------------
+# Contact URL helper
+# ------------------------------------------------------------------
+def build_contact_url(raw: str) -> str:
+    """បំប្លែង username ឬលេខទូរស័ព្ទ ឬ URL ទៅជា Link ត្រឹមត្រូវសម្រាប់ប៊ូតុង"""
+    raw = raw.strip()
+    if raw.startswith("@"):
+        return f"https://t.me/{raw[1:]}"
+    if raw.startswith("https://") or raw.startswith("http://"):
+        return raw
+    digits = "".join(ch for ch in raw if ch.isdigit())
+    return f"https://wa.me/{digits}"
+
+
+# ------------------------------------------------------------------
+# Contact Storage (persistent) - ប្រើ JSON file ដើម្បីរក្សាទុក Rows នៃប៊ូតុង
+# ------------------------------------------------------------------
+def load_contact_rows() -> list:
+    if os.path.exists(CONTACT_STORE_FILE):
+        try:
+            with open(CONTACT_STORE_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                rows = data.get("rows")
+                if rows:
+                    return rows
+        except Exception as e:
+            logger.warning("មិនអាចអាន contact.json បាន: %s", e)
+    return DEFAULT_CONTACT_ROWS
+
+
+def save_contact_rows(rows: list) -> None:
+    with open(CONTACT_STORE_FILE, "w", encoding="utf-8") as f:
+        json.dump({"rows": rows}, f, ensure_ascii=False, indent=2)
+
+
+def build_keyboard_markup(rows: list) -> InlineKeyboardMarkup:
+    kb_rows = [
+        [InlineKeyboardButton(b["label"], url=b["url"]) for b in row]
+        for row in rows
+    ]
+    return InlineKeyboardMarkup(kb_rows)
+
+
+def get_contact_keyboard() -> InlineKeyboardMarkup:
+    return build_keyboard_markup(load_contact_rows())
+
+
+# ------------------------------------------------------------------
+# Parser សម្រាប់ទម្រង់ /setcontact (multiline, | សម្រាប់ជួរដូចគ្នា, - style:color Optional)
+# ------------------------------------------------------------------
+def parse_button_entry(entry: str):
+    """Parse 'Button text - url' or 'Button text - url - style:green' -> (label, url) or None"""
+    entry = entry.strip()
+    if not entry:
+        return None
+
+    style = None
+    m = re.search(r"-\s*style\s*:\s*(\w+)\s*$", entry, flags=re.IGNORECASE)
+    if m:
+        style_name = m.group(1).lower()
+        if style_name in STYLE_EMOJI:
+            style = style_name
+        entry = entry[: m.start()].strip()
+
+    # បំបែក Label និង URL ដោយប្រើ " - " ចុងក្រោយ (URL តែងតែជាផ្នែកចុងក្រោយ)
+    label, sep, target = entry.rpartition(" - ")
+    if not sep:
+        label, sep, target = entry.rpartition("-")
+    if not sep:
+        return None
+
+    label = label.strip()
+    target = target.strip()
+    if not label or not target:
+        return None
+
+    if style:
+        label = f"{STYLE_EMOJI[style]} {label}"
+
+    return {"label": label, "url": build_contact_url(target)}
+
+
+def parse_contact_text(raw_text: str):
+    """បំប្លែងអត្ថបទច្រើនបន្ទាត់ ទៅជា Rows នៃប៊ូតុង។ Return (rows, errors)"""
+    rows = []
+    errors = []
+    lines = [ln for ln in raw_text.splitlines() if ln.strip()]
+
+    for line_no, line in enumerate(lines, start=1):
+        parts = line.split("|")
+        row = []
+        for part in parts[:MAX_BUTTONS_PER_ROW]:
+            btn = parse_button_entry(part)
+            if btn:
+                row.append(btn)
+            else:
+                errors.append(f"បន្ទាត់ទី {line_no}: '{part.strip()}' — ទម្រង់មិនត្រឹមត្រូវ")
+        if len(parts) > MAX_BUTTONS_PER_ROW:
+            errors.append(f"បន្ទាត់ទី {line_no}: លើសពី {MAX_BUTTONS_PER_ROW} ប៊ូតុងក្នុងមួយជួរ — យកតែ {MAX_BUTTONS_PER_ROW} ដំបូង")
+        if row:
+            rows.append(row)
+
+    return rows, errors
+
+
+SETCONTACT_HELP = (
+    "📌 *របៀបប្រើ /setcontact*\n\n"
+    "ផ្ញើតាមទម្រង់ (មួយបន្ទាត់ = មួយជួរប៊ូតុង):\n\n"
+    "`Button text 1 - http://www.example.com/`\n"
+    "`Button text 2 - http://www.example2.com/`\n\n"
+    "ដាក់ពណ៌ (Emoji ពណ៌នៅមុខ Label ព្រោះ Telegram មិនអនុញ្ញាតប្តូរពណ៌ប៊ូតុងពិត):\n\n"
+    "`Button text 1 - http://www.example.com/ - style:green`\n"
+    "`Button text 2 - http://www.example2.com/ - style:blue`\n"
+    "`Button text 3 - http://www.example3.com/ - style:red`\n\n"
+    "ដាក់ច្រើនប៊ូតុងក្នុងជួរតែមួយ (រហូតដល់ 3) ដោយប្រើ `|`:\n\n"
+    "`Button text 1 - http://www.example.com/ | Button text 2 - http://www.example2.com/`\n"
+    "`Button text 3 - http://www.example3.com/ - style:red`\n\n"
+    "ពណ៌ដែលគាំទ្រ: green 🟢, blue 🔵, red 🔴, yellow 🟡, orange 🟠, purple 🟣, black ⚫️, white ⚪️\n\n"
+    "URL អាចជា `@username`, លេខទូរស័ព្ទ, ឬ URL ពេញ។"
+)
+
+
+async def set_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("❌ អ្នកមិនមានសិទ្ធិប្រើ command នេះទេ។")
+        return
+
+    raw_text = update.message.text.partition(" ")[2].strip()
+    # គាំទ្រទាំង "/setcontact\nButton..." (multiline immediately after command)
+    if not raw_text and "\n" in update.message.text:
+        raw_text = update.message.text.split("\n", 1)[1].strip()
+
+    if not raw_text:
+        await update.message.reply_text(SETCONTACT_HELP, parse_mode="Markdown")
+        return
+
+    rows, errors = parse_contact_text(raw_text)
+
+    if not rows:
+        await update.message.reply_text(
+            "⚠️ មិនអាចអានប៊ូតុងណាមួយបានទេ។\n\n" + SETCONTACT_HELP, parse_mode="Markdown"
+        )
+        return
+
+    save_contact_rows(rows)
+    keyboard = build_keyboard_markup(rows)
+    total = sum(len(r) for r in rows)
+
+    msg = f"✅ បានកំណត់ Contact Buttons ថ្មីរួចរាល់ ({total} ប៊ូតុង)!\nវានឹងប្រើប្រាស់ជាប់រហូតគ្រប់ post បន្ទាប់ៗទៀត។"
+    if errors:
+        msg += "\n\n⚠️ បន្ទាត់ខ្លះមានបញ្ហា (បានរំលង):\n" + "\n".join(errors)
+    msg += "\n\nឧទាហរណ៍ប៊ូតុង៖"
+
+    await update.message.reply_text(msg, reply_markup=keyboard)
+
+
+async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    rows = load_contact_rows()
+    lines = []
+    for row in rows:
+        lines.append(" | ".join(f"{b['label']} → {b['url']}" for b in row))
+    await update.message.reply_text(
+        "ℹ️ Contact Buttons បច្ចុប្បន្ន៖\n\n" + "\n".join(lines),
+        reply_markup=build_keyboard_markup(rows),
+    )
+
+
+# ------------------------------------------------------------------
+# /post - បង្ហោះការងារថ្មី (ព័ត៌មាន + រូបភាព ក្នុងសារតែមួយ)
+#   - ផ្ញើរូបភាពមួយជាមួយ Caption -> ព័ត៌មាន = Caption, រូបភាព = រូបនោះ
+#   - ផ្ញើតែអត្ថបទ -> ព័ត៌មានតែមួយមុខ គ្មានរូបភាព
+#   - ផ្ញើតែរូបភាព គ្មាន Caption -> រូបភាពតែមួយមុខ គ្មានព័ត៌មាន
+#
+#   ចំណាំ: Telegram កំណត់ Caption limit = 1024 តួ និង Message limit = 4096 តួ។
+#   ប្រសិនបើអត្ថបទវែងជាងកំណត់ អ្នកជំនួយខាងក្រោមនឹងបំបែកវាដោយស្វ័យប្រវត្តិ
+#   ដើម្បីកុំឱ្យត្រូវកាត់ (truncate) ដោយ Telegram។
+# ------------------------------------------------------------------
+async def post_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("❌ អ្នកមិនមានសិទ្ធិប្រើ command នេះទេ។")
+        return ConversationHandler.END
+
+    context.user_data.clear()
+    await update.message.reply_text(
+        "📝 សូមផ្ញើ *ព័ត៌មានអំពីការងារ និង/ឬ រូបភាព* ក្នុងសារតែមួយ៖\n\n"
+        "🔸 ផ្ញើរូបភាព ជាមួយ Caption (ព័ត៌មានការងារ) — ល្អបំផុត\n"
+        "🔸 ឬផ្ញើតែអត្ថបទ (គ្មានរូបភាព)\n"
+        "🔸 ឬផ្ញើតែរូបភាព (គ្មាន Caption)\n\n"
+        "ព័ត៌មានវែងៗគាំទ្របានដល់ប្រហែល 4000 តួ — បើវែងជាង Caption limit "
+        "(1024 តួ) នៅពេលមានរូបភាព, Bot នឹងផ្ញើរូបភាព រួចផ្ញើអត្ថបទពេញលេញជាសារបន្ទាប់ដោយស្វ័យប្រវត្តិ។\n\n"
+        "សរសេរ /cancel ដើម្បីបោះបង់។",
+        parse_mode="Markdown",
+    )
+    return CONTENT
+
+
+async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    msg = update.message
+
+    if msg.photo:
+        context.user_data["photo_id"] = msg.photo[-1].file_id
+        context.user_data["info"] = (msg.caption or "").strip() or None
+    elif msg.text:
+        text = msg.text.strip()
+        text_len = telegram_length(text)
+        if text_len > TELEGRAM_MESSAGE_LIMIT:
+            await update.message.reply_text(
+                f"⚠️ អត្ថបទវែងពេក ({text_len} តួ)។ Telegram អនុញ្ញាតតែរហូតដល់ "
+                f"{TELEGRAM_MESSAGE_LIMIT} តួសម្រាប់សារអត្ថបទតែម្នាក់ឯង។ សូមកាត់បន្ថយ ឬ ផ្ញើជាមួយរូបភាព។"
+            )
+            return CONTENT
+        context.user_data["photo_id"] = None
+        context.user_data["info"] = text
+    else:
+        await update.message.reply_text(
+            "⚠️ សូមផ្ញើ *អត្ថបទ* ឬ *រូបភាព* (អាចមាន Caption)។", parse_mode="Markdown"
+        )
+        return CONTENT
+
+    await show_preview(update, context)
+    return CONFIRM
+
+
+def telegram_length(text: str) -> int:
+    """
+    Telegram counts text length in UTF-16 code units, not Python characters.
+    Characters outside the Basic Multilingual Plane (many emoji, for example)
+    take up 2 UTF-16 units, so we measure it the same way Telegram does to
+    avoid off-by-a-few truncation at the caption/message limits.
+    """
+    return len(text.encode("utf-16-le")) // 2
+
+
+def _needs_split_caption(post_text: str) -> bool:
+    """True if text + photo combo would exceed Telegram's caption limit."""
+    return bool(post_text) and telegram_length(post_text) > TELEGRAM_CAPTION_LIMIT
+
+
+async def show_preview(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    data = context.user_data
+    post_text = data.get("info") or ""
+    keyboard = get_contact_keyboard()
+
+    if data.get("photo_id"):
+        if _needs_split_caption(post_text):
+            # Caption would be too long -> send photo alone, then full text as its own message
+            await update.message.reply_photo(photo=data["photo_id"])
+            await update.message.reply_text(
+                post_text, parse_mode="Markdown", reply_markup=keyboard
+            )
+        else:
+            await update.message.reply_photo(
+                photo=data["photo_id"],
+                caption=post_text if post_text else None,
+                parse_mode="Markdown" if post_text else None,
+                reply_markup=keyboard,
+            )
+    else:
+        await update.message.reply_text(
+            post_text, parse_mode="Markdown", reply_markup=keyboard
+        )
+
+    await update.message.reply_text(
+        "✅ ត្រឹមត្រូវហើយឬ? វាយ *YES* ដើម្បីបញ្ជូនទៅ Channel, ឬ *NO* ដើម្បីបោះបង់។",
+        parse_mode="Markdown",
+    )
+
+
+async def confirm_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    answer = update.message.text.strip().lower()
+    if answer not in ("yes", "y"):
+        await update.message.reply_text("❌ បានបោះបង់។ សរសេរ /post ដើម្បីចាប់ផ្តើមម្តងទៀត។")
+        context.user_data.clear()
+        return ConversationHandler.END
+
+    data = context.user_data
+    post_text = data.get("info") or ""
+    keyboard = get_contact_keyboard()
+
+    try:
+        if data.get("photo_id"):
+            if _needs_split_caption(post_text):
+                # Photo without caption, then the full description as a separate message
+                # (with the contact buttons attached to the text message).
+                await context.bot.send_photo(chat_id=CHANNEL_ID, photo=data["photo_id"])
+                await context.bot.send_message(
+                    chat_id=CHANNEL_ID,
+                    text=post_text,
+                    parse_mode="Markdown",
+                    reply_markup=keyboard,
+                )
+            else:
+                await context.bot.send_photo(
+                    chat_id=CHANNEL_ID,
+                    photo=data["photo_id"],
+                    caption=post_text if post_text else None,
+                    parse_mode="Markdown" if post_text else None,
+                    reply_markup=keyboard,
+                )
+        else:
+            await context.bot.send_message(
+                chat_id=CHANNEL_ID,
+                text=post_text,
+                parse_mode="Markdown",
+                reply_markup=keyboard,
+            )
+        await update.message.reply_text("🎉 បានបញ្ជូនព័ត៌មានការងារទៅ Channel ដោយជោគជ័យ!")
+    except Exception as e:
+        logger.error("Failed to send to channel: %s", e)
+        await update.message.reply_text(
+            f"⚠️ បរាជ័យក្នុងការបញ្ជូនទៅ Channel។ សូមប្រាកដថា Bot ជា Admin នៅក្នុង Channel។\n\nError: {e}"
+        )
+
+    context.user_data.clear()
+    return ConversationHandler.END
+
+
+async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    context.user_data.clear()
+    await update.message.reply_text("❌ បានបោះបង់ដំណើរការ។")
+    return ConversationHandler.END
+
+
+# ------------------------------------------------------------------
+# /start command
+# ------------------------------------------------------------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        "👋 Hi! I collect job postings from employers.\n\n"
-        "Send me your job description as a message (text, or a photo/document "
-        "with a caption describing the role). I'll pass it to our admin team "
-        "for approval, and once approved it'll go live in our career channel.\n\n"
-        "Please include: job title, company, location, requirements, and how "
-        "to apply."
+        "👋 សួស្តី! ខ្ញុំជា Bot សម្រាប់ទម្លាក់ព័ត៌មានការងារ។\n\n"
+        "Admin អាចប្រើ:\n"
+        "• /setcontact — កំណត់/មើលរបៀបកំណត់ Contact Buttons ថេរ (Icon+ពណ៌+Layout)\n"
+        "• /post — បង្ហោះការងារថ្មី (ផ្ញើព័ត៌មាន/រូបភាព ក្នុងសារតែមួយ)\n"
+        "• /showcontact — មើល Contact បច្ចុប្បន្ន"
     )
 
 
-async def help_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await start(update, context)
-
-
-# --------------------------------------------------------------------------
-# Employer submission handler
-# --------------------------------------------------------------------------
-async def handle_employer_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    message: Message = update.message
-    user = update.effective_user
-
-    # Ignore messages sent by the admin in their own DM to the bot (avoids
-    # accidentally treating admin chatter as a job submission). Admin actions
-    # happen via the inline buttons, not by sending new messages here.
-    if is_admin(user.id):
-        await message.reply_text(
-            "You're set up as the admin — you'll receive submissions here "
-            "with Approve/Reject buttons instead of submitting through this chat."
-        )
-        return
-
-    sub = Submission(
-        submission_id=0,  # assigned by store.add
-        employer_chat_id=message.chat_id,
-        employer_name=user.full_name or user.username or "Unknown",
-        original_message_id=message.message_id,
-        text=message.text,
-        caption=message.caption,
-    )
-
-    if message.photo:
-        sub.photo_file_id = message.photo[-1].file_id
-    if message.document:
-        sub.document_file_id = message.document.file_id
-        sub.document_file_name = message.document.file_name
-
-    if not any([sub.text, sub.caption, sub.photo_file_id, sub.document_file_id]):
-        await message.reply_text(
-            "I couldn't find any content to submit. Please send text, or a "
-            "photo/document with a caption describing the job."
-        )
-        return
-
-    submission_id = store.add(sub)
-
-    # Confirm to employer
-    await message.reply_text(
-        "✅ Thanks! Your job posting has been sent to our team for review. "
-        "You'll be notified here once it's approved and published."
-    )
-
-    # Notify admin
-    admin_header = (
-        f"📩 <b>New job posting submission</b> (#{submission_id})\n"
-        f"From: {sub.employer_name} (id: {sub.employer_chat_id})\n\n"
-        f"Review below and Approve or Reject:"
-    )
-    await context.bot.send_message(
-        chat_id=config.ADMIN_CHAT_ID,
-        text=admin_header,
-        parse_mode=ParseMode.HTML,
-    )
-
-    # Forward/re-send the actual content to the admin so they can review it,
-    # followed by the approve/reject buttons attached to a short footer.
-    if sub.photo_file_id:
-        await context.bot.send_photo(
-            chat_id=config.ADMIN_CHAT_ID,
-            photo=sub.photo_file_id,
-            caption=sub.caption or "",
-        )
-    elif sub.document_file_id:
-        await context.bot.send_document(
-            chat_id=config.ADMIN_CHAT_ID,
-            document=sub.document_file_id,
-            caption=sub.caption or "",
-        )
-    elif sub.text:
-        await context.bot.send_message(chat_id=config.ADMIN_CHAT_ID, text=sub.text)
-
-    await context.bot.send_message(
-        chat_id=config.ADMIN_CHAT_ID,
-        text=f"Decision for submission #{submission_id}:",
-        reply_markup=admin_keyboard(submission_id),
-    )
-
-
-# --------------------------------------------------------------------------
-# Admin decision handler (inline button callback)
-# --------------------------------------------------------------------------
-async def handle_decision(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    query = update.callback_query
-    user = update.effective_user
-
-    if not is_admin(user.id):
-        await query.answer("Only the admin can approve or reject posts.", show_alert=True)
-        return
-
-    action, sub_id_str = query.data.split(":", 1)
-    submission_id = int(sub_id_str)
-    sub = store.get(submission_id)
-
-    if sub is None:
-        await query.answer("Submission not found (maybe already handled).", show_alert=True)
-        return
-
-    if sub.status != "pending":
-        await query.answer(f"This submission was already {sub.status}.", show_alert=True)
-        return
-
-    if action == "approve":
-        await publish_to_channel(context, sub)
-        sub.status = "approved"
-        await query.answer("Approved and published ✅")
-        await query.edit_message_text(
-            f"✅ Submission #{submission_id} approved and posted to the career channel."
-        )
-        await context.bot.send_message(
-            chat_id=sub.employer_chat_id,
-            text="🎉 Good news — your job posting has been approved and is now live "
-                 "in our career channel!",
-        )
-
-    elif action == "reject":
-        sub.status = "rejected"
-        await query.answer("Rejected ❌")
-        await query.edit_message_text(f"❌ Submission #{submission_id} rejected.")
-        await context.bot.send_message(
-            chat_id=sub.employer_chat_id,
-            text="Thanks for the submission. Unfortunately your job posting "
-                 "wasn't approved this time. Feel free to revise and resend it, "
-                 "or contact us for feedback.",
-        )
-
-
-async def publish_to_channel(context: ContextTypes.DEFAULT_TYPE, sub: Submission) -> None:
-    footer = "\n\n— posted via employer submission"
-    if sub.photo_file_id:
-        await context.bot.send_photo(
-            chat_id=config.CAREER_CHANNEL,
-            photo=sub.photo_file_id,
-            caption=(sub.caption or "") + footer,
-        )
-    elif sub.document_file_id:
-        await context.bot.send_document(
-            chat_id=config.CAREER_CHANNEL,
-            document=sub.document_file_id,
-            caption=(sub.caption or "") + footer,
-        )
-    elif sub.text:
-        await context.bot.send_message(
-            chat_id=config.CAREER_CHANNEL,
-            text=sub.text + footer,
-        )
-
-
-# --------------------------------------------------------------------------
-# Entry point
-# --------------------------------------------------------------------------
+# ------------------------------------------------------------------
+# Main
+# ------------------------------------------------------------------
 def main() -> None:
-    app: Application = ApplicationBuilder().token(config.BOT_TOKEN).build()
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+
+    conv_handler = ConversationHandler(
+        entry_points=[CommandHandler("post", post_start)],
+        states={
+            CONTENT: [
+                MessageHandler(filters.PHOTO | (filters.TEXT & ~filters.COMMAND), get_content),
+            ],
+            CONFIRM: [MessageHandler(filters.TEXT & ~filters.COMMAND, confirm_post)],
+        },
+        fallbacks=[CommandHandler("cancel", cancel)],
+    )
 
     app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("help", help_cmd))
-    app.add_handler(CallbackQueryHandler(handle_decision, pattern=r"^(approve|reject):\d+$"))
-    # Any non-command message (text, photo, document) in private chat is
-    # treated as a job submission.
-    app.add_handler(
-        MessageHandler(
-            (filters.TEXT | filters.PHOTO | filters.Document.ALL) & ~filters.COMMAND,
-            handle_employer_message,
-        )
-    )
+    app.add_handler(CommandHandler("setcontact", set_contact))
+    app.add_handler(CommandHandler("showcontact", show_contact))
+    app.add_handler(conv_handler)
 
-    logger.info("Bot starting...")
-    app.run_polling(allowed_updates=Update.ALL_TYPES)
+    logger.info("Bot កំពុងដំណើរការ...")
+    app.run_polling()
 
 
 if __name__ == "__main__":
