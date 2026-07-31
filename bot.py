@@ -165,18 +165,27 @@ def get_contact_keyboard() -> InlineKeyboardMarkup:
 # Parser សម្រាប់ទម្រង់ /setcontact (multiline, | សម្រាប់ជួរដូចគ្នា, - style:color Optional)
 # ------------------------------------------------------------------
 def parse_button_entry(entry: str):
-    """Parse 'Button text - url' or 'Button text - url - style:green' -> (label, url) or None"""
+    """Parse 'Button text - url' or with optional '- style:green' / '- emoji:🔥' suffixes."""
     entry = entry.strip()
     if not entry:
         return None
 
-    style = None
-    m = re.search(r"-\s*style\s*:\s*(\w+)\s*$", entry, flags=re.IGNORECASE)
-    if m:
-        style_name = m.group(1).lower()
+    style_prefix = ""
+    emoji_prefix = ""
+
+    # ស្វែងរក - style:color (ពណ៌ Emoji ពណ៌ដូច 🟢)
+    m_style = re.search(r"-\s*style\s*:\s*(\w+)\s*$", entry, flags=re.IGNORECASE)
+    if m_style:
+        style_name = m_style.group(1).lower()
         if style_name in STYLE_EMOJI:
-            style = style_name
-        entry = entry[: m.start()].strip()
+            style_prefix = STYLE_EMOJI[style_name] + " "
+        entry = entry[: m_style.start()].strip()
+
+    # ស្វែងរក - emoji:<any emoji or text> (Emoji ដែលអ្នកប្ដូរបាន)
+    m_emoji = re.search(r"-\s*emoji\s*:\s*(\S+)\s*$", entry, flags=re.IGNORECASE)
+    if m_emoji:
+        emoji_prefix = m_emoji.group(1).strip() + " "
+        entry = entry[: m_emoji.start()].strip()
 
     # បំបែក Label និង URL ដោយប្រើ " - " ចុងក្រោយ (URL តែងតែជាផ្នែកចុងក្រោយ)
     label, sep, target = entry.rpartition(" - ")
@@ -190,8 +199,9 @@ def parse_button_entry(entry: str):
     if not label or not target:
         return None
 
-    if style:
-        label = f"{STYLE_EMOJI[style]} {label}"
+    # emoji: overrides style: if both given
+    prefix = emoji_prefix if emoji_prefix else style_prefix
+    label = f"{prefix}{label}"
 
     return {"label": label, "url": build_contact_url(target)}
 
@@ -221,17 +231,28 @@ def parse_contact_text(raw_text: str):
 
 SETCONTACT_HELP = (
     "📌 *របៀបប្រើ /setcontact*\n\n"
-    "ផ្ញើតាមទម្រង់ (មួយបន្ទាត់ = មួយជួរប៊ូតុង):\n\n"
-    "`Button text 1 - http://www.example.com/`\n"
-    "`Button text 2 - http://www.example2.com/`\n\n"
-    "ដាក់ពណ៌ (Emoji ពណ៌នៅមុខ Label ព្រោះ Telegram មិនអនុញ្ញាតប្តូរពណ៌ប៊ូតុងពិត):\n\n"
-    "`Button text 1 - http://www.example.com/ - style:green`\n"
-    "`Button text 2 - http://www.example2.com/ - style:blue`\n"
-    "`Button text 3 - http://www.example3.com/ - style:red`\n\n"
-    "ដាក់ច្រើនប៊ូតុងក្នុងជួរតែមួយ (រហូតដល់ 3) ដោយប្រើ `|`:\n\n"
-    "`Button text 1 - http://www.example.com/ | Button text 2 - http://www.example2.com/`\n"
-    "`Button text 3 - http://www.example3.com/ - style:red`\n\n"
-    "ពណ៌ដែលគាំទ្រ: green 🟢, blue 🔵, red 🔴, yellow 🟡, orange 🟠, purple 🟣, black ⚫️, white ⚪️\n\n"
+    "មួយបន្ទាត់ = មួយជួរប៊ូតុង\n"
+    "ប្រើ `|` ដើម្បីដាក់ច្រើនប៊ូតុងក្នុងជួរតែមួយ (រហូតដល់ 3)\n\n"
+
+    "*— ប៊ូតុងធម្មតា —*\n"
+    "`ទំនាក់ទំនង - @username`\n"
+    "`គេហទំព័រ - https://example.com`\n\n"
+
+    "*— ដាក់ពណ៌ (style:) —*\n"
+    "Telegram មិនអនុញ្ញាតប្ដូរពណ៌ប៊ូតុងពិតប្រាកដទេ\n"
+    "ដូច្នេះពណ៌ត្រូវបានបង្ហាញជា Emoji ពណ៌ នៅខាងមុខ Label\n"
+    "`ទំនាក់ទំនង - @username - style:green`  →  🟢 ទំនាក់ទំនង\n"
+    "`Apply - https://example.com - style:blue`  →  🔵 Apply\n"
+    "ពណ៌ដែលគាំទ្រ: `green` 🟢 `blue` 🔵 `red` 🔴 `yellow` 🟡 `orange` 🟠 `purple` 🟣 `black` ⚫️ `white` ⚪️\n\n"
+
+    "*— ដាក់ Emoji ផ្ទាល់ (emoji:) —*\n"
+    "ប្រើ Emoji ណាក៏បានតាមចង់\n"
+    "`ទំនាក់ទំនង - @username - emoji:📞`  →  📞 ទំនាក់ទំនង\n"
+    "`Apply Now - https://example.com - emoji:🚀`  →  🚀 Apply Now\n\n"
+
+    "*— ច្រើនប៊ូតុង (|) —*\n"
+    "`ទំនាក់ទំនង - @username - emoji:📞 | Apply - https://example.com - style:green`\n\n"
+
     "URL អាចជា `@username`, លេខទូរស័ព្ទ, ឬ URL ពេញ។"
 )
 
