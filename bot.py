@@ -64,9 +64,10 @@ from telegram.ext import (
 # ------------------------------------------------------------------
 # ការកំណត់រចនាសម្ព័ន្ធ (CONFIG) - ត្រូវកែតម្លៃទាំងនេះ
 # ------------------------------------------------------------------
-BOT_TOKEN = os.getenv("BOT_TOKEN")       # ទទួលបានពី @BotFather (កុំចែករំលែក token ជាសាធារណៈ!)
-CHANNEL_ID = os.getenv("CHANNEL_ID")          # ឧ. "@jobs_kh" ឬ "-1001234567890"
-ADMIN_IDS = [1147056937]                        # Telegram user id របស់ Admin (អាចដាក់ច្រើននាក់)
+BOT_TOKEN  = os.getenv("BOT_TOKEN")        # ទទួលបានពី @BotFather (កុំចែករំលែក token ជាសាធារណៈ!)
+CHANNEL_ID = os.getenv("CHANNEL_ID")           # ឧ. "@jobs_kh" ឬ "-1001234567890"
+ADMIN_IDS  = [1147056937]                        # Telegram user id របស់ Admin (អាចដាក់ច្រើននាក់)
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://bottelegrampostccusea.onrender.com")
 
 # Contact លំនាំដើម (Rows នីមួយៗគឺជាមួយជួរ, រៀងក្នុងជួរអាចមានច្រើនប៊ូតុង)
 DEFAULT_CONTACT_ROWS = [
@@ -479,7 +480,7 @@ def main() -> None:
         listen="0.0.0.0",
         port=int(os.getenv("PORT", 8443)),
         url_path=BOT_TOKEN,
-        webhook_url=f"https://bottelegrampostccusea.onrender.com/{BOT_TOKEN}",
+        webhook_url=f"{WEBHOOK_URL}/{BOT_TOKEN}",
     )
 
 if __name__ == "__main__":
