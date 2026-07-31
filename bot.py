@@ -480,7 +480,7 @@ def main() -> None:
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     conv_handler = ConversationHandler(
-    entry_points=[CommandHandler("post", post_start)],
+    entry_points=[CommandHandler("បង្ហោះការងារ", post_start)],
     states={
         CONTENT: [
             MessageHandler(filters.PHOTO | (filters.TEXT & ~filters.COMMAND), get_content),
@@ -488,16 +488,16 @@ def main() -> None:
         CONFIRM: [MessageHandler(filters.TEXT & ~filters.COMMAND, confirm_post)],
     },
         fallbacks=[
-            CommandHandler("cancel", cancel),
-            CommandHandler("post", post_start),  # <-- lets /post restart even if "stuck"
+            CommandHandler("បោះបង់", cancel),
+            CommandHandler("បង្ហោះការងារ", post_start),  # <-- lets /post restart even if "stuck"
         ],
         allow_reentry=True,        # <-- lets /post re-trigger entry_points anytime
         conversation_timeout=600,  # <-- auto-cancels an abandoned conversation after 10 min
     )
 
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("setcontact", set_contact))
-    app.add_handler(CommandHandler("showcontact", show_contact))
+    app.add_handler(CommandHandler("ចាប់ផ្ដើម", start))
+    app.add_handler(CommandHandler("កំណត់Contact", set_contact))
+    app.add_handler(CommandHandler("មើលContact", show_contact))
     app.add_handler(conv_handler)
 
     logger.info("Bot is running with webhook...")
