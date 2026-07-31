@@ -54,6 +54,7 @@ load_dotenv()
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
+    CallbackQueryHandler,
     CommandHandler,
     ConversationHandler,
     ContextTypes,
@@ -399,22 +400,32 @@ async def show_preview(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             post_text, parse_mode="Markdown", reply_markup=keyboard
         )
 
+    confirm_keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("✅ YES — បញ្ជូន", callback_data="confirm_yes"),
+            InlineKeyboardButton("❌ NO — បោះបង់", callback_data="confirm_no"),
+        ]
+    ])
     await update.message.reply_text(
-        "✅ ត្រឹមត្រូវហើយឬ? វាយ *YES* ដើម្បីបញ្ជូនទៅ Channel, ឬ *NO* ដើម្បីបោះបង់។",
-        parse_mode="Markdown",
+        "✅ ត្រឹមត្រូវហើយឬ? សូមចុចប៊ូតុងខាងក្រោមដើម្បីបញ្ជាក់។",
+        reply_markup=confirm_keyboard,
     )
 
 
 async def confirm_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    answer = update.message.text.strip().lower()
-    if answer not in ("yes", "y"):
-        await update.message.reply_text("❌ បានបោះបង់។ សរសេរ /post ដើម្បីចាប់ផ្តើមម្តងទៀត។")
+    query = update.callback_query
+    await query.answer()  # acknowledge the button tap immediately
+
+    if query.data != "confirm_yes":
+        await query.edit_message_text("❌ បានបោះបង់។ សរសេរ /post ដើម្បីចាប់ផ្តើមម្តងទៀត។")
         context.user_data.clear()
         return ConversationHandler.END
 
     data = context.user_data
     post_text = data.get("info") or ""
     keyboard = get_contact_keyboard()
+
+    await query.edit_message_text("⏳ កំពុងបញ្ជូន...")
 
     try:
         if data.get("photo_id"):
@@ -443,10 +454,10 @@ async def confirm_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
                 parse_mode="Markdown",
                 reply_markup=keyboard,
             )
-        await update.message.reply_text("🎉 បានបញ្ជូនព័ត៌មានការងារទៅ Channel ដោយជោគជ័យ!")
+        await query.edit_message_text("🎉 បានបញ្ជូនព័ត៌មានការងារទៅ Channel ដោយជោគជ័យ!")
     except Exception as e:
         logger.error("Failed to send to channel: %s", e)
-        await update.message.reply_text(
+        await query.edit_message_text(
             f"⚠️ បរាជ័យក្នុងការបញ្ជូនទៅ Channel។ សូមប្រាកដថា Bot ជា Admin នៅក្នុង Channel។\n\nError: {e}"
         )
 
@@ -485,7 +496,7 @@ def main() -> None:
         CONTENT: [
             MessageHandler(filters.PHOTO | (filters.TEXT & ~filters.COMMAND), get_content),
         ],
-        CONFIRM: [MessageHandler(filters.TEXT & ~filters.COMMAND, confirm_post)],
+        CONFIRM: [CallbackQueryHandler(confirm_post, pattern="^confirm_(yes|no)$")],
     },
         fallbacks=[
             CommandHandler("cancel", cancel),
