@@ -480,14 +480,19 @@ def main() -> None:
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("post", post_start)],
-        states={
-            CONTENT: [
-                MessageHandler(filters.PHOTO | (filters.TEXT & ~filters.COMMAND), get_content),
-            ],
-            CONFIRM: [MessageHandler(filters.TEXT & ~filters.COMMAND, confirm_post)],
-        },
-        fallbacks=[CommandHandler("cancel", cancel)],
+    entry_points=[CommandHandler("post", post_start)],
+    states={
+        CONTENT: [
+            MessageHandler(filters.PHOTO | (filters.TEXT & ~filters.COMMAND), get_content),
+        ],
+        CONFIRM: [MessageHandler(filters.TEXT & ~filters.COMMAND, confirm_post)],
+    },
+        fallbacks=[
+            CommandHandler("cancel", cancel),
+            CommandHandler("post", post_start),  # <-- lets /post restart even if "stuck"
+        ],
+        allow_reentry=True,        # <-- lets /post re-trigger entry_points anytime
+        conversation_timeout=600,  # <-- auto-cancels an abandoned conversation after 10 min
     )
 
     app.add_handler(CommandHandler("start", start))
