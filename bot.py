@@ -49,6 +49,8 @@ import json
 import logging
 import os
 import re
+from dotenv import load_dotenv
+load_dotenv()
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -62,8 +64,8 @@ from telegram.ext import (
 # ------------------------------------------------------------------
 # ការកំណត់រចនាសម្ព័ន្ធ (CONFIG) - ត្រូវកែតម្លៃទាំងនេះ
 # ------------------------------------------------------------------
-BOT_TOKEN = "8684591169:AAFaLx0qR5b3T7ZaCOk04yvUo8Bp5l5nQVE"          # ទទួលបានពី @BotFather (កុំចែករំលែក token ជាសាធារណៈ!)
-CHANNEL_ID = "@careercentertest"          # ឧ. "@jobs_kh" ឬ "-1001234567890"
+BOT_TOKEN = os.getenv("BOT_TOKEN")       # ទទួលបានពី @BotFather (កុំចែករំលែក token ជាសាធារណៈ!)
+CHANNEL_ID = os.getenv("CHANNEL_ID")          # ឧ. "@jobs_kh" ឬ "-1001234567890"
 ADMIN_IDS = [1147056937]                        # Telegram user id របស់ Admin (អាចដាក់ច្រើននាក់)
 
 # Contact លំនាំដើម (Rows នីមួយៗគឺជាមួយជួរ, រៀងក្នុងជួរអាចមានច្រើនប៊ូតុង)
@@ -471,9 +473,14 @@ def main() -> None:
     app.add_handler(CommandHandler("showcontact", show_contact))
     app.add_handler(conv_handler)
 
-    logger.info("Bot កំពុងដំណើរការ...")
-    app.run_polling()
+    logger.info("Bot is running with webhook...")
 
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=int(os.getenv("PORT", 8443)),
+        url_path=BOT_TOKEN,
+        webhook_url=f"https://bottelegrampostccusea.onrender.com/{BOT_TOKEN}",
+    )
 
 if __name__ == "__main__":
     main()
