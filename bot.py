@@ -66,7 +66,7 @@ from telegram.ext import (
 # ------------------------------------------------------------------
 BOT_TOKEN  = os.getenv("BOT_TOKEN")        # ទទួលបានពី @BotFather (កុំចែករំលែក token ជាសាធារណៈ!)
 CHANNEL_ID = os.getenv("CHANNEL_ID")           # ឧ. "@jobs_kh" ឬ "-1001234567890"
-ADMIN_IDS  = [1147056937]                        # Telegram user id របស់ Admin (អាចដាក់ច្រើននាក់)
+ADMIN_IDS  = [1147056937, 468517256, 1287745757]                        # Telegram user id របស់ Admin (អាចដាក់ច្រើននាក់)
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://bottelegrampostccusea.onrender.com")
 
 # Contact លំនាំដើម (Rows នីមួយៗគឺជាមួយជួរ, រៀងក្នុងជួរអាចមានច្រើនប៊ូតុង)
@@ -467,8 +467,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
         "👋 សួស្តី! ខ្ញុំជា Bot សម្រាប់ទម្លាក់ព័ត៌មានការងារ។\n\n"
         "Admin អាចប្រើ:\n"
-        "• /setcontact — កំណត់/មើលរបៀបកំណត់ Contact Buttons ថេរ (Icon+ពណ៌+Layout)\n"
-        "• /post — បង្ហោះការងារថ្មី (ផ្ញើព័ត៌មាន/រូបភាព ក្នុងសារតែមួយ)\n"
+        "• /កំណត់Contact — កំណត់/មើលរបៀបកំណត់ Contact Buttons ថេរ (Icon+ពណ៌+Layout)\n"
+        "• /បង្ហោះការងារ — បង្ហោះការងារថ្មី (ផ្ញើព័ត៌មាន/រូបភាព ក្នុងសារតែមួយ)\n"
         "• /showcontact — មើល Contact បច្ចុប្បន្ន"
     )
 
