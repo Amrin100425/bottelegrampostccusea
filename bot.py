@@ -343,8 +343,13 @@ async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     msg = update.message
 
     # --- Handle forwarded messages inside the /post flow ---
-    if msg.forward_date or msg.forward_origin:
-        # Delegate to the forward handler; it posts directly and ends the conversation
+    # A message is forwarded when forward_origin is present (Bot API 7+)
+    # or when forward_date is present (legacy API). Use getattr for safety.
+    is_forwarded = (
+        getattr(msg, "forward_origin", None) is not None
+        or getattr(msg, "forward_date", None) is not None
+    )
+    if is_forwarded:
         await _do_forward_post(update, context)
         context.user_data.clear()
         return ConversationHandler.END
@@ -489,27 +494,48 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 # Works for: text, photo, video, document, audio, voice, sticker, animation.
 # ------------------------------------------------------------------
 async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Core logic: take the forwarded message and publish it to the channel."""
+    """Core logic: re-publish the forwarded message to the channel with contact buttons.
+
+    Strategy:
+    1. Try copy_message (works for all content types, even restricted channels).
+       copy_message re-sends a COPY so we can attach an inline keyboard to it.
+    2. If copy_message fails (e.g. Telegram won't allow it), fall back to
+       type-specific send_* calls using the file_id from the received message.
+    """
     msg = update.message
     keyboard = get_contact_keyboard()
 
     try:
+        # copy_message is the simplest and most reliable path — it works for
+        # text, photo, video, document, audio, voice, sticker, animation, etc.
+        # and it allows attaching an inline keyboard.
+        sent = await context.bot.copy_message(
+            chat_id=CHANNEL_ID,
+            from_chat_id=msg.chat_id,
+            message_id=msg.message_id,
+            reply_markup=keyboard,
+        )
+        logger.info("Forward re-posted via copy_message. New msg id: %s", sent.message_id)
+        await update.message.reply_text("🎉 បាន post ព័ត៌មានដែល forward ទៅ Channel ដោយជោគជ័យ!")
+        return
+
+    except Exception as copy_err:
+        logger.warning("copy_message failed (%s), trying type-specific fallback.", copy_err)
+
+    # Fallback: send by file_id / text with type-specific API calls
+    try:
         if msg.photo:
             caption = (msg.caption or "").strip() or None
             if caption and telegram_length(caption) > TELEGRAM_CAPTION_LIMIT:
-                # Caption too long — send photo first, then text with buttons
                 await context.bot.send_photo(chat_id=CHANNEL_ID, photo=msg.photo[-1].file_id)
                 await context.bot.send_message(
-                    chat_id=CHANNEL_ID,
-                    text=caption,
-                    reply_markup=keyboard,
+                    chat_id=CHANNEL_ID, text=caption, reply_markup=keyboard
                 )
             else:
                 await context.bot.send_photo(
                     chat_id=CHANNEL_ID,
                     photo=msg.photo[-1].file_id,
                     caption=caption,
-                    parse_mode="HTML" if caption else None,
                     reply_markup=keyboard,
                 )
 
@@ -519,7 +545,6 @@ async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                 chat_id=CHANNEL_ID,
                 video=msg.video.file_id,
                 caption=caption,
-                parse_mode="HTML" if caption else None,
                 reply_markup=keyboard,
             )
 
@@ -529,7 +554,6 @@ async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                 chat_id=CHANNEL_ID,
                 document=msg.document.file_id,
                 caption=caption,
-                parse_mode="HTML" if caption else None,
                 reply_markup=keyboard,
             )
 
@@ -539,7 +563,6 @@ async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                 chat_id=CHANNEL_ID,
                 audio=msg.audio.file_id,
                 caption=caption,
-                parse_mode="HTML" if caption else None,
                 reply_markup=keyboard,
             )
 
@@ -556,31 +579,24 @@ async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                 chat_id=CHANNEL_ID,
                 animation=msg.animation.file_id,
                 caption=caption,
-                parse_mode="HTML" if caption else None,
                 reply_markup=keyboard,
             )
 
         elif msg.sticker:
-            # Stickers cannot have captions or inline keyboards via send_sticker,
-            # so send the sticker then a follow-up text with the buttons.
             await context.bot.send_sticker(chat_id=CHANNEL_ID, sticker=msg.sticker.file_id)
             await context.bot.send_message(
-                chat_id=CHANNEL_ID,
-                text="\u200b",  # zero-width space as placeholder text
-                reply_markup=keyboard,
+                chat_id=CHANNEL_ID, text="​", reply_markup=keyboard
             )
 
         elif msg.text:
             text = msg.text.strip()
             if telegram_length(text) > TELEGRAM_MESSAGE_LIMIT:
                 await update.message.reply_text(
-                    f"⚠️ អត្ថបទក្នុងសារ forward វែងពេក ({telegram_length(text)} តួ)។"
+                    f"⚠️ អត្ថបទវែងពេកពេក ({telegram_length(text)} តួ)។"
                 )
                 return
             await context.bot.send_message(
-                chat_id=CHANNEL_ID,
-                text=text,
-                reply_markup=keyboard,
+                chat_id=CHANNEL_ID, text=text, reply_markup=keyboard
             )
 
         else:
@@ -592,7 +608,7 @@ async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await update.message.reply_text("🎉 បាន post ព័ត៌មានដែល forward ទៅ Channel ដោយជោគជ័យ!")
 
     except Exception as e:
-        logger.error("Forward post failed: %s", e)
+        logger.error("Forward post fallback also failed: %s", e)
         await update.message.reply_text(
             f"⚠️ បរាជ័យក្នុងការ post ទៅ Channel។\n\nError: {e}"
         )
@@ -602,8 +618,7 @@ async def handle_forward(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     """Standalone handler: Admin forwards any message to Bot outside the /post flow."""
     user = update.effective_user
     if not is_admin(user.id):
-        # Silently ignore non-admin forwards
-        return
+        return  # silently ignore non-admin messages
     await _do_forward_post(update, context)
 
 
@@ -629,13 +644,14 @@ def main() -> None:
     # Filter that matches any forwarded message (forward_origin is set on all forwards)
     FORWARDED = filters.FORWARDED
 
+    # NOTE: The CONTENT state now uses filters.ALL (excluding commands) so it
+    # catches ANY message type: text, photo, video, doc, audio, forwarded, etc.
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("post", post_start)],
         states={
             CONTENT: [
-                # Accept forwarded messages, photos, and plain text in the /post flow
                 MessageHandler(
-                    FORWARDED | filters.PHOTO | (filters.TEXT & ~filters.COMMAND),
+                    filters.ALL & ~filters.COMMAND,
                     get_content,
                 ),
             ],
@@ -643,19 +659,24 @@ def main() -> None:
         },
         fallbacks=[
             CommandHandler("cancel", cancel),
-            CommandHandler("post", post_start),  # <-- lets /post restart even if "stuck"
+            CommandHandler("post", post_start),
         ],
-        allow_reentry=True,        # <-- lets /post re-trigger entry_points anytime
-        conversation_timeout=600,  # <-- auto-cancels an abandoned conversation after 10 min
+        allow_reentry=True,
+        conversation_timeout=600,
     )
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("setcontact", set_contact))
     app.add_handler(CommandHandler("showcontact", show_contact))
     app.add_handler(conv_handler)
-    # Standalone forward handler — must be registered AFTER conv_handler so that
-    # forwards inside an active /post conversation are handled by conv_handler first.
-    app.add_handler(MessageHandler(filters.FORWARDED, handle_forward))
+    # Standalone: Admin forwards any message directly (no /post needed).
+    # Registered AFTER conv_handler so active /post sessions take priority.
+    app.add_handler(
+        MessageHandler(
+            (filters.ALL & ~filters.COMMAND) & filters.ChatType.PRIVATE,
+            handle_forward,
+        )
+    )
 
     logger.info("Bot is running with webhook...")
 
