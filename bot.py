@@ -21,6 +21,12 @@ Bot សម្រាប់ជួយ Admin ទម្លាក់ព័ត៌មា
       ពី group/channel/user ណាក៏បានមកដល់ Bot ដោយផ្ទាល់ (គ្មាន /post ក៏បាន)
       Bot នឹង re-post ខ្លឹមសារនោះទៅ Channel ដោយភ្ជាប់ Contact Buttons ដោយស្វ័យប្រវត្តិ។
 
+    - **កំណែថ្មី**: ប្រសិនបើអ្នកបានបង្កើត hyperlink ពិតប្រាកដលើពាក្យណាមួយ (ដូចជា
+      "Website", "Facebook" ។ល។) ដោយប្រើមុខងារ "Create Link" របស់ Telegram ខ្លួនឯង
+      នៅពេលវាយ Caption/អត្ថបទ, Bot នឹងរក្សាទុក Link នោះឱ្យនៅតែ Click បានដដែល
+      ពេលបង្ហោះទៅ Channel (មុននេះ Link ទាំងនោះនឹងបាត់ ព្រោះ Bot បានយកតែអត្ថបទធម្មតា
+      ដោយមិនរក្សា Formatting/Entities របស់វា)។
+
 របៀបប្រើប្រាស់ /setcontact (សម្រាប់ Admin ក្នុង Private Chat ជាមួយ Bot):
 
     /setcontact
@@ -318,6 +324,13 @@ async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 #   ចំណាំ: Telegram កំណត់ Caption limit = 1024 តួ និង Message limit = 4096 តួ។
 #   ប្រសិនបើអត្ថបទវែងជាងកំណត់ អ្នកជំនួយខាងក្រោមនឹងបំបែកវាដោយស្វ័យប្រវត្តិ
 #   ដើម្បីកុំឱ្យត្រូវកាត់ (truncate) ដោយ Telegram។
+#
+#   ចំណាំសំខាន់អំពី Formatting: យើងប្រើ `caption_html` / `text_html` ជំនួសឱ្យ
+#   `caption` / `text` ធម្មតា ព្រោះ property ទាំងនេះរក្សាទុក entities (Bold,
+#   Italic, ជាពិសេស Hyperlink ដែល Admin បានបង្កើតដោយផ្ទាល់តាមរយៈ Telegram's
+#   own "Create Link" feature) ជា HTML tags។ បើប្រើ `caption`/`text` ធម្មតា
+#   នោះ Link ទាំងនោះនឹងបាត់ ព្រោះវាយកតែអត្ថបទសុទ្ធ គ្មាន Formatting។
+#   ដូច្នេះនៅពេលផ្ញើទៅវិញ ត្រូវប្រើ parse_mode="HTML" ជានិច្ច (មិនមែន Markdown ទេ)។
 # ------------------------------------------------------------------
 async def post_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.effective_user
@@ -333,6 +346,8 @@ async def post_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         "🔸 ឬផ្ញើតែរូបភាព (គ្មាន Caption)\n\n"
         "ព័ត៌មានវែងៗគាំទ្របានដល់ប្រហែល 4000 តួ — បើវែងជាង Caption limit "
         "(1024 តួ) នៅពេលមានរូបភាព, Bot នឹងផ្ញើរូបភាព រួចផ្ញើអត្ថបទពេញលេញជាសារបន្ទាប់ដោយស្វ័យប្រវត្តិ។\n\n"
+        "ចំណាំ: ប្រសិនបើអ្នកបានបង្កើត Hyperlink (Create Link) លើពាក្យណាមួយ "
+        "វានឹងនៅតែ Click បានដដែលនៅពេលបង្ហោះ។\n\n"
         "សរសេរ /cancel ដើម្បីបោះបង់។",
         parse_mode="Markdown",
     )
@@ -356,10 +371,13 @@ async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
     if msg.photo:
         context.user_data["photo_id"] = msg.photo[-1].file_id
-        context.user_data["info"] = (msg.caption or "").strip() or None
+        # Use caption_html (not caption) so any hyperlink/bold/italic the admin
+        # applied via Telegram's own formatting tools is preserved as HTML tags
+        # instead of being flattened to plain, unclickable text.
+        context.user_data["info"] = (msg.caption_html or "").strip() or None
     elif msg.text:
-        text = msg.text.strip()
-        text_len = telegram_length(text)
+        # Use text_html for the same reason as above.
+        text_len = telegram_length(msg.text)
         if text_len > TELEGRAM_MESSAGE_LIMIT:
             await update.message.reply_text(
                 f"⚠️ អត្ថបទវែងពេក ({text_len} តួ)។ Telegram អនុញ្ញាតតែរហូតដល់ "
@@ -367,7 +385,7 @@ async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
             )
             return CONTENT
         context.user_data["photo_id"] = None
-        context.user_data["info"] = text
+        context.user_data["info"] = msg.text_html.strip()
     else:
         await update.message.reply_text(
             "⚠️ សូមផ្ញើ *អត្ថបទ* ឬ *រូបភាព* (អាចមាន Caption)។", parse_mode="Markdown"
@@ -403,18 +421,18 @@ async def show_preview(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             # Caption would be too long -> send photo alone, then full text as its own message
             await update.message.reply_photo(photo=data["photo_id"])
             await update.message.reply_text(
-                post_text, parse_mode="Markdown", reply_markup=keyboard
+                post_text, parse_mode="HTML", reply_markup=keyboard
             )
         else:
             await update.message.reply_photo(
                 photo=data["photo_id"],
                 caption=post_text if post_text else None,
-                parse_mode="Markdown" if post_text else None,
+                parse_mode="HTML" if post_text else None,
                 reply_markup=keyboard,
             )
     else:
         await update.message.reply_text(
-            post_text, parse_mode="Markdown", reply_markup=keyboard
+            post_text, parse_mode="HTML", reply_markup=keyboard
         )
 
     confirm_keyboard = InlineKeyboardMarkup([
@@ -453,7 +471,7 @@ async def confirm_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
                 await context.bot.send_message(
                     chat_id=CHANNEL_ID,
                     text=post_text,
-                    parse_mode="Markdown",
+                    parse_mode="HTML",
                     reply_markup=keyboard,
                 )
             else:
@@ -461,14 +479,14 @@ async def confirm_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
                     chat_id=CHANNEL_ID,
                     photo=data["photo_id"],
                     caption=post_text if post_text else None,
-                    parse_mode="Markdown" if post_text else None,
+                    parse_mode="HTML" if post_text else None,
                     reply_markup=keyboard,
                 )
         else:
             await context.bot.send_message(
                 chat_id=CHANNEL_ID,
                 text=post_text,
-                parse_mode="Markdown",
+                parse_mode="HTML",
                 reply_markup=keyboard,
             )
         await query.edit_message_text("🎉 បានបញ្ជូនព័ត៌មានការងារទៅ Channel ដោយជោគជ័យ!")
@@ -499,8 +517,12 @@ async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     Strategy:
     1. Try copy_message (works for all content types, even restricted channels).
        copy_message re-sends a COPY so we can attach an inline keyboard to it.
+       It also preserves the original message's formatting entities (bold,
+       links, etc.) automatically, which is why links "just work" on forwards.
     2. If copy_message fails (e.g. Telegram won't allow it), fall back to
-       type-specific send_* calls using the file_id from the received message.
+       type-specific send_* calls using the file_id from the received message,
+       using caption_html/text_html so any hyperlink formatting is preserved
+       here too, instead of being flattened to plain text.
     """
     msg = update.message
     keyboard = get_contact_keyboard()
@@ -525,44 +547,48 @@ async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     # Fallback: send by file_id / text with type-specific API calls
     try:
         if msg.photo:
-            caption = (msg.caption or "").strip() or None
-            if caption and telegram_length(caption) > TELEGRAM_CAPTION_LIMIT:
+            caption = (msg.caption_html or "").strip() or None
+            if caption and telegram_length(msg.caption or "") > TELEGRAM_CAPTION_LIMIT:
                 await context.bot.send_photo(chat_id=CHANNEL_ID, photo=msg.photo[-1].file_id)
                 await context.bot.send_message(
-                    chat_id=CHANNEL_ID, text=caption, reply_markup=keyboard
+                    chat_id=CHANNEL_ID, text=caption, parse_mode="HTML", reply_markup=keyboard
                 )
             else:
                 await context.bot.send_photo(
                     chat_id=CHANNEL_ID,
                     photo=msg.photo[-1].file_id,
                     caption=caption,
+                    parse_mode="HTML" if caption else None,
                     reply_markup=keyboard,
                 )
 
         elif msg.video:
-            caption = (msg.caption or "").strip() or None
+            caption = (msg.caption_html or "").strip() or None
             await context.bot.send_video(
                 chat_id=CHANNEL_ID,
                 video=msg.video.file_id,
                 caption=caption,
+                parse_mode="HTML" if caption else None,
                 reply_markup=keyboard,
             )
 
         elif msg.document:
-            caption = (msg.caption or "").strip() or None
+            caption = (msg.caption_html or "").strip() or None
             await context.bot.send_document(
                 chat_id=CHANNEL_ID,
                 document=msg.document.file_id,
                 caption=caption,
+                parse_mode="HTML" if caption else None,
                 reply_markup=keyboard,
             )
 
         elif msg.audio:
-            caption = (msg.caption or "").strip() or None
+            caption = (msg.caption_html or "").strip() or None
             await context.bot.send_audio(
                 chat_id=CHANNEL_ID,
                 audio=msg.audio.file_id,
                 caption=caption,
+                parse_mode="HTML" if caption else None,
                 reply_markup=keyboard,
             )
 
@@ -574,11 +600,12 @@ async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             )
 
         elif msg.animation:
-            caption = (msg.caption or "").strip() or None
+            caption = (msg.caption_html or "").strip() or None
             await context.bot.send_animation(
                 chat_id=CHANNEL_ID,
                 animation=msg.animation.file_id,
                 caption=caption,
+                parse_mode="HTML" if caption else None,
                 reply_markup=keyboard,
             )
 
@@ -589,14 +616,13 @@ async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             )
 
         elif msg.text:
-            text = msg.text.strip()
-            if telegram_length(text) > TELEGRAM_MESSAGE_LIMIT:
+            if telegram_length(msg.text) > TELEGRAM_MESSAGE_LIMIT:
                 await update.message.reply_text(
-                    f"⚠️ អត្ថបទវែងពេកពេក ({telegram_length(text)} តួ)។"
+                    f"⚠️ អត្ថបទវែងពេកពេក ({telegram_length(msg.text)} តួ)។"
                 )
                 return
             await context.bot.send_message(
-                chat_id=CHANNEL_ID, text=text, reply_markup=keyboard
+                chat_id=CHANNEL_ID, text=msg.text_html.strip(), parse_mode="HTML", reply_markup=keyboard
             )
 
         else:
@@ -629,8 +655,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
         "👋 សួស្តី! ខ្ញុំជា Bot សម្រាប់ទម្លាក់ព័ត៌មានការងារ។\n\n"
         "Admin អាចប្រើ:\n"
-        "• /កំណត់Contact — កំណត់/មើលរបៀបកំណត់ Contact Buttons ថេរ (Icon+ពណ៌+Layout)\n"
-        "• /បង្ហោះការងារ — បង្ហោះការងារថ្មី (ផ្ញើព័ត៌មាន/រូបភាព ក្នុងសារតែមួយ)\n"
+        "• /setcontact — កំណត់/មើលរបៀបកំណត់ Contact Buttons ថេរ (Icon+ពណ៌+Layout)\n"
+        "• /post — បង្ហោះការងារថ្មី (ផ្ញើព័ត៌មាន/រូបភាព ក្នុងសារតែមួយ)\n"
         "• /showcontact — មើល Contact បច្ចុប្បន្ន"
     )
 
@@ -640,9 +666,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 # ------------------------------------------------------------------
 def main() -> None:
     app = ApplicationBuilder().token(BOT_TOKEN).build()
-
-    # Filter that matches any forwarded message (forward_origin is set on all forwards)
-    FORWARDED = filters.FORWARDED
 
     # NOTE: The CONTENT state now uses filters.ALL (excluding commands) so it
     # catches ANY message type: text, photo, video, doc, audio, forwarded, etc.
