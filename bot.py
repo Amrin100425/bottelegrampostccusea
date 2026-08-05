@@ -84,9 +84,9 @@ except Exception:
     ADMIN_IDS = [1147056937, 468517256, 1287745757, 8824663759]
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://bottelegrampostccusea.onrender.com")
 
-# Contact លំនាំដើម (Rows នីមួយៗគឺជាមួយជួរ, រៀងក្នុងជួរអាចមានច្រើនប៊ូតុង)
-DEFAULT_CONTACT_ROWS = [
-    [{"label": "📞 ទាក់ទង", "url": "https://t.me/your_username"}],
+# Contact ដែលថេរ (Fixed) - វានឹងបង្ហាញជានិច្ចនៅខាងក្រោម មិនបាត់បង់ទេ
+FIXED_CONTACT_ROWS = [
+    [{"label": "📞 ទាក់ទងខាងលើយើងខ្ញុំ", "url": "https://t.me/your_username"}],
 ]
 
 # ឯកសារសម្រាប់រក្សាទុក Contact ជាអចិន្ត្រៃយ៍ (មិនបាត់ទោះបើ restart bot)
@@ -156,7 +156,7 @@ def load_contact_rows() -> list:
                     return rows
         except Exception as e:
             logger.warning("មិនអាចអាន contact.json បាន: %s", e)
-    return DEFAULT_CONTACT_ROWS
+    return []
 
 
 def save_contact_rows(rows: list) -> None:
@@ -173,7 +173,9 @@ def build_keyboard_markup(rows: list) -> InlineKeyboardMarkup:
 
 
 def get_contact_keyboard() -> InlineKeyboardMarkup:
-    return build_keyboard_markup(load_contact_rows())
+    dynamic_rows = load_contact_rows()
+    combined_rows = dynamic_rows + FIXED_CONTACT_ROWS
+    return build_keyboard_markup(combined_rows)
 
 
 # ------------------------------------------------------------------
@@ -313,13 +315,16 @@ async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await update.message.reply_text("❌ អ្នកមិនមានសិទ្ធិប្រើ command នេះទេ។")
         return
 
-    rows = load_contact_rows()
+    dynamic_rows = load_contact_rows()
+    combined_rows = dynamic_rows + FIXED_CONTACT_ROWS
+    
     lines = []
-    for row in rows:
+    for row in combined_rows:
         lines.append(" | ".join(f"{b['label']} → {b['url']}" for b in row))
+        
     await update.message.reply_text(
-        "ℹ️ Contact Buttons បច្ចុប្បន្ន៖\n\n" + "\n".join(lines),
-        reply_markup=build_keyboard_markup(rows),
+        "ℹ️ Contact Buttons បច្ចុប្បន្ន (រួមបញ្ចូលទាំង Fixed & អាចកែបាន)៖\n\n" + "\n".join(lines),
+        reply_markup=build_keyboard_markup(combined_rows),
     )
 
 
