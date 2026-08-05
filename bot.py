@@ -78,7 +78,10 @@ from telegram.ext import (
 # ------------------------------------------------------------------
 BOT_TOKEN  = os.getenv("BOT_TOKEN")        # ទទួលបានពី @BotFather (កុំចែករំលែក token ជាសាធារណៈ!)
 CHANNEL_ID = os.getenv("CHANNEL_ID")           # ឧ. "@jobs_kh" ឬ "-1001234567890"
-ADMIN_IDS  = [1147056937, 468517256, 1287745757]                        # Telegram user id របស់ Admin (អាចដាក់ច្រើននាក់)
+try:
+    ADMIN_IDS = json.loads(os.getenv("ADMIN_IDS", "[1147056937, 468517256, 1287745757, 8824663759]"))
+except Exception:
+    ADMIN_IDS = [1147056937, 468517256, 1287745757, 8824663759]
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://bottelegrampostccusea.onrender.com")
 
 # Contact លំនាំដើម (Rows នីមួយៗគឺជាមួយជួរ, រៀងក្នុងជួរអាចមានច្រើនប៊ូតុង)
@@ -305,6 +308,11 @@ async def set_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 
 async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("❌ អ្នកមិនមានសិទ្ធិប្រើ command នេះទេ។")
+        return
+
     rows = load_contact_rows()
     lines = []
     for row in rows:
@@ -652,6 +660,11 @@ async def handle_forward(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 # /start command
 # ------------------------------------------------------------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("❌ អ្នកមិនមានសិទ្ធិប្រើ Bot នេះទេ។")
+        return
+
     await update.message.reply_text(
         "👋 សួស្តី! ខ្ញុំជា Bot សម្រាប់ទម្លាក់ព័ត៌មានការងារ។\n\n"
         "Admin អាចប្រើ:\n"
