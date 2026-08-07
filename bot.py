@@ -84,10 +84,7 @@ except Exception:
     ADMIN_IDS = [1147056937, 468517256, 1287745757, 8824663759]
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://bottelegrampostccusea.onrender.com")
 
-# Contact ដែលថេរ (Fixed) - វានឹងបង្ហាញជានិច្ចនៅខាងក្រោម មិនបាត់បង់ទេ
-# FIXED_CONTACT_ROWS = [
-#     [{"label": "📞 ទាក់ទងខាងលើយើងខ្ញុំ", "url": "https://t.me/USEACCAD"}],
-# ]
+
 
 # ឯកសារសម្រាប់រក្សាទុក Contact ជាអចិន្ត្រៃយ៍ (មិនបាត់ទោះបើ restart bot)
 CONTACT_STORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
@@ -174,8 +171,7 @@ def build_keyboard_markup(rows: list) -> InlineKeyboardMarkup:
 
 def get_contact_keyboard() -> InlineKeyboardMarkup:
     dynamic_rows = load_contact_rows()
-    combined_rows = dynamic_rows + FIXED_CONTACT_ROWS
-    return build_keyboard_markup(combined_rows)
+    return build_keyboard_markup(dynamic_rows)
 
 
 # ------------------------------------------------------------------
@@ -316,15 +312,14 @@ async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         return
 
     dynamic_rows = load_contact_rows()
-    combined_rows = dynamic_rows + FIXED_CONTACT_ROWS
     
     lines = []
-    for row in combined_rows:
+    for row in dynamic_rows:
         lines.append(" | ".join(f"{b['label']} → {b['url']}" for b in row))
         
     await update.message.reply_text(
-        "ℹ️ Contact Buttons បច្ចុប្បន្ន (រួមបញ្ចូលទាំង Fixed & អាចកែបាន)៖\n\n" + "\n".join(lines),
-        reply_markup=build_keyboard_markup(combined_rows),
+        "ℹ️ Contact Buttons បច្ចុប្បន្ន៖\n\n" + "\n".join(lines),
+        reply_markup=build_keyboard_markup(dynamic_rows),
     )
 
 
