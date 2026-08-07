@@ -85,9 +85,9 @@ except Exception:
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://bottelegrampostccusea.onrender.com")
 
 # Contact ដែលថេរ (Fixed) - វានឹងបង្ហាញជានិច្ចនៅខាងក្រោម មិនបាត់បង់ទេ
-FIXED_CONTACT_ROWS = [
-    [{"label": "📞 ទាក់ទងខាងលើយើងខ្ញុំ", "url": "https://t.me/USEACCAD"}],
-]
+# FIXED_CONTACT_ROWS = [
+#     [{"label": "📞 ទាក់ទងខាងលើយើងខ្ញុំ", "url": "https://t.me/USEACCAD"}],
+# ]
 
 # ឯកសារសម្រាប់រក្សាទុក Contact ជាអចិន្ត្រៃយ៍ (មិនបាត់ទោះបើ restart bot)
 CONTACT_STORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
