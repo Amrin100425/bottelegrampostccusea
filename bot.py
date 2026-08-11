@@ -169,8 +169,10 @@ def build_keyboard_markup(rows: list) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(kb_rows)
 
 
-def get_contact_keyboard() -> InlineKeyboardMarkup:
+def get_contact_keyboard():
     dynamic_rows = load_contact_rows()
+    if not dynamic_rows:
+        return None
     return build_keyboard_markup(dynamic_rows)
 
 
@@ -312,6 +314,9 @@ async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         return
 
     dynamic_rows = load_contact_rows()
+    if not dynamic_rows:
+        await update.message.reply_text("ℹ️ មិនទាន់មាន Contact Buttons ទេបច្ចុប្បន្ន។ សូមប្រើ /setcontact ដើម្បីកំណត់។")
+        return
     
     lines = []
     for row in dynamic_rows:
@@ -383,6 +388,7 @@ async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         # applied via Telegram's own formatting tools is preserved as HTML tags
         # instead of being flattened to plain, unclickable text.
         context.user_data["info"] = (msg.caption_html or "").strip() or None
+        context.user_data["raw_length"] = telegram_length(msg.caption or "")
     elif msg.text:
         # Use text_html for the same reason as above.
         text_len = telegram_length(msg.text)
@@ -394,6 +400,7 @@ async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
             return CONTENT
         context.user_data["photo_id"] = None
         context.user_data["info"] = msg.text_html.strip()
+        context.user_data["raw_length"] = text_len
     else:
         await update.message.reply_text(
             "⚠️ សូមផ្ញើ *អត្ថបទ* ឬ *រូបភាព* (អាចមាន Caption)។", parse_mode="Markdown"
@@ -414,18 +421,19 @@ def telegram_length(text: str) -> int:
     return len(text.encode("utf-16-le")) // 2
 
 
-def _needs_split_caption(post_text: str) -> bool:
+def _needs_split_caption(raw_length: int) -> bool:
     """True if text + photo combo would exceed Telegram's caption limit."""
-    return bool(post_text) and telegram_length(post_text) > TELEGRAM_CAPTION_LIMIT
+    return raw_length > TELEGRAM_CAPTION_LIMIT
 
 
 async def show_preview(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     data = context.user_data
     post_text = data.get("info") or ""
+    raw_length = data.get("raw_length", 0)
     keyboard = get_contact_keyboard()
 
     if data.get("photo_id"):
-        if _needs_split_caption(post_text):
+        if _needs_split_caption(raw_length):
             # Caption would be too long -> send photo alone, then full text as its own message
             await update.message.reply_photo(photo=data["photo_id"])
             await update.message.reply_text(
@@ -466,13 +474,14 @@ async def confirm_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 
     data = context.user_data
     post_text = data.get("info") or ""
+    raw_length = data.get("raw_length", 0)
     keyboard = get_contact_keyboard()
 
     await query.edit_message_text("⏳ កំពុងបញ្ជូន...")
 
     try:
         if data.get("photo_id"):
-            if _needs_split_caption(post_text):
+            if _needs_split_caption(raw_length):
                 # Photo without caption, then the full description as a separate message
                 # (with the contact buttons attached to the text message).
                 await context.bot.send_photo(chat_id=CHANNEL_ID, photo=data["photo_id"])
