@@ -175,10 +175,6 @@ def get_contact_keyboard():
         return None
     return build_keyboard_markup(dynamic_rows)
 
-
-# ------------------------------------------------------------------
-# Parser សម្រាប់ទម្រង់ /setcontact (multiline, | សម្រាប់ជួរដូចគ្នា, - style:color Optional)
-# ------------------------------------------------------------------
 def parse_button_entry(entry: str):
     """Parse 'Button text - url' or with optional '- style:green' / '- emoji:🔥' suffixes."""
     entry = entry.strip()
@@ -522,12 +518,6 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await update.message.reply_text("❌ បានបោះបង់ដំណើរការ។")
     return ConversationHandler.END
 
-
-# ------------------------------------------------------------------
-# Forward handler — Admin forwards any message directly to Bot
-# The bot re-posts it to the channel with contact buttons appended.
-# Works for: text, photo, video, document, audio, voice, sticker, animation.
-# ------------------------------------------------------------------
 async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Core logic: re-publish the forwarded message to the channel with contact buttons.
 
@@ -545,9 +535,6 @@ async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     keyboard = get_contact_keyboard()
 
     try:
-        # copy_message is the simplest and most reliable path — it works for
-        # text, photo, video, document, audio, voice, sticker, animation, etc.
-        # and it allows attaching an inline keyboard.
         sent = await context.bot.copy_message(
             chat_id=CHANNEL_ID,
             from_chat_id=msg.chat_id,
@@ -561,7 +548,6 @@ async def _do_forward_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     except Exception as copy_err:
         logger.warning("copy_message failed (%s), trying type-specific fallback.", copy_err)
 
-    # Fallback: send by file_id / text with type-specific API calls
     try:
         if msg.photo:
             caption = (msg.caption_html or "").strip() or None
@@ -664,10 +650,6 @@ async def handle_forward(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         return  # silently ignore non-admin messages
     await _do_forward_post(update, context)
 
-
-# ------------------------------------------------------------------
-# /start command
-# ------------------------------------------------------------------
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     if not is_admin(user.id):
@@ -682,15 +664,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "• /showcontact — មើល Contact បច្ចុប្បន្ន"
     )
 
-
-# ------------------------------------------------------------------
-# Main
-# ------------------------------------------------------------------
 def main() -> None:
     app = ApplicationBuilder().token(BOT_TOKEN).build()
-
-    # NOTE: The CONTENT state now uses filters.ALL (excluding commands) so it
-    # catches ANY message type: text, photo, video, doc, audio, forwarded, etc.
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("post", post_start)],
         states={
@@ -714,8 +689,6 @@ def main() -> None:
     app.add_handler(CommandHandler("setcontact", set_contact))
     app.add_handler(CommandHandler("showcontact", show_contact))
     app.add_handler(conv_handler)
-    # Standalone: Admin forwards any message directly (no /post needed).
-    # Registered AFTER conv_handler so active /post sessions take priority.
     app.add_handler(
         MessageHandler(
             (filters.ALL & ~filters.COMMAND) & filters.ChatType.PRIVATE,
