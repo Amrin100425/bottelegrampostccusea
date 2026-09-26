@@ -37,7 +37,7 @@ from telegram.ext import (
 # ការកំណត់រចនាសម្ព័ន្ធ (CONFIG)
 # ------------------------------------------------------------------
 BOT_TOKEN  = os.getenv("BOT_TOKEN")
-CHANNEL_ID = os.getenv("CHANNEL_ID")
+CHANNEL_ID = os.getenv(-1001535612806)
 try:
     ADMIN_IDS = json.loads(os.getenv("ADMIN_IDS", "[1147056937, 468517256, 1287745757, 8824663759]"))
 except Exception:
