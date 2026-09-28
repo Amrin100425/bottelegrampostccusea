@@ -54,9 +54,9 @@ except Exception:
 WEBHOOK_URL = (os.getenv("RENDER_EXTERNAL_URL") or os.getenv("WEBHOOK_URL") or "https://bottelegrampostccusea.onrender.com").rstrip("/")
 
 # Contact ដែលថេរ (Fixed) - វានឹងបង្ហាញជានិច្ចនៅខាងក្រោម មិនបាត់បង់ទេ
-FIXED_CONTACT_ROWS = [
-    [{"label": "📞 Contact Us", "url": "https://t.me/USEACCAD"}],
-]
+# FIXED_CONTACT_ROWS = [
+#     [{"label": "📞 Contact Us", "url": "https://t.me/USEACCAD"}],
+# ]
 
 CONTACT_STORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
 
@@ -141,7 +141,7 @@ def build_keyboard_markup(rows: list) -> InlineKeyboardMarkup:
 
 def get_contact_keyboard():
     dynamic_rows = load_contact_rows()
-    combined_rows = (dynamic_rows or []) + FIXED_CONTACT_ROWS
+    combined_rows = (dynamic_rows or [])
     if not combined_rows:
         return None
     return build_keyboard_markup(combined_rows)
@@ -259,7 +259,7 @@ async def set_contact_start(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
         save_contact_rows(rows)
         keyboard = get_contact_keyboard()
-        total = sum(len(r) for r in (rows + FIXED_CONTACT_ROWS))
+        total = sum(len(r) for r in (rows))
 
         msg = f"✅ បានកំណត់ Contact Buttons ថ្មីរួចរាល់ ({total} ប៊ូតុង រួមទាំង Contact Us ថេរ)!\nវានឹងប្រើប្រាស់ជាប់រហូតគ្រប់ post បន្ទាប់ៗទៀត។"
         if errors:
@@ -290,7 +290,7 @@ async def set_contact_process(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     save_contact_rows(rows)
     keyboard = get_contact_keyboard()
-    total = sum(len(r) for r in (rows + FIXED_CONTACT_ROWS))
+    total = sum(len(r) for r in (rows))
 
     msg = f"✅ បានកំណត់ Contact Buttons ថ្មីរួចរាល់ ({total} ប៊ូតុង រួមទាំង Contact Us ថេរ)!\nវានឹងប្រើប្រាស់ជាប់រហូតគ្រប់ post បន្ទាប់ៗទៀត។"
     if errors:
@@ -312,7 +312,7 @@ async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         return
 
     dynamic_rows = load_contact_rows()
-    combined_rows = (dynamic_rows or []) + FIXED_CONTACT_ROWS
+    combined_rows = (dynamic_rows or [])
     if not combined_rows:
         await update.message.reply_text("ℹ️ មិនទាន់មាន Contact Buttons ទេបច្ចុប្បន្ន។ សូមប្រើ /setcontact ដើម្បីកំណត់។")
         return
