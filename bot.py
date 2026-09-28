@@ -36,10 +36,19 @@ from telegram.ext import (
 # ------------------------------------------------------------------
 # ការកំណត់រចនាសម្ព័ន្ធ (CONFIG)
 # ------------------------------------------------------------------
-BOT_TOKEN  = os.getenv("BOT_TOKEN")
-CHANNEL_ID = os.getenv("CHANNEL_ID")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+raw_channel = os.getenv("CHANNEL_ID")
+if raw_channel:
+    try:
+        CHANNEL_ID = int(raw_channel)
+    except ValueError:
+        CHANNEL_ID = raw_channel
+else:
+    CHANNEL_ID = None
+
 try:
-    ADMIN_IDS = json.loads(os.getenv("ADMIN_IDS", "[1147056937, 468517256, 1287745757, 8824663759]"))
+    admin_env = os.getenv("ADMIN_IDS", "[1147056937, 468517256, 1287745757, 8824663759]")
+    ADMIN_IDS = json.loads(admin_env) if admin_env.startswith("[") else [int(x.strip()) for x in admin_env.split(",") if x.strip()]
 except Exception:
     ADMIN_IDS = [1147056937, 468517256, 1287745757, 8824663759]
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://bottelegrampostccusea.onrender.com")
@@ -541,21 +550,28 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
 async def confirm_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
+    logger.info("confirm_post triggered with data: %s", query.data)
 
-    if query.data != "confirm_yes":
-        await query.edit_message_text("❌ បានបោះបង់។ សរសេរ /post ដើម្បីចាប់ផ្តើមម្តងទៀត។")
+    if not query.data.endswith("_yes"):
+        await query.edit_message_text("❌ បានបោះបង់ការបង្ហោះ។")
         context.user_data.clear()
         return ConversationHandler.END
 
-    await query.edit_message_text("⏳ កំពុងបញ្ជូនទៅកាន់ Channel...")
+    await query.edit_message_text("⏳ កំពុងបញ្ជូនទៅកាន់ Channel/Group...")
 
     try:
         await _publish_data_to_channel(context.bot, context.user_data)
-        await query.edit_message_text("🎉 បានបញ្ជូនព័ត៌មានការងារទៅ Channel ដោយជោគជ័យ!")
+        await query.edit_message_text("🎉 បានបញ្ជូនព័ត៌មានទៅកាន់ Channel/Group ដោយជោគជ័យ!")
+        logger.info("Successfully published post to Channel/Group ID %s", CHANNEL_ID)
     except Exception as e:
-        logger.error("Failed to send to channel: %s", e)
+        logger.error("Failed to send to channel/group: %s", e, exc_info=True)
         await query.edit_message_text(
-            f"⚠️ បរាជ័យក្នុងការបញ្ជូនទៅ Channel។ សូមប្រាកដថា Bot ជា Admin នៅក្នុង Channel។\n\nError: {e}"
+            f"⚠️ បរាជ័យក្នុងការបញ្ជូនទៅ Channel/Group (ID: {CHANNEL_ID})។\n\n"
+            f"Error: {e}\n\n"
+            f"👉 សូមពិនិត្យមើល:\n"
+            f"1. Bot ត្រូវបាន Add ចូល Channel/Group រួចរាល់\n"
+            f"2. Bot មានសិទ្ធិជា Administrator (Post/Send Messages)\n"
+            f"3. CHANNEL_ID ក្នុង .env ត្រឹមត្រូវ"
         )
 
     context.user_data.clear()
@@ -596,25 +612,32 @@ async def handle_standalone_message(update: Update, context: ContextTypes.DEFAUL
 async def standalone_confirm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     await query.answer()
+    logger.info("standalone_confirm_callback triggered with data: %s", query.data)
 
-    if query.data == "standalone_confirm_no":
+    if not query.data.endswith("_yes"):
         await query.edit_message_text("❌ បានបោះបង់ការបង្ហោះ។")
         context.user_data.clear()
         return
 
     if not context.user_data.get("source_message_id") and not context.user_data.get("info"):
-        await query.edit_message_text("⚠️ ព័ត៌មានសារនេះហួសសុពលភាពហើយ។ សូមផ្ញើសារម្តងទៀត។")
+        await query.edit_message_text("⚠️ ព័ត៌មានសារនេះហួសសុពលភាពហើយ។ សូមផ្ញើសារថ្មីម្តងទៀត។")
         return
 
-    await query.edit_message_text("⏳ កំពុងបញ្ជូនទៅកាន់ Channel...")
+    await query.edit_message_text("⏳ កំពុងបញ្ជូនទៅកាន់ Channel/Group...")
 
     try:
         await _publish_data_to_channel(context.bot, context.user_data)
-        await query.edit_message_text("🎉 បានបញ្ជូនព័ត៌មានទៅ Channel ដោយជោគជ័យ!")
+        await query.edit_message_text("🎉 បានបញ្ជូនព័ត៌មានទៅកាន់ Channel/Group ដោយជោគជ័យ!")
+        logger.info("Successfully published post to Channel/Group ID %s", CHANNEL_ID)
     except Exception as e:
-        logger.error("Failed to send standalone to channel: %s", e)
+        logger.error("Failed to send standalone to channel/group: %s", e, exc_info=True)
         await query.edit_message_text(
-            f"⚠️ បរាជ័យក្នុងការបញ្ជូនទៅ Channel។\n\nError: {e}"
+            f"⚠️ បរាជ័យក្នុងការបញ្ជូនទៅ Channel/Group (ID: {CHANNEL_ID})។\n\n"
+            f"Error: {e}\n\n"
+            f"👉 សូមពិនិត្យមើល:\n"
+            f"1. Bot ត្រូវបាន Add ចូល Channel/Group រួចរាល់\n"
+            f"2. Bot មានសិទ្ធិជា Administrator (Post/Send Messages)\n"
+            f"3. CHANNEL_ID ក្នុង .env ត្រឹមត្រូវ"
         )
 
     context.user_data.clear()
@@ -653,6 +676,7 @@ def main() -> None:
         ],
         allow_reentry=True,
         conversation_timeout=600,
+        per_message=False,
     )
 
     # Conversation handler សម្រាប់ /post
@@ -665,7 +689,7 @@ def main() -> None:
                     get_content,
                 ),
             ],
-            CONFIRM: [CallbackQueryHandler(confirm_post, pattern="^confirm_(yes|no)$")],
+            CONFIRM: [CallbackQueryHandler(confirm_post, pattern="^(confirm|standalone_confirm)_(yes|no)$")],
         },
         fallbacks=[
             CommandHandler("cancel", cancel),
@@ -673,6 +697,7 @@ def main() -> None:
         ],
         allow_reentry=True,
         conversation_timeout=600,
+        per_message=False,
     )
 
     app.add_handler(CommandHandler("start", start))
@@ -681,7 +706,7 @@ def main() -> None:
     app.add_handler(post_conv_handler)
     app.add_handler(
         CallbackQueryHandler(
-            standalone_confirm_callback, pattern="^standalone_confirm_(yes|no)$"
+            standalone_confirm_callback, pattern="^(confirm|standalone_confirm)_(yes|no)$"
         )
     )
     app.add_handler(
@@ -690,15 +715,31 @@ def main() -> None:
             handle_standalone_message,
         )
     )
+    # Fallback to answer any expired/unhandled button clicks immediately so it never spins/glows indefinitely
+    async def fallback_expired_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        query = update.callback_query
+        if query:
+            await query.answer("⚠️ ប៊ូតុងនេះហួសសុពលភាពហើយ (bot ត្រូវបាន restart)។ សូមផ្ញើសារម្តងទៀត។", show_alert=True)
+            try:
+                await query.edit_message_text("⚠️ ព័ត៌មានសារនេះហួសសុពលភាពហើយ។ សូមផ្ញើសារថ្មីម្តងទៀត។")
+            except Exception:
+                pass
 
-    logger.info("Bot is running with webhook...")
+    app.add_handler(CallbackQueryHandler(fallback_expired_callback))
 
-    app.run_webhook(
-        listen="0.0.0.0",
-        port=int(os.getenv("PORT", 8443)),
-        url_path=BOT_TOKEN,
-        webhook_url=f"{WEBHOOK_URL}/{BOT_TOKEN}",
-    )
+    is_render = bool(os.getenv("RENDER") or os.getenv("RENDER_EXTERNAL_URL") or os.getenv("USE_WEBHOOK"))
+
+    if is_render and WEBHOOK_URL:
+        logger.info("Bot is running with Webhook on Render...")
+        app.run_webhook(
+            listen="0.0.0.0",
+            port=int(os.getenv("PORT", 10000)),
+            url_path=BOT_TOKEN,
+            webhook_url=f"{WEBHOOK_URL}/{BOT_TOKEN}",
+        )
+    else:
+        logger.info("Bot is running with Polling (Local Development Mode)...")
+        app.run_polling(drop_pending_updates=True)
 
 
 if __name__ == "__main__":
