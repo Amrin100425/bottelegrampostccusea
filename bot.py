@@ -44,6 +44,11 @@ except Exception:
     ADMIN_IDS = [1147056937, 468517256, 1287745757, 8824663759]
 WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://bottelegrampostccusea.onrender.com")
 
+# Contact ដែលថេរ (Fixed) - វានឹងបង្ហាញជានិច្ចនៅខាងក្រោម មិនបាត់បង់ទេ
+FIXED_CONTACT_ROWS = [
+    [{"label": "Contact Us", "url": "https://t.me/USEACCAD"}],
+]
+
 CONTACT_STORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
 
 STYLE_EMOJI = {
@@ -127,9 +132,10 @@ def build_keyboard_markup(rows: list) -> InlineKeyboardMarkup:
 
 def get_contact_keyboard():
     dynamic_rows = load_contact_rows()
-    if not dynamic_rows:
+    combined_rows = (dynamic_rows or []) + FIXED_CONTACT_ROWS
+    if not combined_rows:
         return None
-    return build_keyboard_markup(dynamic_rows)
+    return build_keyboard_markup(combined_rows)
 
 
 def parse_button_entry(entry: str):
@@ -243,10 +249,10 @@ async def set_contact_start(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             return ConversationHandler.END
 
         save_contact_rows(rows)
-        keyboard = build_keyboard_markup(rows)
-        total = sum(len(r) for r in rows)
+        keyboard = get_contact_keyboard()
+        total = sum(len(r) for r in (rows + FIXED_CONTACT_ROWS))
 
-        msg = f"✅ បានកំណត់ Contact Buttons ថ្មីរួចរាល់ ({total} ប៊ូតុង)!\nវានឹងប្រើប្រាស់ជាប់រហូតគ្រប់ post បន្ទាប់ៗទៀត។"
+        msg = f"✅ បានកំណត់ Contact Buttons ថ្មីរួចរាល់ ({total} ប៊ូតុង រួមទាំង Contact Us ថេរ)!\nវានឹងប្រើប្រាស់ជាប់រហូតគ្រប់ post បន្ទាប់ៗទៀត។"
         if errors:
             msg += "\n\n⚠️ បន្ទាត់ខ្លះមានបញ្ហា (បានរំលង):\n" + "\n".join(errors)
         msg += "\n\nឧទាហរណ៍ប៊ូតុង៖"
@@ -274,10 +280,10 @@ async def set_contact_process(update: Update, context: ContextTypes.DEFAULT_TYPE
         return SETTING_CONTACT
 
     save_contact_rows(rows)
-    keyboard = build_keyboard_markup(rows)
-    total = sum(len(r) for r in rows)
+    keyboard = get_contact_keyboard()
+    total = sum(len(r) for r in (rows + FIXED_CONTACT_ROWS))
 
-    msg = f"✅ បានកំណត់ Contact Buttons ថ្មីរួចរាល់ ({total} ប៊ូតុង)!\nវានឹងប្រើប្រាស់ជាប់រហូតគ្រប់ post បន្ទាប់ៗទៀត។"
+    msg = f"✅ បានកំណត់ Contact Buttons ថ្មីរួចរាល់ ({total} ប៊ូតុង រួមទាំង Contact Us ថេរ)!\nវានឹងប្រើប្រាស់ជាប់រហូតគ្រប់ post បន្ទាប់ៗទៀត។"
     if errors:
         msg += "\n\n⚠️ បន្ទាត់ខ្លះមានបញ្ហា (បានរំលង):\n" + "\n".join(errors)
     msg += "\n\nឧទាហរណ៍ប៊ូតុង៖"
@@ -297,17 +303,18 @@ async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         return
 
     dynamic_rows = load_contact_rows()
-    if not dynamic_rows:
+    combined_rows = (dynamic_rows or []) + FIXED_CONTACT_ROWS
+    if not combined_rows:
         await update.message.reply_text("ℹ️ មិនទាន់មាន Contact Buttons ទេបច្ចុប្បន្ន។ សូមប្រើ /setcontact ដើម្បីកំណត់។")
         return
     
     lines = []
-    for row in dynamic_rows:
+    for row in combined_rows:
         lines.append(" | ".join(f"{b['label']} → {b['url']}" for b in row))
         
     await update.message.reply_text(
-        "ℹ️ Contact Buttons បច្ចុប្បន្ន៖\n\n" + "\n".join(lines),
-        reply_markup=build_keyboard_markup(dynamic_rows),
+        "ℹ️ Contact Buttons បច្ចុប្បន្ន (រួមបញ្ចូលទាំង Contact Us ថេរ & ប៊ូតុងបន្ថែម)៖\n\n" + "\n".join(lines),
+        reply_markup=build_keyboard_markup(combined_rows),
     )
 
 
