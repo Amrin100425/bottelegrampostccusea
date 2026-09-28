@@ -55,7 +55,7 @@ WEBHOOK_URL = (os.getenv("RENDER_EXTERNAL_URL") or os.getenv("WEBHOOK_URL") or "
 
 # Contact ដែលថេរ (Fixed) - វានឹងបង្ហាញជានិច្ចនៅខាងក្រោម មិនបាត់បង់ទេ
 FIXED_CONTACT_ROWS = [
-    [{"label": "Contact Us", "url": "https://t.me/USEACCAD"}],
+    [{"label": "📞 Contact Us", "url": "https://t.me/USEACCAD"}],
 ]
 
 CONTACT_STORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
