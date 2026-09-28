@@ -51,7 +51,7 @@ try:
     ADMIN_IDS = json.loads(admin_env) if admin_env.startswith("[") else [int(x.strip()) for x in admin_env.split(",") if x.strip()]
 except Exception:
     ADMIN_IDS = [1147056937, 468517256, 1287745757, 8824663759]
-WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://bottelegrampostccusea.onrender.com")
+WEBHOOK_URL = (os.getenv("RENDER_EXTERNAL_URL") or os.getenv("WEBHOOK_URL") or "https://bottelegrampostccusea.onrender.com").rstrip("/")
 
 # Contact ដែលថេរ (Fixed) - វានឹងបង្ហាញជានិច្ចនៅខាងក្រោម មិនបាត់បង់ទេ
 FIXED_CONTACT_ROWS = [
@@ -730,16 +730,18 @@ def main() -> None:
     is_render = bool(os.getenv("RENDER") or os.getenv("RENDER_EXTERNAL_URL") or os.getenv("USE_WEBHOOK"))
 
     if is_render and WEBHOOK_URL:
-        logger.info("Bot is running with Webhook on Render...")
+        logger.info("Bot is running with Webhook on Render (%s)...", WEBHOOK_URL)
         app.run_webhook(
             listen="0.0.0.0",
             port=int(os.getenv("PORT", 10000)),
             url_path=BOT_TOKEN,
             webhook_url=f"{WEBHOOK_URL}/{BOT_TOKEN}",
+            allowed_updates=Update.ALL_TYPES,
+            drop_pending_updates=True,
         )
     else:
         logger.info("Bot is running with Polling (Local Development Mode)...")
-        app.run_polling(drop_pending_updates=True)
+        app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == "__main__":
