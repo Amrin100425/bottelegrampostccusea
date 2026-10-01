@@ -61,14 +61,82 @@ WEBHOOK_URL = (os.getenv("RENDER_EXTERNAL_URL") or os.getenv("WEBHOOK_URL") or "
 CONTACT_STORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
 
 STYLE_EMOJI = {
-    "green": "🟢",
-    "blue": "🔵",
-    "red": "🔴",
-    "yellow": "🟡",
-    "orange": "🟠",
-    "purple": "🟣",
-    "black": "⚫️",
-    "white": "⚪️",
+    # ពណ៌ប្រអប់បួនជ្រុង (Square Color Blocks)
+    "green": "🟩",
+    "blue": "🟦",
+    "red": "🟥",
+    "yellow": "🟨",
+    "orange": "🟧",
+    "purple": "🟪",
+    "brown": "🟫",
+    "black": "⬛",
+    "white": "⬜",
+    "pink": "🩷",
+    "cyan": "🩵",
+    "gray": "🩶",
+    "grey": "🩶",
+
+    # ពណ៌រង្វង់មូល (Circle Dots)
+    "circle-green": "🟢",
+    "cgreen": "🟢",
+    "circle_green": "🟢",
+    "circle-blue": "🔵",
+    "cblue": "🔵",
+    "circle_blue": "🔵",
+    "circle-red": "🔴",
+    "cred": "🔴",
+    "circle_red": "🔴",
+    "circle-yellow": "🟡",
+    "cyellow": "🟡",
+    "circle_yellow": "🟡",
+    "circle-orange": "🟠",
+    "corange": "🟠",
+    "circle_orange": "🟠",
+    "circle-purple": "🟣",
+    "cpurple": "🟣",
+    "circle_purple": "🟣",
+    "circle-brown": "🟤",
+    "cbrown": "🟤",
+    "circle_brown": "🟤",
+    "circle-black": "⚫️",
+    "cblack": "⚫️",
+    "circle_black": "⚫️",
+    "circle-white": "⚪️",
+    "cwhite": "⚪️",
+    "circle_white": "⚪️",
+
+    # បេះដូងពណ៌ (Hearts)
+    "heart-red": "❤️",
+    "heart-green": "💚",
+    "heart-blue": "💙",
+    "heart-yellow": "💛",
+    "heart-purple": "💜",
+    "heart-orange": "🧡",
+    "heart-pink": "🩷",
+    "heart-cyan": "🩵",
+    "heart-black": "🖤",
+    "heart-white": "🤍",
+    "heart-brown": "🤎",
+    "heart-gray": "🩶",
+    "heart-grey": "🩶",
+
+    # ពេជ្រ (Diamonds)
+    "diamond-blue": "🔷",
+    "diamond-orange": "🔶",
+    "diamond-red": "♦️",
+
+    # ឈ្មោះពណ៌ជាភាសាខ្មែរ (Khmer Color Names)
+    "បៃតង": "🟩",
+    "ខៀវ": "🟦",
+    "ក្រហម": "🟥",
+    "លឿង": "🟨",
+    "ទឹកក្រូច": "🟧",
+    "ស្វាយ": "🟪",
+    "ត្នោត": "🟫",
+    "ខ្មៅ": "⬛",
+    "ស": "⬜",
+    "ផ្កាឈូក": "🩷",
+    "ប្រផេះ": "🩶",
 }
 
 MAX_BUTTONS_PER_ROW = 3
@@ -148,27 +216,29 @@ def get_contact_keyboard():
 
 
 def parse_button_entry(entry: str):
-    """Parse 'Button text - url' or with optional '- style:green' / '- emoji:🔥' suffixes."""
+    """Parse 'Button text - url' with optional '- style:green' / '- color:blue' / '- emoji:🔥' suffixes."""
     entry = entry.strip()
     if not entry:
         return None
 
-    style_prefix = ""
-    emoji_prefix = ""
+    style_name = None
+    emoji_icon = None
 
-    # ស្វែងរក - style:color
-    m_style = re.search(r"-\s*style\s*:\s*(\w+)\s*$", entry, flags=re.IGNORECASE)
+    # ស្វែងរក - style:color ឬ - color:color ឬ - colour:color ឬ - ពណ៌:color
+    m_style = re.search(r"-\s*(?:style|color|colour|ពណ៌)\s*[:=\s]\s*([\w\u1780-\u17FF\-]+)", entry, flags=re.IGNORECASE)
     if m_style:
-        style_name = m_style.group(1).lower()
-        if style_name in STYLE_EMOJI:
-            style_prefix = STYLE_EMOJI[style_name] + " "
-        entry = entry[: m_style.start()].strip()
+        style_candidate = m_style.group(1).lower()
+        if style_candidate in STYLE_EMOJI:
+            style_name = style_candidate
+            entry = entry[:m_style.start()] + entry[m_style.end():]
 
-    # ស្វែងរក - emoji:<any emoji or text>
-    m_emoji = re.search(r"-\s*emoji\s*:\s*(\S+)\s*$", entry, flags=re.IGNORECASE)
+    # ស្វែងរក - emoji:<icon> ឬ - icon:<icon>
+    m_emoji = re.search(r"-\s*(?:emoji|icon)\s*[:=\s]\s*(\S+)", entry, flags=re.IGNORECASE)
     if m_emoji:
-        emoji_prefix = m_emoji.group(1).strip() + " "
-        entry = entry[: m_emoji.start()].strip()
+        emoji_icon = m_emoji.group(1).strip()
+        entry = entry[:m_emoji.start()] + entry[m_emoji.end():]
+
+    entry = re.sub(r"\s*-\s*-\s*", " - ", entry).strip()
 
     # បំបែក Label និង URL ដោយប្រើ " - " ចុងក្រោយ
     label, sep, target = entry.rpartition(" - ")
@@ -182,8 +252,12 @@ def parse_button_entry(entry: str):
     if not label or not target:
         return None
 
-    prefix = emoji_prefix if emoji_prefix else style_prefix
-    label = f"{prefix}{label}"
+    if emoji_icon:
+        label = f"{emoji_icon} {label}"
+
+    if style_name and style_name in STYLE_EMOJI:
+        color_box = STYLE_EMOJI[style_name]
+        label = f"{color_box} {label} {color_box}"
 
     return {"label": label, "url": build_contact_url(target)}
 
@@ -220,20 +294,20 @@ SETCONTACT_HELP = (
     "`ទំនាក់ទំនង - @username`\n"
     "`គេហទំព័រ - https://example.com`\n\n"
 
-    "*— ដាក់ពណ៌ (style:) —*\n"
-    "Telegram មិនអនុញ្ញាតប្ដូរពណ៌ប៊ូតុងពិតប្រាកដទេ\n"
-    "ដូច្នេះពណ៌ត្រូវបានបង្ហាញជា Emoji ពណ៌ នៅខាងមុខ Label\n"
-    "`ទំនាក់ទំនង - @username - style:green`  →  🟢 ទំនាក់ទំនង\n"
-    "`Apply - https://example.com - style:blue`  →  🔵 Apply\n"
-    "ពណ៌ដែលគាំទ្រ: `green` 🟢 `blue` 🔵 `red` 🔴 `yellow` 🟡 `orange` 🟠 `purple` 🟣 `black` ⚫️ `white` ⚪️\n\n"
+    "*— ដាក់ពណ៌ប៊ូតុង (style: ឬ color:) —*\n"
+    "• *ប្រអប់ពណ៌ (Squares)*: `green` 🟩 `blue` 🟦 `red` 🟥 `yellow` 🟨 `orange` 🟧 `purple` 🟪 `pink` 🩷 `cyan` 🩵 `brown` 🟫 `black` ⬛ `white` ⬜ `gray` 🩶\n"
+    "• *រង្វង់មូល (Circles)*: `circle-green` 🟢 `circle-blue` 🔵 `circle-red` 🔴 `circle-yellow` 🟡 `circle-orange` 🟠 `circle-purple` 🟣\n"
+    "• *បេះដូង (Hearts)*: `heart-red` ❤️ `heart-green` 💚 `heart-blue` 💙 `heart-pink` 🩷 `heart-yellow` 💛\n"
+    "• *ភាសាខ្មែរ*: `ពណ៌:បៃតង` 🟩 `ពណ៌:ខៀវ` 🟦 `ពណ៌:ក្រហម` 🟥 `ពណ៌:លឿង` 🟨 `ពណ៌:ផ្កាឈូក` 🩷\n\n"
+    "`ទំនាក់ទំនង - @username - color:green`  →  🟩 ទំនាក់ទំនង 🟩\n"
+    "`Apply Now - https://example.com - style:circle-blue`  →  🔵 Apply Now 🔵\n\n"
 
-    "*— ដាក់ Emoji ផ្ទាល់ (emoji:) —*\n"
-    "ប្រើ Emoji ណាក៏បានតាមចង់\n"
-    "`ទំនាក់ទំនង - @username - emoji:📞`  →  📞 ទំនាក់ទំនង\n"
-    "`Apply Now - https://example.com - emoji:🚀`  →  🚀 Apply Now\n\n"
+    "*— ដាក់ Emoji ផ្ទាល់ (emoji: ឬ icon:) —*\n"
+    "`ទំនាក់ទំនង - @username - icon:📞`  →  📞 ទំនាក់ទំនង\n"
+    "`Apply Now - https://example.com - emoji:🚀 - color:green`  →  🟩 🚀 Apply Now 🟩\n\n"
 
-    "*— ច្រើនប៊ូតុង (|) —*\n"
-    "`ទំនាក់ទំនង - @username - emoji:📞 | Apply - https://example.com - style:green`\n\n"
+    "*— ច្រើនប៊ូតុងក្នុងមួយជួរ (|) —*\n"
+    "`ទំនាក់ទំនង - @username - icon:📞 - color:green | Apply - https://example.com - color:blue`\n\n"
 
     "URL អាចជា `@username`, លេខទូរស័ព្ទ, ឬ URL ពេញ។"
 )
