@@ -60,19 +60,39 @@ WEBHOOK_URL = (os.getenv("RENDER_EXTERNAL_URL") or os.getenv("WEBHOOK_URL") or "
 
 CONTACT_STORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
 
+# Telegram Native Solid Button Background Colors (Bot API 9.4+)
+# Blue (primary), Red (danger), Green (success)
+NATIVE_BUTTON_STYLES = {
+    # Blue / ពណ៌ខៀវ
+    "blue": "primary",
+    "primary": "primary",
+    "ខៀវ": "primary",
+
+    # Red / ពណ៌ក្រហម
+    "red": "danger",
+    "danger": "danger",
+    "ក្រហម": "danger",
+
+    # Green / ពណ៌បៃតង
+    "green": "success",
+    "success": "success",
+    "បៃតង": "success",
+}
+
 STYLE_EMOJI = {
     # ពណ៌ប្រអប់បួនជ្រុង (Square Color Blocks)
-    "green": "🟩",
-    "blue": "🟦",
-    "red": "🟥",
     "yellow": "🟨",
+    "gold": "🟨",
     "orange": "🟧",
     "purple": "🟪",
+    "violet": "🟪",
     "brown": "🟫",
     "black": "⬛",
     "white": "⬜",
     "pink": "🩷",
+    "rose": "🌸",
     "cyan": "🩵",
+    "teal": "🩵",
     "gray": "🩶",
     "grey": "🩶",
 
@@ -126,9 +146,6 @@ STYLE_EMOJI = {
     "diamond-red": "♦️",
 
     # ឈ្មោះពណ៌ជាភាសាខ្មែរ (Khmer Color Names)
-    "បៃតង": "🟩",
-    "ខៀវ": "🟦",
-    "ក្រហម": "🟥",
     "លឿង": "🟨",
     "ទឹកក្រូច": "🟧",
     "ស្វាយ": "🟪",
@@ -200,10 +217,15 @@ def save_contact_rows(rows: list) -> None:
 
 
 def build_keyboard_markup(rows: list) -> InlineKeyboardMarkup:
-    kb_rows = [
-        [InlineKeyboardButton(b["label"], url=b["url"]) for b in row]
-        for row in rows
-    ]
+    kb_rows = []
+    for row in rows:
+        row_btns = []
+        for b in row:
+            kwargs = {}
+            if b.get("btn_style"):
+                kwargs["api_kwargs"] = {"style": b["btn_style"]}
+            row_btns.append(InlineKeyboardButton(b["label"], url=b["url"], **kwargs))
+        kb_rows.append(row_btns)
     return InlineKeyboardMarkup(kb_rows)
 
 
@@ -216,7 +238,7 @@ def get_contact_keyboard():
 
 
 def parse_button_entry(entry: str):
-    """Parse 'Button text - url' with optional '- style:green' / '- color:blue' / '- emoji:🔥' suffixes."""
+    """Parse 'Button text - url' with optional solid colors ('- color:blue', '- color:red', '- color:green') or emojis."""
     entry = entry.strip()
     if not entry:
         return None
@@ -228,7 +250,7 @@ def parse_button_entry(entry: str):
     m_style = re.search(r"-\s*(?:style|color|colour|ពណ៌)\s*[:=\s]\s*([\w\u1780-\u17FF\-]+)", entry, flags=re.IGNORECASE)
     if m_style:
         style_candidate = m_style.group(1).lower()
-        if style_candidate in STYLE_EMOJI:
+        if style_candidate in NATIVE_BUTTON_STYLES or style_candidate in STYLE_EMOJI:
             style_name = style_candidate
             entry = entry[:m_style.start()] + entry[m_style.end():]
 
@@ -255,11 +277,18 @@ def parse_button_entry(entry: str):
     if emoji_icon:
         label = f"{emoji_icon} {label}"
 
-    if style_name and style_name in STYLE_EMOJI:
-        color_box = STYLE_EMOJI[style_name]
-        label = f"{color_box} {label} {color_box}"
+    btn_dict = {"label": label, "url": build_contact_url(target)}
 
-    return {"label": label, "url": build_contact_url(target)}
+    if style_name:
+        if style_name in NATIVE_BUTTON_STYLES:
+            # Telegram Native Solid Background Color (Blue, Red, Green)
+            btn_dict["btn_style"] = NATIVE_BUTTON_STYLES[style_name]
+        elif style_name in STYLE_EMOJI:
+            # Emoji styling fallback for other colors (yellow, orange, purple, etc.)
+            color_box = STYLE_EMOJI[style_name]
+            btn_dict["label"] = f"{color_box} {label} {color_box}"
+
+    return btn_dict
 
 
 def parse_contact_text(raw_text: str):
@@ -290,24 +319,28 @@ SETCONTACT_HELP = (
     "មួយបន្ទាត់ = មួយជួរប៊ូតុង\n"
     "ប្រើ `|` ដើម្បីដាក់ច្រើនប៊ូតុងក្នុងជួរតែមួយ (រហូតដល់ 3)\n\n"
 
-    "*— ប៊ូតុងធម្មតា —*\n"
-    "`ទំនាក់ទំនង - @username`\n"
-    "`គេហទំព័រ - https://example.com`\n\n"
+    "*— 🎨 1. ពណ៌ផ្ទៃខាងក្រោយប៊ូតុងពេញ (Solid Background Colors) —*\n"
+    "Telegram គាំទ្រពណ៌ Solid ពេញចំនួន ៣ គឺ:\n"
+    "• ពណ៌ខៀវ (Blue): `color:blue` ឬ `style:primary` ឬ `ពណ៌:ខៀវ`\n"
+    "• ពណ៌ក្រហម (Red): `color:red` ឬ `style:danger` ឬ `ពណ៌:ក្រហម`\n"
+    "• ពណ៌បៃតង (Green): `color:green` ឬ `style:success` ឬ `ពណ៌:បៃតង`\n\n"
+    "ឧទាហរណ៍:\n"
+    "`View my balance - https://example.com - color:green`\n"
+    "`Unlock exclusive offers - https://example.com - icon:🎁 - color:blue`\n"
+    "`Cancel - https://example.com - icon:🪅 - color:red | Renew - https://example.com - icon:🍿 - color:green`\n\n"
 
-    "*— ដាក់ពណ៌ប៊ូតុង (style: ឬ color:) —*\n"
-    "• *ប្រអប់ពណ៌ (Squares)*: `green` 🟩 `blue` 🟦 `red` 🟥 `yellow` 🟨 `orange` 🟧 `purple` 🟪 `pink` 🩷 `cyan` 🩵 `brown` 🟫 `black` ⬛ `white` ⬜ `gray` 🩶\n"
-    "• *រង្វង់មូល (Circles)*: `circle-green` 🟢 `circle-blue` 🔵 `circle-red` 🔴 `circle-yellow` 🟡 `circle-orange` 🟠 `circle-purple` 🟣\n"
-    "• *បេះដូង (Hearts)*: `heart-red` ❤️ `heart-green` 💚 `heart-blue` 💙 `heart-pink` 🩷 `heart-yellow` 💛\n"
-    "• *ភាសាខ្មែរ*: `ពណ៌:បៃតង` 🟩 `ពណ៌:ខៀវ` 🟦 `ពណ៌:ក្រហម` 🟥 `ពណ៌:លឿង` 🟨 `ពណ៌:ផ្កាឈូក` 🩷\n\n"
-    "`ទំនាក់ទំនង - @username - color:green`  →  🟩 ទំនាក់ទំនង 🟩\n"
-    "`Apply Now - https://example.com - style:circle-blue`  →  🔵 Apply Now 🔵\n\n"
+    "*— 🌈 2. ពណ៌បន្ថែម (Pink, Yellow, Purple, Orange...) —*\n"
+    "• ពណ៌ផ្កាឈូក (Pink): `color:pink` 🩷 ឬ `color:rose` 🌸 ឬ `ពណ៌:ផ្កាឈូក`\n"
+    "• ពណ៌លឿង (Yellow): `color:yellow` 🟨 ឬ `color:gold` 🟨 ឬ `ពណ៌:លឿង`\n"
+    "• ពណ៌ស្វាយ (Purple): `color:purple` 🟪\n"
+    "• ពណ៌ទឹកក្រូច (Orange): `color:orange` 🟧\n"
+    "• ពណ៌ផ្ទៃមេឃ (Cyan): `color:cyan` 🩵\n\n"
+    "ឧទាហរណ៍:\n"
+    "`Hot Promo - https://example.com - color:pink - icon:🎀`  →  🩷 🎀 Hot Promo 🩷\n"
+    "`VIP Gold - https://example.com - color:yellow - icon:⭐`  →  🟨 ⭐ VIP Gold 🟨\n\n"
 
-    "*— ដាក់ Emoji ផ្ទាល់ (emoji: ឬ icon:) —*\n"
-    "`ទំនាក់ទំនង - @username - icon:📞`  →  📞 ទំនាក់ទំនង\n"
-    "`Apply Now - https://example.com - emoji:🚀 - color:green`  →  🟩 🚀 Apply Now 🟩\n\n"
-
-    "*— ច្រើនប៊ូតុងក្នុងមួយជួរ (|) —*\n"
-    "`ទំនាក់ទំនង - @username - icon:📞 - color:green | Apply - https://example.com - color:blue`\n\n"
+    "*— 3. ដាក់ Icon / Emoji —*\n"
+    "`ទំនាក់ទំនង - @username - icon:📞 - color:blue`\n\n"
 
     "URL អាចជា `@username`, លេខទូរស័ព្ទ, ឬ URL ពេញ។"
 )
@@ -518,8 +551,8 @@ async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
     confirm_keyboard = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("✅ YES — បញ្ជូនទៅ Channel", callback_data="confirm_yes"),
-            InlineKeyboardButton("❌ NO — បោះបង់", callback_data="confirm_no"),
+            InlineKeyboardButton("✅ YES — បញ្ជូនទៅ Channel", callback_data="confirm_yes", api_kwargs={"style": "success"}),
+            InlineKeyboardButton("❌ NO — បោះបង់", callback_data="confirm_no", api_kwargs={"style": "danger"}),
         ]
     ])
     await update.message.reply_text(
@@ -672,8 +705,8 @@ async def handle_standalone_message(update: Update, context: ContextTypes.DEFAUL
 
     confirm_keyboard = InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("✅ YES — បញ្ជូនទៅ Channel", callback_data="standalone_confirm_yes"),
-            InlineKeyboardButton("❌ NO — បោះបង់", callback_data="standalone_confirm_no"),
+            InlineKeyboardButton("✅ YES — បញ្ជូនទៅ Channel", callback_data="standalone_confirm_yes", api_kwargs={"style": "success"}),
+            InlineKeyboardButton("❌ NO — បោះបង់", callback_data="standalone_confirm_no", api_kwargs={"style": "danger"}),
         ]
     ])
     await update.message.reply_text(
