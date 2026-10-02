@@ -182,17 +182,64 @@ def is_admin(user_id: int) -> bool:
 
 
 # ------------------------------------------------------------------
-# Contact URL helper
+# Contact URL & Phone Helper
 # ------------------------------------------------------------------
-def build_contact_url(raw: str) -> str:
-    """បំប្លែង username ឬលេខទូរស័ព្ទ ឬ URL ទៅជា Link ត្រឹមត្រូវសម្រាប់ប៊ូតុង"""
+def format_phone_number(raw: str) -> str:
+    """Format local Cambodian numbers (0xx) or international numbers with +country code."""
     raw = raw.strip()
+    digits = "".join(ch for ch in raw if ch.isdigit())
+    if not digits:
+        return ""
+    if digits.startswith("0"):
+        return f"+855{digits[1:]}"
+    elif digits.startswith("855"):
+        return f"+{digits}"
+    elif raw.startswith("+"):
+        return f"+{digits}"
+    return f"+{digits}"
+
+
+def build_contact_url(raw: str) -> str:
+    """បំប្លែង username ឬលេខទូរស័ព្ទ (Telegram/WhatsApp) ឬ Web URL ទៅជា Link ត្រឹមត្រូវសម្រាប់ប៊ូតុង"""
+    raw = raw.strip()
+
+    # 1. WhatsApp prefix: wa:012345678 or whatsapp:012345678
+    if raw.lower().startswith(("wa:", "whatsapp:")):
+        num_part = raw.split(":", 1)[1].strip()
+        phone = format_phone_number(num_part)
+        clean = phone.lstrip("+")
+        return f"https://wa.me/{clean}"
+
+    # 2. Telegram prefix: tg:012345678 or telegram:012345678 or t.me:012345678
+    if raw.lower().startswith(("tg:", "telegram:", "t.me:")):
+        target = raw.split(":", 1)[1].strip()
+        if target.startswith("@"):
+            return f"https://t.me/{target[1:]}"
+        phone = format_phone_number(target)
+        return f"https://t.me/{phone}" if phone else f"https://t.me/{target}"
+
+    # 3. Username with @
     if raw.startswith("@"):
         return f"https://t.me/{raw[1:]}"
-    if raw.startswith("https://") or raw.startswith("http://"):
+
+    # 4. Standard HTTP/HTTPS link
+    if raw.startswith(("https://", "http://")):
         return raw
+
+    # 5. Tel: or Phone: prefix
+    if raw.lower().startswith(("tel:", "phone:")):
+        num_part = raw.split(":", 1)[1].strip()
+        phone = format_phone_number(num_part)
+        return f"https://t.me/{phone}"
+
+    # 6. Raw phone number (digits >= 8, e.g. 012 345 678, 098765432, +85512345678)
     digits = "".join(ch for ch in raw if ch.isdigit())
-    return f"https://wa.me/{digits}"
+    if digits and len(digits) >= 8:
+        phone = format_phone_number(raw)
+        return f"https://t.me/{phone}"
+
+    # 7. Fallback to Telegram username
+    return f"https://t.me/{raw}"
 
 
 # ------------------------------------------------------------------
@@ -319,15 +366,22 @@ SETCONTACT_HELP = (
     "មួយបន្ទាត់ = មួយជួរប៊ូតុង\n"
     "ប្រើ `|` ដើម្បីដាក់ច្រើនប៊ូតុងក្នុងជួរតែមួយ (រហូតដល់ 3)\n\n"
 
+    "*— 📞 ការប្រើប្រាស់លេខទូរស័ព្ទ (Phone Number) —*\n"
+    "អាចដាក់លេខទូរស័ព្ទជំនួស `@username` បានដោយផ្ទាល់:\n"
+    "• *Telegram Chat តាមលេខទូរស័ព្ទ*: `012345678` ឬ `098 765 432` ឬ `+85512345678`\n"
+    "• *WhatsApp Chat*: `wa:012345678`\n"
+    "ឧទាហរណ៍:\n"
+    "`ទាក់ទងមកយើង - 012345678 - icon:📞 - color:green`  →  (ចុចទៅ Telegram Chat តាមលេខទូរស័ព្ទ)\n"
+    "`WhatsApp - wa:012345678 - icon:💬 - color:green`  →  (ចុចទៅ WhatsApp Chat)\n\n"
+
     "*— 🎨 1. ពណ៌ផ្ទៃខាងក្រោយប៊ូតុងពេញ (Solid Background Colors) —*\n"
-    "Telegram គាំទ្រពណ៌ Solid ពេញចំនួន ៣ គឺ:\n"
     "• ពណ៌ខៀវ (Blue): `color:blue` ឬ `style:primary` ឬ `ពណ៌:ខៀវ`\n"
     "• ពណ៌ក្រហម (Red): `color:red` ឬ `style:danger` ឬ `ពណ៌:ក្រហម`\n"
     "• ពណ៌បៃតង (Green): `color:green` ឬ `style:success` ឬ `ពណ៌:បៃតង`\n\n"
     "ឧទាហរណ៍:\n"
     "`View my balance - https://example.com - color:green`\n"
     "`Unlock exclusive offers - https://example.com - icon:🎁 - color:blue`\n"
-    "`Cancel - https://example.com - icon:🪅 - color:red | Renew - https://example.com - icon:🍿 - color:green`\n\n"
+    "`Cancel - 012345678 - icon:🪅 - color:red | Renew - 098765432 - icon:🍿 - color:green`\n\n"
 
     "*— 🌈 2. ពណ៌បន្ថែម (Pink, Yellow, Purple, Orange...) —*\n"
     "• ពណ៌ផ្កាឈូក (Pink): `color:pink` 🩷 ឬ `color:rose` 🌸 ឬ `ពណ៌:ផ្កាឈូក`\n"
@@ -335,14 +389,9 @@ SETCONTACT_HELP = (
     "• ពណ៌ស្វាយ (Purple): `color:purple` 🟪\n"
     "• ពណ៌ទឹកក្រូច (Orange): `color:orange` 🟧\n"
     "• ពណ៌ផ្ទៃមេឃ (Cyan): `color:cyan` 🩵\n\n"
-    "ឧទាហរណ៍:\n"
-    "`Hot Promo - https://example.com - color:pink - icon:🎀`  →  🩷 🎀 Hot Promo 🩷\n"
-    "`VIP Gold - https://example.com - color:yellow - icon:⭐`  →  🟨 ⭐ VIP Gold 🟨\n\n"
 
     "*— 3. ដាក់ Icon / Emoji —*\n"
-    "`ទំនាក់ទំនង - @username - icon:📞 - color:blue`\n\n"
-
-    "URL អាចជា `@username`, លេខទូរស័ព្ទ, ឬ URL ពេញ។"
+    "`ទំនាក់ទំនង - @username - icon:📞 - color:blue`"
 )
 
 
