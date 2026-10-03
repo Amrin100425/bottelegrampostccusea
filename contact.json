@@ -2,6 +2,13 @@
   "rows": [
     [
       {
+        "label": "Contact Us",
+        "url": "https://t.me/USEACCAD",
+        "btn_style": "success"
+      }
+    ],
+    [
+      {
         "label": "Apply Now",
         "url": "https://t.me/+85581787985",
         "btn_style": "primary"
