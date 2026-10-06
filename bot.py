@@ -199,12 +199,42 @@ def build_keyboard_markup(rows: list) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(kb_rows)
 
 
-def get_contact_keyboard():
+def get_contact_keyboard(post_url: str = None, post_text: str = None):
     dynamic_rows = load_contact_rows()
     combined_rows = (dynamic_rows or [])
     if not combined_rows:
         return None
-    return build_keyboard_markup(combined_rows)
+        
+    import urllib.parse
+    kb_rows = []
+    for row in combined_rows:
+        row_btns = []
+        for b in row:
+            kwargs = {}
+            if b.get("btn_style"):
+                kwargs["api_kwargs"] = {"style": b["btn_style"]}
+            
+            url = b["url"]
+            
+            if "85599240474" in url:
+                if post_url:
+                    # Strip HTML tags from post_text if it exists
+                    plain_text = re.sub(r'<[^>]+>', '', post_text) if post_text else ""
+                    # Ensure it doesn't exceed URL limits (Telegram max text is usually ~4096)
+                    prefix = "ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ"
+                    msg_text = f"{prefix} {post_url}\n\n{plain_text}" if plain_text else f"{prefix} {post_url}"
+                    encoded_text = urllib.parse.quote(msg_text)
+                    separator = "&" if "?" in url else "?"
+                    final_url = f"{url}{separator}text={encoded_text}"
+                    row_btns.append(InlineKeyboardButton(b["label"], url=final_url, **kwargs))
+                else:
+                    row_btns.append(InlineKeyboardButton(b["label"], url=url, **kwargs))
+            else:
+                row_btns.append(InlineKeyboardButton(b["label"], url=url, **kwargs))
+        kb_rows.append(row_btns)
+    return InlineKeyboardMarkup(kb_rows)
+
+
 
 
 def parse_button_entry(entry: str):
@@ -409,6 +439,38 @@ async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 # ------------------------------------------------------------------
 # Helper Functions for Post Formatting & Dispatch
 # ------------------------------------------------------------------
+async def handle_contact_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await query.answer("✅ Your interest has been sent to the Admin! They will contact you soon.", show_alert=True)
+    
+    admin_id = 8824663759
+    user = update.effective_user
+    
+    try:
+        # Copy the original message from the channel to the admin
+        await context.bot.copy_message(
+            chat_id=admin_id,
+            from_chat_id=query.message.chat_id,
+            message_id=query.message.message_id
+        )
+        
+        # Send user info to the admin
+        username_str = f"@{user.username}" if user.username else "No username"
+        text = (
+            f"👤 **New Applicant!**\n"
+            f"Name: {user.full_name}\n"
+            f"Username: {username_str}\n"
+            f"Profile: [Click here](tg://user?id={user.id})"
+        )
+        await context.bot.send_message(
+            chat_id=admin_id,
+            text=text,
+            parse_mode="Markdown"
+        )
+    except Exception as e:
+        logger.error(f"Failed to forward to admin: {e}")
+
+
 def telegram_length(text: str) -> int:
     """Telegram UTF-16 code units length calculator."""
     if not text:
@@ -542,88 +604,118 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
     source_message_id = data.get("source_message_id")
     raw_length = data.get("raw_length", 0)
     info = data.get("info") or ""
+    
+    sent_msg_id = None
 
     # 1. If photo with split caption (longer than 1024 chars)
     if data.get("photo_id") and _needs_split_caption(raw_length):
         await bot.send_photo(chat_id=CHANNEL_ID, photo=data["photo_id"])
-        await bot.send_message(
+        msg = await bot.send_message(
             chat_id=CHANNEL_ID,
             text=info,
             parse_mode="HTML",
             reply_markup=keyboard,
         )
-        return
+        sent_msg_id = msg.message_id
 
     # 2. Try copy_message first (preserves native formatting, forwards, documents, etc.)
-    if source_chat_id and source_message_id:
+    elif source_chat_id and source_message_id:
         try:
-            await bot.copy_message(
+            msg_id_obj = await bot.copy_message(
                 chat_id=CHANNEL_ID,
                 from_chat_id=source_chat_id,
                 message_id=source_message_id,
                 reply_markup=keyboard,
             )
-            return
+            sent_msg_id = msg_id_obj.message_id
         except Exception as copy_err:
             logger.warning("copy_message to channel failed (%s), trying fallback.", copy_err)
+            sent_msg_id = None
 
     # 3. Direct send fallbacks
-    if data.get("photo_id"):
-        await bot.send_photo(
-            chat_id=CHANNEL_ID,
-            photo=data["photo_id"],
-            caption=info if info else None,
-            parse_mode="HTML" if info else None,
-            reply_markup=keyboard,
-        )
-    elif data.get("video_id"):
-        await bot.send_video(
-            chat_id=CHANNEL_ID,
-            video=data["video_id"],
-            caption=info if info else None,
-            parse_mode="HTML" if info else None,
-            reply_markup=keyboard,
-        )
-    elif data.get("document_id"):
-        await bot.send_document(
-            chat_id=CHANNEL_ID,
-            document=data["document_id"],
-            caption=info if info else None,
-            parse_mode="HTML" if info else None,
-            reply_markup=keyboard,
-        )
-    elif data.get("audio_id"):
-        await bot.send_audio(
-            chat_id=CHANNEL_ID,
-            audio=data["audio_id"],
-            caption=info if info else None,
-            parse_mode="HTML" if info else None,
-            reply_markup=keyboard,
-        )
-    elif data.get("voice_id"):
-        await bot.send_voice(
-            chat_id=CHANNEL_ID,
-            voice=data["voice_id"],
-            reply_markup=keyboard,
-        )
-    elif data.get("animation_id"):
-        await bot.send_animation(
-            chat_id=CHANNEL_ID,
-            animation=data["animation_id"],
-            caption=info if info else None,
-            parse_mode="HTML" if info else None,
-            reply_markup=keyboard,
-        )
-    elif data.get("sticker_id"):
-        await bot.send_sticker(chat_id=CHANNEL_ID, sticker=data["sticker_id"])
-        await bot.send_message(chat_id=CHANNEL_ID, text="​", reply_markup=keyboard)
-    elif info:
-        await bot.send_message(
-            chat_id=CHANNEL_ID,
-            text=info,
-            parse_mode="HTML",
-            reply_markup=keyboard,
-        )
+    if not sent_msg_id:
+        msg = None
+        if data.get("photo_id"):
+            msg = await bot.send_photo(
+                chat_id=CHANNEL_ID,
+                photo=data["photo_id"],
+                caption=info if info else None,
+                parse_mode="HTML" if info else None,
+                reply_markup=keyboard,
+            )
+        elif data.get("video_id"):
+            msg = await bot.send_video(
+                chat_id=CHANNEL_ID,
+                video=data["video_id"],
+                caption=info if info else None,
+                parse_mode="HTML" if info else None,
+                reply_markup=keyboard,
+            )
+        elif data.get("document_id"):
+            msg = await bot.send_document(
+                chat_id=CHANNEL_ID,
+                document=data["document_id"],
+                caption=info if info else None,
+                parse_mode="HTML" if info else None,
+                reply_markup=keyboard,
+            )
+        elif data.get("audio_id"):
+            msg = await bot.send_audio(
+                chat_id=CHANNEL_ID,
+                audio=data["audio_id"],
+                caption=info if info else None,
+                parse_mode="HTML" if info else None,
+                reply_markup=keyboard,
+            )
+        elif data.get("voice_id"):
+            msg = await bot.send_voice(
+                chat_id=CHANNEL_ID,
+                voice=data["voice_id"],
+                reply_markup=keyboard,
+            )
+        elif data.get("animation_id"):
+            msg = await bot.send_animation(
+                chat_id=CHANNEL_ID,
+                animation=data["animation_id"],
+                caption=info if info else None,
+                parse_mode="HTML" if info else None,
+                reply_markup=keyboard,
+            )
+        elif data.get("sticker_id"):
+            await bot.send_sticker(chat_id=CHANNEL_ID, sticker=data["sticker_id"])
+            msg = await bot.send_message(chat_id=CHANNEL_ID, text="​", reply_markup=keyboard)
+        elif info:
+            msg = await bot.send_message(
+                chat_id=CHANNEL_ID,
+                text=info,
+                parse_mode="HTML",
+                reply_markup=keyboard,
+            )
+        
+        if msg:
+            sent_msg_id = msg.message_id
+            
+    # Now that we have the sent_msg_id, we can append it to the contact button URLs
+    if sent_msg_id:
+        post_url = ""
+        channel_str = str(CHANNEL_ID)
+        if channel_str.startswith("-100"):
+            post_url = f"https://t.me/c/{channel_str[4:]}/{sent_msg_id}"
+        elif channel_str.startswith("@"):
+            post_url = f"https://t.me/{channel_str[1:]}/{sent_msg_id}"
+        else:
+            post_url = f"https://t.me/c/{channel_str}/{sent_msg_id}"
+
+        new_keyboard = get_contact_keyboard(post_url=post_url, post_text=info)
+        if new_keyboard:
+            try:
+                await bot.edit_message_reply_markup(
+                    chat_id=CHANNEL_ID,
+                    message_id=sent_msg_id,
+                    reply_markup=new_keyboard
+                )
+            except Exception as e:
+                logger.warning("Failed to edit reply markup to add post URL: %s", e)
 
 
 async def confirm_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -783,6 +875,7 @@ def main() -> None:
     app.add_handler(CommandHandler("showcontact", show_contact))
     app.add_handler(contact_conv_handler)
     app.add_handler(post_conv_handler)
+    app.add_handler(CallbackQueryHandler(handle_contact_admin, pattern="^contact_admin_8824663759$"))
     app.add_handler(
         CallbackQueryHandler(
             standalone_confirm_callback, pattern="^(confirm|standalone_confirm)_(yes|no)$"

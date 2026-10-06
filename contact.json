@@ -2,9 +2,14 @@
   "rows": [
     [
       {
-        "label": "Contact Us",
-        "url": "https://t.me/USEACCAD",
+        "label": "Contact Admin USEA Career Center",
+        "url": "https://t.me/+85599240474",
         "btn_style": "success"
+      },
+      {
+        "label": "Contact KHEV BOUSIVLY",
+        "url": "https://t.me/+85516736214",
+        "btn_style": "danger"
       }
     ]
   ]
