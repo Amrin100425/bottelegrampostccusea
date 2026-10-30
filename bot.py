@@ -79,6 +79,27 @@ NATIVE_BUTTON_STYLES = {
     "បៃតង": "success",
 }
 
+STYLE_EMOJI = {
+    "yellow": "🟨",
+    "gold": "🟨",
+    "orange": "🟧",
+    "purple": "🟪",
+    "violet": "🟪",
+    "brown": "🟫",
+    "black": "⬛",
+    "white": "⬜",
+    "pink": "🩷",
+    "rose": "🌸",
+    "cyan": "🩵",
+    "teal": "🩵",
+    "gray": "🩶",
+    "grey": "🩶",
+    "លឿង": "🟨",
+    "ទឹកក្រូច": "🟧",
+    "ស្វាយ": "🟪",
+    "ផ្កាឈូក": "🩷",
+}
+
 MAX_BUTTONS_PER_ROW = 3
 
 TELEGRAM_CAPTION_LIMIT = 1024
@@ -166,24 +187,87 @@ def build_contact_url(raw: str) -> str:
 
 
 # ------------------------------------------------------------------
-# Contact Storage (persistent)
+# Contact Storage (persistent) & Keyboard Builders
 # ------------------------------------------------------------------
-def load_contact_rows() -> list:
+BOT_USERNAME = os.getenv("BOT_USERNAME", "USEACCBot")
+
+# Static button 1: Admin contact — never changes
+STATIC_ADMIN_BUTTON_LABEL = "📞 Contact Admin USEA Career Center"
+STATIC_ADMIN_BUTTON_URL = "https://t.me/USEACCAD"
+
+# Static button 3: Bot redirect — never changes
+STATIC_BOT_BUTTON_LABEL = "🤖 Career Center Bot"
+STATIC_BOT_BUTTON_URL = "https://t.me/careercentercvbot"
+
+DEFAULT_APPLY_CONTACTS = {
+    "employer": {
+        "label": "📞 Contact KHEV BOUSIVLY",
+        "url": "https://t.me/+85516736214",
+    },
+}
+
+DEFAULT_FIXED_BUTTONS = []
+
+
+def load_contact_data() -> dict:
     if os.path.exists(CONTACT_STORE_FILE):
         try:
             with open(CONTACT_STORE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
-                rows = data.get("rows")
-                if rows:
-                    return rows
+                if isinstance(data, dict):
+                    if "apply_contacts" in data or "fixed_buttons" in data:
+                        return {
+                            "apply_contacts": data.get("apply_contacts", DEFAULT_APPLY_CONTACTS),
+                            "fixed_buttons": data.get("fixed_buttons", DEFAULT_FIXED_BUTTONS),
+                        }
+                    elif "rows" in data:
+                        rows = data.get("rows", [])
+                        flat = [b for r in rows for b in r]
+                        emp = flat[1] if len(flat) > 1 else (flat[0] if flat else DEFAULT_APPLY_CONTACTS["employer"])
+                        adm = flat[0] if len(flat) > 1 else DEFAULT_APPLY_CONTACTS["admin"]
+                        return {
+                            "apply_contacts": {
+                                "employer": emp,
+                                "admin": adm,
+                            },
+                            "fixed_buttons": DEFAULT_FIXED_BUTTONS,
+                        }
         except Exception as e:
             logger.warning("មិនអាចអាន contact.json បាន: %s", e)
-    return []
+    return {
+        "apply_contacts": DEFAULT_APPLY_CONTACTS,
+        "fixed_buttons": DEFAULT_FIXED_BUTTONS,
+    }
+
+
+def save_contact_data(apply_contacts: dict, fixed_buttons: list = None) -> None:
+    if fixed_buttons is None:
+        fixed_buttons = DEFAULT_FIXED_BUTTONS
+    with open(CONTACT_STORE_FILE, "w", encoding="utf-8") as f:
+        json.dump(
+            {
+                "apply_contacts": apply_contacts,
+                "fixed_buttons": fixed_buttons,
+            },
+            f,
+            ensure_ascii=False,
+            indent=2,
+        )
+
+
+def load_contact_rows() -> list:
+    """Compatibility helper returning flat rows for the keyboard."""
+    data = load_contact_data()
+    fixed_buttons = data.get("fixed_buttons", DEFAULT_FIXED_BUTTONS)
+    rows = [[{"label": "📥 Apply for This Job", "url": f"https://t.me/{BOT_USERNAME}?start=apply", "btn_style": "primary"}]]
+    rows.extend(fixed_buttons)
+    return rows
 
 
 def save_contact_rows(rows: list) -> None:
-    with open(CONTACT_STORE_FILE, "w", encoding="utf-8") as f:
-        json.dump({"rows": rows}, f, ensure_ascii=False, indent=2)
+    """Compatibility helper for saving list of rows."""
+    current = load_contact_data()
+    save_contact_data(current.get("apply_contacts", DEFAULT_APPLY_CONTACTS), fixed_buttons=rows)
 
 
 def build_keyboard_markup(rows: list) -> InlineKeyboardMarkup:
@@ -194,44 +278,50 @@ def build_keyboard_markup(rows: list) -> InlineKeyboardMarkup:
             kwargs = {}
             if b.get("btn_style"):
                 kwargs["api_kwargs"] = {"style": b["btn_style"]}
+            else:
+                kwargs["api_kwargs"] = {"style": "primary"}
             row_btns.append(InlineKeyboardButton(b["label"], url=b["url"], **kwargs))
         kb_rows.append(row_btns)
     return InlineKeyboardMarkup(kb_rows)
 
 
-def get_contact_keyboard(post_url: str = None, post_text: str = None):
-    dynamic_rows = load_contact_rows()
-    combined_rows = (dynamic_rows or [])
-    if not combined_rows:
-        return None
-        
-    import urllib.parse
+def get_contact_keyboard(post_url: str = None, post_text: str = None) -> InlineKeyboardMarkup:
+    data = load_contact_data()
+    apply_contacts = data.get("apply_contacts", DEFAULT_APPLY_CONTACTS)
+
+    employer = apply_contacts.get("employer") or {}
+    emp_label = employer.get("label") or "📞 Contact Employer"
+    emp_url = employer.get("url") or ""
+
     kb_rows = []
-    for row in combined_rows:
-        row_btns = []
-        for b in row:
-            kwargs = {}
-            if b.get("btn_style"):
-                kwargs["api_kwargs"] = {"style": b["btn_style"]}
-            
-            url = b["url"]
-            
-            if "85599240474" in url:
-                if post_url:
-                    # Strip HTML tags from post_text if it exists
-                    plain_text = re.sub(r'<[^>]+>', '', post_text) if post_text else ""
-                    # Ensure it doesn't exceed URL limits (Telegram max text is usually ~4096)
-                    prefix = "ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ"
-                    msg_text = f"{prefix} {post_url}\n\n{plain_text}" if plain_text else f"{prefix} {post_url}"
-                    encoded_text = urllib.parse.quote(msg_text)
-                    separator = "&" if "?" in url else "?"
-                    final_url = f"{url}{separator}text={encoded_text}"
-                    row_btns.append(InlineKeyboardButton(b["label"], url=final_url, **kwargs))
-                else:
-                    row_btns.append(InlineKeyboardButton(b["label"], url=url, **kwargs))
-            else:
-                row_btns.append(InlineKeyboardButton(b["label"], url=url, **kwargs))
-        kb_rows.append(row_btns)
+
+    # Row 1: Static admin button + Dynamic employer button (side by side)
+    row1 = [
+        InlineKeyboardButton(
+            STATIC_ADMIN_BUTTON_LABEL,
+            url=STATIC_ADMIN_BUTTON_URL,
+            api_kwargs={"style": "primary"}
+        ),
+    ]
+    if emp_url:
+        row1.append(
+            InlineKeyboardButton(
+                emp_label,
+                url=emp_url,
+                api_kwargs={"style": "primary"}
+            )
+        )
+    kb_rows.append(row1)
+
+    # Row 2: Static bot redirect button
+    kb_rows.append([
+        InlineKeyboardButton(
+            STATIC_BOT_BUTTON_LABEL,
+            url=STATIC_BOT_BUTTON_URL,
+            api_kwargs={"style": "primary"}
+        )
+    ])
+
     return InlineKeyboardMarkup(kb_rows)
 
 
@@ -314,37 +404,45 @@ def parse_contact_text(raw_text: str):
     return rows, errors
 
 
+def parse_apply_contacts_input(raw_text: str):
+    """
+    Parse 1 line for the dynamic employer contact button.
+    """
+    lines = [ln.strip() for ln in raw_text.splitlines() if ln.strip()]
+    if not lines:
+        return None
+
+    current_data = load_contact_data()
+    apply_contacts = dict(current_data.get("apply_contacts", DEFAULT_APPLY_CONTACTS))
+
+    # Use first non-empty line as employer contact
+    entry = lines[0]
+    label = "📞 Contact Employer"
+    target = entry
+    if " - " in entry:
+        label, _, target = entry.rpartition(" - ")
+    elif "-" in entry and not any(ch.isdigit() for ch in entry.split("-")[0]):
+        label, _, target = entry.rpartition("-")
+    apply_contacts["employer"] = {
+        "label": label.strip() or "📞 Contact Employer",
+        "url": build_contact_url(target.strip()),
+    }
+
+    return apply_contacts
+
+
 SETCONTACT_HELP = (
-    "📌 *របៀបប្រើ /setcontact*\n\n"
-    "មួយបន្ទាត់ = មួយជួរប៊ូតុង\n"
-    "ប្រើ `|` ដើម្បីដាក់ច្រើនប៊ូតុងក្នុងជួរតែមួយ (រហូតដល់ 3)\n\n"
-
-    "*— 📞 ការប្រើប្រាស់លេខទូរស័ព្ទ (Phone Number) —*\n"
-    "អាចដាក់លេខទូរស័ព្ទជំនួស `@username` បានដោយផ្ទាល់:\n"
-    "• *Telegram Chat តាមលេខទូរស័ព្ទ*: `012345678` ឬ `098 765 432` ឬ `+85512345678`\n"
-    "• *WhatsApp Chat*: `wa:012345678`\n"
-    "ឧទាហរណ៍:\n"
-    "`ទាក់ទងមកយើង - 012345678 - icon:📞 - color:green`  →  (ចុចទៅ Telegram Chat តាមលេខទូរស័ព្ទ)\n"
-    "`WhatsApp - wa:012345678 - icon:💬 - color:green`  →  (ចុចទៅ WhatsApp Chat)\n\n"
-
-    "*— 🎨 1. ពណ៌ផ្ទៃខាងក្រោយប៊ូតុងពេញ (Solid Background Colors) —*\n"
-    "• ពណ៌ខៀវ (Blue): `color:blue` ឬ `style:primary` ឬ `ពណ៌:ខៀវ`\n"
-    "• ពណ៌ក្រហម (Red): `color:red` ឬ `style:danger` ឬ `ពណ៌:ក្រហម`\n"
-    "• ពណ៌បៃតង (Green): `color:green` ឬ `style:success` ឬ `ពណ៌:បៃតង`\n\n"
-    "ឧទាហរណ៍:\n"
-    "`View my balance - https://example.com - color:green`\n"
-    "`Unlock exclusive offers - https://example.com - icon:🎁 - color:blue`\n"
-    "`Cancel - 012345678 - icon:🪅 - color:red | Renew - 098765432 - icon:🍿 - color:green`\n\n"
-
-    "*— 🌈 2. ពណ៌បន្ថែម (Pink, Yellow, Purple, Orange...) —*\n"
-    "• ពណ៌ផ្កាឈូក (Pink): `color:pink` 🩷 ឬ `color:rose` 🌸 ឬ `ពណ៌:ផ្កាឈូក`\n"
-    "• ពណ៌លឿង (Yellow): `color:yellow` 🟨 ឬ `color:gold` 🟨 ឬ `ពណ៌:លឿង`\n"
-    "• ពណ៌ស្វាយ (Purple): `color:purple` 🟪\n"
-    "• ពណ៌ទឹកក្រូច (Orange): `color:orange` 🟧\n"
-    "• ពណ៌ផ្ទៃមេឃ (Cyan): `color:cyan` 🩵\n\n"
-
-    "*— 3. ដាក់ Icon / Emoji —*\n"
-    "`ទំនាក់ទំនង - @username - icon:📞 - color:blue`"
+    "📌 *របៀបកំណត់ Contact សម្រាប់ប៊ូតុង (Change Contact)*\n\n"
+    "ប៊ូតុងទី ២ (ប៊ូតុង Contact Employer) អាចផ្លាស់ប្ដូរបាន។\n\n"
+    "*👉 របៀបបញ្ចូល៖*\n"
+    "ផ្ញើ Contact កន្លែងជ្រើសរើសបុគ្គលិក (លេខទូរស័ព្ទ, @username, ឬ link)\n\n"
+    "*ឧទាហរណ៍៖*\n"
+    "`016736214`\n\n"
+    "ឬមាន Label ស្រេច៖\n"
+    "`KHEV BOUSIVLY - 016736214`\n\n"
+    "📌 ប៊ូតុងថេរ (មិនផ្លាស់ប្ដូរ):\n"
+    "• ប៊ូតុងទី ១: 📞 Contact Admin USEA Career Center\n"
+    "• ប៊ូតុងទី ៣: 🤖 Career Center Bot"
 )
 
 
@@ -359,27 +457,28 @@ async def set_contact_start(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         raw_text = update.message.text.split("\n", 1)[1].strip()
 
     if raw_text:
-        rows, errors = parse_contact_text(raw_text)
-        if not rows:
+        contacts = parse_apply_contacts_input(raw_text)
+        if not contacts:
             await update.message.reply_text(
-                "⚠️ មិនអាចអានប៊ូតុងណាមួយបានទេ។\n\n" + SETCONTACT_HELP, parse_mode="Markdown"
+                "⚠️ មិនអាចអាន Contact បានទេ។\n\n" + SETCONTACT_HELP, parse_mode="Markdown"
             )
             return ConversationHandler.END
 
-        save_contact_rows(rows)
+        save_contact_data(contacts)
         keyboard = get_contact_keyboard()
-        total = sum(len(r) for r in (rows))
 
-        msg = f"✅ បានកំណត់ Contact Buttons ថ្មីរួចរាល់ ({total} ប៊ូតុង រួមទាំង Contact Us ថេរ)!\nវានឹងប្រើប្រាស់ជាប់រហូតគ្រប់ post បន្ទាប់ៗទៀត។"
-        if errors:
-            msg += "\n\n⚠️ បន្ទាត់ខ្លះមានបញ្ហា (បានរំលង):\n" + "\n".join(errors)
-        msg += "\n\nឧទាហរណ៍ប៊ូតុង៖"
+        msg = (
+            "✅ បានកំណត់ Contact សម្រាប់ប៊ូតុង Apply រួចរាល់!\n"
+            "• កន្លែងការងារ: " + contacts.get("employer", {}).get("url", "") + "\n"
+            "• Admin ផ្សព្វផ្សាយ: " + contacts.get("admin", {}).get("url", "") + "\n\n"
+            "ឧទាហរណ៍ប៊ូតុង៖"
+        )
         await update.message.reply_text(msg, reply_markup=keyboard)
         return ConversationHandler.END
 
     await update.message.reply_text(
         SETCONTACT_HELP + "\n\n━━━━━━━━━━━━━━━━━━━━\n"
-        "📝 *សូមផ្ញើអត្ថបទប៊ូតុង Contact របស់អ្នកឥឡូវនេះ (ឬសរសេរ /cancel ដើម្បីបោះបង់)៖*",
+        "📝 *សូមផ្ញើ Contact របស់អ្នកឥឡូវនេះ (ឬសរសេរ /cancel ដើម្បីបោះបង់)៖*",
         parse_mode="Markdown",
     )
     return SETTING_CONTACT
@@ -387,24 +486,25 @@ async def set_contact_start(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
 async def set_contact_process(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     raw_text = update.message.text.strip()
-    rows, errors = parse_contact_text(raw_text)
+    contacts = parse_apply_contacts_input(raw_text)
 
-    if not rows:
+    if not contacts:
         await update.message.reply_text(
-            "⚠️ មិនអាចអានប៊ូតុងបានទេ។ សូមពិនិត្យទម្រង់រួចផ្ញើម្តងទៀត ឬសរសេរ /cancel ដើម្បីបោះបង់៖\n\n"
+            "⚠️ មិនអាចអាន Contact បានទេ។ សូមពិនិត្យទម្រង់រួចផ្ញើម្តងទៀត ឬសរសេរ /cancel ដើម្បីបោះបង់៖\n\n"
             + SETCONTACT_HELP,
             parse_mode="Markdown",
         )
         return SETTING_CONTACT
 
-    save_contact_rows(rows)
+    save_contact_data(contacts)
     keyboard = get_contact_keyboard()
-    total = sum(len(r) for r in (rows))
 
-    msg = f"✅ បានកំណត់ Contact Buttons ថ្មីរួចរាល់ ({total} ប៊ូតុង រួមទាំង Contact Us ថេរ)!\nវានឹងប្រើប្រាស់ជាប់រហូតគ្រប់ post បន្ទាប់ៗទៀត។"
-    if errors:
-        msg += "\n\n⚠️ បន្ទាត់ខ្លះមានបញ្ហា (បានរំលង):\n" + "\n".join(errors)
-    msg += "\n\nឧទាហរណ៍ប៊ូតុង៖"
+    msg = (
+        "✅ បានកំណត់ Contact សម្រាប់ប៊ូតុង Apply រួចរាល់!\n"
+        "• កន្លែងការងារ: " + contacts.get("employer", {}).get("url", "") + "\n"
+        "• Admin ផ្សព្វផ្សាយ: " + contacts.get("admin", {}).get("url", "") + "\n\n"
+        "ឧទាហរណ៍ប៊ូតុង៖"
+    )
     await update.message.reply_text(msg, reply_markup=keyboard)
     return ConversationHandler.END
 
@@ -420,19 +520,25 @@ async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await update.message.reply_text("❌ អ្នកមិនមានសិទ្ធិប្រើ command នេះទេ។")
         return
 
-    dynamic_rows = load_contact_rows()
-    combined_rows = (dynamic_rows or [])
-    if not combined_rows:
-        await update.message.reply_text("ℹ️ មិនទាន់មាន Contact Buttons ទេបច្ចុប្បន្ន។ សូមប្រើ /setcontact ដើម្បីកំណត់។")
-        return
-    
-    lines = []
-    for row in combined_rows:
-        lines.append(" | ".join(f"{b['label']} → {b['url']}" for b in row))
-        
+    data = load_contact_data()
+    apply_contacts = data.get("apply_contacts", DEFAULT_APPLY_CONTACTS)
+
+    emp = apply_contacts.get("employer", {})
+
+    lines = [
+        "ℹ️ <b>ទម្រង់ប៊ូតុងបច្ចុប្បន្ន (Current Button Layout)</b>\n",
+        "🔒 <b>ប៊ូតុងថេរ (Static — មិនផ្លាស់ប្ដូរ):</b>",
+        f"1️⃣ {STATIC_ADMIN_BUTTON_LABEL} → {STATIC_ADMIN_BUTTON_URL}",
+        f"3️⃣ {STATIC_BOT_BUTTON_LABEL} → {STATIC_BOT_BUTTON_URL}\n",
+        "🔄 <b>ប៊ូតុងអាចផ្លាស់ប្ដូរ (Dynamic — ប្រើ /setcontact):</b>",
+        f"2️⃣ {emp.get('label', 'Contact Employer')} → {emp.get('url', 'គ្មាន')}",
+    ]
+
+    keyboard = get_contact_keyboard()
     await update.message.reply_text(
-        "ℹ️ Contact Buttons បច្ចុប្បន្ន (រួមបញ្ចូលទាំង Contact Us ថេរ & ប៊ូតុងបន្ថែម)៖\n\n" + "\n".join(lines),
-        reply_markup=build_keyboard_markup(combined_rows),
+        "\n".join(lines),
+        reply_markup=keyboard,
+        parse_mode="HTML",
     )
 
 
@@ -699,12 +805,14 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
     if sent_msg_id:
         post_url = ""
         channel_str = str(CHANNEL_ID)
-        if channel_str.startswith("-100"):
+        if channel_str == "-1001535612806" or "useacareercenter" in channel_str:
+            post_url = f"https://t.me/useacareercenter/{sent_msg_id}"
+        elif channel_str.startswith("-100"):
             post_url = f"https://t.me/c/{channel_str[4:]}/{sent_msg_id}"
         elif channel_str.startswith("@"):
             post_url = f"https://t.me/{channel_str[1:]}/{sent_msg_id}"
         else:
-            post_url = f"https://t.me/c/{channel_str}/{sent_msg_id}"
+            post_url = f"https://t.me/useacareercenter/{sent_msg_id}"
 
         new_keyboard = get_contact_keyboard(post_url=post_url, post_text=info)
         if new_keyboard:
@@ -816,16 +924,93 @@ async def standalone_confirm_callback(update: Update, context: ContextTypes.DEFA
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
-    if not is_admin(user.id):
-        await update.message.reply_text("❌ អ្នកមិនមានសិទ្ធិប្រើ Bot នេះទេ។")
+    args = context.args or []
+
+    # 1. Handle applicant clicking "Apply for This Job"
+    if args and args[0].startswith("apply"):
+        data = load_contact_data()
+        apply_contacts = data.get("apply_contacts", DEFAULT_APPLY_CONTACTS)
+        employer = apply_contacts.get("employer", {})
+        admin = apply_contacts.get("admin", {})
+
+        post_id = args[0].replace("apply_", "") if "_" in args[0] else ""
+        post_link = f"https://t.me/useacareercenter/{post_id}" if post_id else ""
+
+        kb_btns = []
+        if employer.get("url"):
+            emp_label = employer.get("label") or "🏢 ទំនាក់ទំនងកន្លែងជ្រើសរើសបុគ្គលិក (Place Looking for Staff)"
+            kb_btns.append([
+                InlineKeyboardButton(emp_label, url=employer["url"], api_kwargs={"style": "primary"})
+            ])
+
+        if admin.get("url"):
+            adm_label = admin.get("label") or "👤 ទំនាក់ទំនង Admin USEA Career Center"
+            admin_url = admin["url"]
+            prefix = "ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ"
+            msg_text = f"{prefix} {post_link}" if post_link else prefix
+            import urllib.parse
+            encoded_text = urllib.parse.quote(msg_text)
+            sep = "&" if "?" in admin_url else "?"
+            adm_final_url = f"{admin_url}{sep}text={encoded_text}"
+            kb_btns.append([
+                InlineKeyboardButton(adm_label, url=adm_final_url, api_kwargs={"style": "primary"})
+            ])
+
+        if post_link:
+            kb_btns.append([
+                InlineKeyboardButton("📢 មើលការងារក្នុង Channel (View Job Post)", url=post_link, api_kwargs={"style": "primary"})
+            ])
+
+        msg_body = (
+            "💼 <b>ដាក់ពាក្យស្នើសុំការងារ / Job Application</b>\n\n"
+            "សូមជ្រើសរើសទំនាក់ទំនងខាងក្រោមដើម្បីដាក់ពាក្យ៖\n"
+            "(Please choose a contact below to apply):\n\n"
+            "1️⃣ <b>កន្លែងជ្រើសរើសបុគ្គលិក (Place Looking for Staff)</b>\n"
+            "2️⃣ <b>Admin ផ្សព្វផ្សាយ (Admin that Posted)</b>"
+        )
+        if post_link:
+            msg_body += f"\n\n🔗 <b>តំណភ្ជាប់ការងារ:</b> {post_link}"
+
+        await update.message.reply_text(
+            msg_body,
+            reply_markup=InlineKeyboardMarkup(kb_btns),
+            parse_mode="HTML",
+        )
+
+        # Notify admins about the applicant
+        username_str = f"@{user.username}" if user.username else "គ្មាន (No username)"
+        applicant_alert = (
+            f"👤 <b>បេក្ខជនថ្មីចាប់អារម្មណ៍ការងារ (New Applicant!)</b>\n\n"
+            f"• ឈ្មោះ: {user.full_name}\n"
+            f"• Username: {username_str}\n"
+            f"• Profile: <a href='tg://user?id={user.id}'>ចុចមើល Profile</a>"
+        )
+        if post_link:
+            applicant_alert += f"\n• ការងារ: {post_link}"
+
+        for aid in ADMIN_IDS:
+            try:
+                await context.bot.send_message(chat_id=aid, text=applicant_alert, parse_mode="HTML")
+            except Exception:
+                pass
         return
 
+    # 2. Non-admin visitor
+    if not is_admin(user.id):
+        await update.message.reply_text(
+            f"👋 សួស្តី {user.first_name}! ខ្ញុំជា USEA Career Center Bot។\n\n"
+            "📢 សូមតាមដានឱកាសការងារ និងព័ត៌មានអាជីពនៅទីនេះ៖\n"
+            "👉 https://t.me/useacareercenter"
+        )
+        return
+
+    # 3. Admin user
     await update.message.reply_text(
-        "👋 សួស្តី! ខ្ញុំជា Bot សម្រាប់ទម្លាក់ព័ត៌មានការងារ។\n\n"
+        "👋 សួស្តី Admin! ខ្ញុំជា Bot សម្រាប់ទម្លាក់ព័ត៌មានការងារ។\n\n"
         "Admin អាចប្រើ:\n"
-        "• /setcontact — កំណត់/កែប្រែ Contact Buttons ថេរ (Icon+ពណ៌+Layout)\n"
         "• /post — បង្ហោះការងារថ្មី (ផ្ញើព័ត៌មាន/រូបភាព ក្នុងសារតែមួយ)\n"
-        "• /showcontact — មើល Contact បច្ចុប្បន្ន\n"
+        "• /setcontact — កំណត់ Contact សម្រាប់ប៊ូតុងទី ២ (Contact Employer — ផ្លាស់ប្ដូរបាន)\n"
+        "• /showcontact — មើលទម្រង់ប៊ូតុងបច្ចុប្បន្ន (៣ ប៊ូតុង)\n"
         "• ឬ forward សារណាមួយមក bot ដោយផ្ទាល់ (bot នឹងសួរ confirm មុន post)"
     )
 

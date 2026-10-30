@@ -1,15 +1,37 @@
 {
-  "rows": [
+  "apply_contacts": {
+    "employer": {
+      "label": "KHEV BOUSIVLY",
+      "url": "https://t.me/+85516736214"
+    },
+    "admin": {
+      "label": "👤 ទំនាក់ទំនង Admin USEA Career Center",
+      "url": "https://t.me/+85599240474"
+    }
+  },
+  "fixed_buttons": [
     [
       {
-        "label": "Contact Admin USEA Career Center",
-        "url": "https://t.me/+85599240474",
-        "btn_style": "success"
+        "label": "📄 CV & Cover Letter",
+        "url": "https://t.me/USEACCTCV",
+        "btn_style": "primary"
       },
       {
-        "label": "Contact KHEV BOUSIVLY",
-        "url": "https://t.me/+85516736214",
-        "btn_style": "danger"
+        "label": "🎤 Interview Tips",
+        "url": "https://t.me/USEACCITP",
+        "btn_style": "primary"
+      }
+    ],
+    [
+      {
+        "label": "💡 Career Tips",
+        "url": "https://t.me/USEACCCT",
+        "btn_style": "primary"
+      },
+      {
+        "label": "💬 Chat with Us",
+        "url": "https://t.me/USEACCAD",
+        "btn_style": "primary"
       }
     ]
   ]
