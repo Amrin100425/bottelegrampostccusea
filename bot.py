@@ -47,7 +47,7 @@ else:
     CHANNEL_ID = None
 
 try:
-    admin_env = os.getenv("ADMIN_IDS", "[1147056937, 468517256, 1287745757, 8824663759]")
+    admin_env = os.getenv("ADMIN_IDS") or os.getenv("ADMIN_ID") or "[1147056937, 468517256, 1287745757, 8824663759]"
     ADMIN_IDS = json.loads(admin_env) if admin_env.startswith("[") else [int(x.strip()) for x in admin_env.split(",") if x.strip()]
 except Exception:
     ADMIN_IDS = [1147056937, 468517256, 1287745757, 8824663759]
@@ -1015,6 +1015,159 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
+def setup_webhook_health_routes() -> None:
+    """
+    Patch python-telegram-bot's internal Tornado webhook server to provide
+    HTTP GET/HEAD routes for root '/' (Render URL & health check), '/health',
+    and '/ping', preventing 404 errors when visiting the URL on Render.
+    """
+    try:
+        import telegram.ext._utils.webhookhandler as ptb_webhook
+        import tornado.web
+
+        class HealthCheckHandler(tornado.web.RequestHandler):
+            def get(self):
+                accept_header = self.request.headers.get("Accept", "")
+                if "application/json" in accept_header:
+                    self.set_header("Content-Type", "application/json; charset=utf-8")
+                    self.write(json.dumps({"status": "ok", "service": "USEA Career Center Bot"}))
+                    return
+
+                self.set_header("Content-Type", "text/html; charset=utf-8")
+                self.write(
+                    """<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>USEA Career Center Bot - Status</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #064e3b;
+            color: #34d399;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+        }
+        h1 {
+            font-size: 24px;
+            margin: 0 0 12px;
+            color: #ffffff;
+        }
+        p {
+            color: #94a3b8;
+            line-height: 1.6;
+            margin: 0 0 24px;
+        }
+        .btn {
+            display: inline-block;
+            background: #2563eb;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            Online &amp; Healthy
+        </div>
+        <h1>USEA Career Center Bot</h1>
+        <p>The Telegram Job Posting Bot is live and running smoothly on Render.</p>
+        <a href="https://t.me/useacareercenter" class="btn" target="_blank">Visit Telegram Channel</a>
+    </div>
+</body>
+</html>"""
+                )
+
+            def head(self):
+                self.set_status(200)
+
+        class JsonHealthHandler(tornado.web.RequestHandler):
+            def get(self):
+                self.set_header("Content-Type", "application/json; charset=utf-8")
+                self.write(json.dumps({"status": "ok", "service": "USEA Career Center Bot"}))
+
+            def head(self):
+                self.set_status(200)
+
+        class FaviconHandler(tornado.web.RequestHandler):
+            def get(self):
+                self.set_status(204)
+
+        _original_init = ptb_webhook.WebhookAppClass.__init__
+
+        def _patched_webhook_init(self, webhook_path: str, bot, update_queue, secret_token=None):
+            _original_init(self, webhook_path, bot, update_queue, secret_token)
+            self.add_handlers(
+                r".*",
+                [
+                    (r"/?$", HealthCheckHandler),
+                    (r"/health(?:z)?/?", JsonHealthHandler),
+                    (r"/ping/?", HealthCheckHandler),
+                    (r"/favicon\.ico", FaviconHandler),
+                ],
+            )
+
+        ptb_webhook.WebhookAppClass.__init__ = _patched_webhook_init
+
+        # Support GET/HEAD on the webhook endpoint so visiting the webhook path directly
+        # in a browser returns 200 OK instead of 405 Method Not Allowed
+        def _telegram_get(self):
+            self.set_header("Content-Type", "text/plain; charset=utf-8")
+            self.write("USEA Career Center Bot webhook is active.")
+
+        ptb_webhook.TelegramHandler.SUPPORTED_METHODS = ("POST", "GET", "HEAD")
+        ptb_webhook.TelegramHandler.get = _telegram_get
+        ptb_webhook.TelegramHandler.head = lambda self: self.set_status(200)
+
+        logger.info("Configured web routes for Render health check: /, /health, /healthz, /ping")
+    except Exception as exc:
+        logger.warning("Could not setup webhook health routes: %s", exc)
+
+
 def main() -> None:
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
@@ -1087,6 +1240,7 @@ def main() -> None:
     is_render = bool(os.getenv("RENDER") or os.getenv("RENDER_EXTERNAL_URL") or os.getenv("USE_WEBHOOK"))
 
     if is_render and WEBHOOK_URL:
+        setup_webhook_health_routes()
         logger.info("Bot is running with Webhook on Render (%s)...", WEBHOOK_URL)
         app.run_webhook(
             listen="0.0.0.0",
