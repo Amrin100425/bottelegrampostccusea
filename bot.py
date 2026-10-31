@@ -192,11 +192,11 @@ def build_contact_url(raw: str) -> str:
 BOT_USERNAME = os.getenv("BOT_USERNAME", "USEACCBot")
 
 # Static button 1: Admin contact — never changes
-STATIC_ADMIN_BUTTON_LABEL = "📞 Contact Admin USEA Career Center"
+STATIC_ADMIN_BUTTON_LABEL = "📞 Contact Admin"
 STATIC_ADMIN_BUTTON_URL = "https://t.me/USEACCAD"
 
 # Static button 3: Bot redirect — never changes
-STATIC_BOT_BUTTON_LABEL = "🤖 Career Center Bot"
+STATIC_BOT_BUTTON_LABEL = "Career Tips, CV & Cover Letter"
 STATIC_BOT_BUTTON_URL = "https://t.me/careercentercvbot"
 
 DEFAULT_APPLY_CONTACTS = {
