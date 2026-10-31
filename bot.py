@@ -16,10 +16,12 @@ Bot សម្រាប់ជួយ Admin ទម្លាក់ព័ត៌មា
       សុទ្ធតែមាន Confirmation (✅ YES / ❌ NO) សិន មុននឹងបញ្ជូនទៅកាន់ Channel។
 """
 
+import io
 import json
 import logging
 import os
 import re
+from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
@@ -31,6 +33,17 @@ from telegram.ext import (
     ContextTypes,
     MessageHandler,
     filters,
+)
+from tracker import (
+    register_tracking_link,
+    record_click,
+    get_available_months,
+    get_monthly_report_data,
+    format_telegram_report,
+    generate_csv_report,
+    RedirectTrackerHandler,
+    WebReportHandler,
+    WebCsvExportHandler,
 )
 
 # ------------------------------------------------------------------
@@ -316,13 +329,27 @@ def build_admin_contact_url(
     return f"{target_base}{sep}text={encoded_text}"
 
 
-def get_contact_keyboard(post_url: str = None, post_text: str = None) -> InlineKeyboardMarkup:
+def get_contact_keyboard(
+    post_url: str = None,
+    post_text: str = None,
+    post_id: str = None,
+    enable_tracking: bool = True,
+) -> InlineKeyboardMarkup:
     data = load_contact_data()
     apply_contacts = data.get("apply_contacts") or {}
 
     employer = apply_contacts.get("employer") or {}
     emp_url = (employer.get("url") or "").strip()
     emp_label = (employer.get("label") or "").strip() or "Apply Now"
+
+    # If post_url is provided but post_id is not, extract post_id from post_url
+    if post_url and not post_id:
+        try:
+            candidate_id = post_url.rstrip("/").split("/")[-1]
+            if candidate_id.isdigit():
+                post_id = candidate_id
+        except Exception:
+            post_id = None
 
     # Contact Admin button redirects to Admin Career Center with post text & link attached
     admin_contact_url = build_admin_contact_url(
@@ -331,21 +358,59 @@ def get_contact_keyboard(post_url: str = None, post_text: str = None) -> InlineK
         post_text=post_text,
     )
 
+    # Wrap buttons with tracking redirect URLs only when post_url is known (channel posts)
+    # Previews in admin chat or /showcontact retain direct URLs so tests don't skew real analytics
+    should_track = enable_tracking and bool(post_url) and bool(WEBHOOK_URL)
+
+    if should_track:
+        final_admin_url = register_tracking_link(
+            base_url=WEBHOOK_URL,
+            target_url=admin_contact_url,
+            label=STATIC_ADMIN_BUTTON_LABEL,
+            link_type="admin",
+            post_id=post_id,
+            post_url=post_url,
+        )
+        final_bot_url = register_tracking_link(
+            base_url=WEBHOOK_URL,
+            target_url=STATIC_BOT_BUTTON_URL,
+            label=STATIC_BOT_BUTTON_LABEL,
+            link_type="bot",
+            post_id=post_id,
+            post_url=post_url,
+        )
+        final_emp_url = (
+            register_tracking_link(
+                base_url=WEBHOOK_URL,
+                target_url=emp_url,
+                label=emp_label,
+                link_type="employer",
+                post_id=post_id,
+                post_url=post_url,
+            )
+            if emp_url
+            else ""
+        )
+    else:
+        final_admin_url = admin_contact_url
+        final_bot_url = STATIC_BOT_BUTTON_URL
+        final_emp_url = emp_url
+
     kb_rows = []
 
     # Row 1: Contact Admin button + Optional Apply Now button (side by side only when contact is set)
     row1 = [
         InlineKeyboardButton(
             STATIC_ADMIN_BUTTON_LABEL,
-            url=admin_contact_url,
+            url=final_admin_url,
             api_kwargs={"style": "primary"},
         ),
     ]
-    if emp_url:
+    if final_emp_url:
         row1.append(
             InlineKeyboardButton(
                 emp_label,
-                url=emp_url,
+                url=final_emp_url,
                 api_kwargs={"style": "primary"},
             )
         )
@@ -355,7 +420,7 @@ def get_contact_keyboard(post_url: str = None, post_text: str = None) -> InlineK
     kb_rows.append([
         InlineKeyboardButton(
             STATIC_BOT_BUTTON_LABEL,
-            url=STATIC_BOT_BUTTON_URL,
+            url=final_bot_url,
             api_kwargs={"style": "primary"},
         )
     ])
@@ -916,7 +981,12 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
         else:
             post_url = f"https://t.me/useacareercenter/{sent_msg_id}"
 
-        new_keyboard = get_contact_keyboard(post_url=post_url, post_text=info)
+        new_keyboard = get_contact_keyboard(
+            post_url=post_url,
+            post_text=info,
+            post_id=str(sent_msg_id),
+            enable_tracking=True,
+        )
         if new_keyboard:
             try:
                 await bot.edit_message_reply_markup(
@@ -1114,8 +1184,158 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "• /setcontact — កំណត់ Contact សម្រាប់ប៊ូតុង Apply Now (បើមិនកំណត់ ឬលុប ប៊ូតុងនឹងបាត់)\n"
         "• /clearcontact — លុប Contact (ធ្វើឱ្យប៊ូតុង Apply Now បាត់)\n"
         "• /showcontact — មើលទម្រង់ប៊ូតុងបច្ចុប្បន្ន\n"
+        "• /report — មើលរបាយការណ៍ចំនួនអ្នកចុចលើប៊ូតុងនីមួយៗប្រចាំខែ (Button Clicks Report)\n"
         "• ឬ forward សារណាមួយមក bot ដោយផ្ទាល់ (bot នឹងសួរ confirm មុន post)"
     )
+
+
+# ------------------------------------------------------------------
+# Report & Analytics Helpers & Commands
+# ------------------------------------------------------------------
+def build_report_month_keyboard(current_selected_month: str = None) -> InlineKeyboardMarkup:
+    """Build inline keyboard allowing admin to pick any month or all-time."""
+    months = get_available_months()
+    keyboard_rows = []
+
+    # 2 buttons per row
+    row = []
+    now_month = datetime.now().strftime("%Y-%m")
+    for m in months[:8]:
+        label = f"📅 {m}"
+        if m == now_month:
+            label += " (ខែនេះ)"
+        if m == current_selected_month:
+            label = f"✅ {label}"
+        row.append(InlineKeyboardButton(label, callback_data=f"rep_month:{m}"))
+        if len(row) == 2:
+            keyboard_rows.append(row)
+            row = []
+    if row:
+        keyboard_rows.append(row)
+
+    all_label = "📈 គ្រប់ខែទាំងអស់ (All-Time)"
+    if current_selected_month == "all":
+        all_label = f"✅ {all_label}"
+    keyboard_rows.append([InlineKeyboardButton(all_label, callback_data="rep_month:all")])
+
+    target = current_selected_month or now_month
+    keyboard_rows.append([
+        InlineKeyboardButton(f"📥 ទាញយក CSV ({target})", callback_data=f"rep_csv:{target}")
+    ])
+
+    return InlineKeyboardMarkup(keyboard_rows)
+
+
+def build_report_view_keyboard(month: str) -> InlineKeyboardMarkup:
+    """Build action buttons when viewing a specific month report."""
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("📥 ទាញយកជា CSV", callback_data=f"rep_csv:{month}"),
+            InlineKeyboardButton("🔄 Refresh", callback_data=f"rep_month:{month}"),
+        ],
+        [
+            InlineKeyboardButton("🔙 ជ្រើសរើសខែផ្សេង (Choose Another Month)", callback_data="rep_home"),
+        ],
+    ])
+
+
+async def send_csv_report_file(update: Update, context: ContextTypes.DEFAULT_TYPE, month: str) -> None:
+    """Generate and send CSV report directly to admin chat."""
+    csv_bytes = generate_csv_report(month=month)
+    filename = f"button_clicks_{month}.csv"
+    chat_id = update.effective_chat.id
+
+    caption = (
+        f"📥 <b>របាយការណ៍ស្ថិតិចុចលើប៊ូតុងនីមួយៗ (Button Click Report)</b>\n"
+        f"📅 ប្រចាំ: <code>{month}</code>\n"
+        f"💡 ឯកសារនេះអាចបើកមើលក្នុង Microsoft Excel បានយ៉ាងស្រួល។"
+    )
+    await context.bot.send_document(
+        chat_id=chat_id,
+        document=io.BytesIO(csv_bytes),
+        filename=filename,
+        caption=caption,
+        parse_mode="HTML",
+    )
+
+
+async def report_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⚠️ បញ្ជានេះសម្រាប់តែ Admin ប៉ុណ្ណោះ (Admins only)។")
+        return
+
+    args = context.args or []
+    now_month = datetime.now().strftime("%Y-%m")
+
+    # If admin types /report csv or /report csv 2026-10
+    if args and args[0].lower() == "csv":
+        target_month = args[1] if len(args) > 1 else now_month
+        await send_csv_report_file(update, context, target_month)
+        return
+
+    if not args:
+        # Show interactive month selector with current month's report
+        rep_data = get_monthly_report_data(now_month)
+        text = format_telegram_report(rep_data, webhook_url=WEBHOOK_URL)
+        keyboard = build_report_month_keyboard(current_selected_month=now_month)
+    else:
+        # User specified a month, e.g. /report 2026-10 or /report all
+        target_month = args[0]
+        rep_data = get_monthly_report_data(target_month)
+        text = format_telegram_report(rep_data, webhook_url=WEBHOOK_URL)
+        keyboard = build_report_view_keyboard(target_month)
+
+    await update.message.reply_text(
+        text,
+        reply_markup=keyboard,
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+    )
+
+
+async def report_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    user = update.effective_user
+
+    if not is_admin(user.id):
+        await query.answer("⚠️ សុំទោស អ្នកមិនមែនជា Admin ទេ (Admins only)!", show_alert=True)
+        return
+
+    data = query.data or ""
+    await query.answer()
+
+    if data == "rep_home":
+        now_month = datetime.now().strftime("%Y-%m")
+        rep_data = get_monthly_report_data(now_month)
+        text = format_telegram_report(rep_data, webhook_url=WEBHOOK_URL)
+        kb = build_report_month_keyboard(current_selected_month=now_month)
+        try:
+            await query.edit_message_text(
+                text,
+                reply_markup=kb,
+                parse_mode="HTML",
+                disable_web_page_preview=True,
+            )
+        except Exception:
+            pass
+    elif data.startswith("rep_month:"):
+        month = data.split(":", 1)[1]
+        rep_data = get_monthly_report_data(month)
+        text = format_telegram_report(rep_data, webhook_url=WEBHOOK_URL)
+        kb = build_report_view_keyboard(month)
+        try:
+            await query.edit_message_text(
+                text,
+                reply_markup=kb,
+                parse_mode="HTML",
+                disable_web_page_preview=True,
+            )
+        except Exception:
+            pass
+    elif data.startswith("rep_csv:"):
+        month = data.split(":", 1)[1]
+        await send_csv_report_file(update, context, month)
 
 
 def setup_webhook_health_routes() -> None:
@@ -1251,6 +1471,9 @@ def setup_webhook_health_routes() -> None:
                     (r"/health(?:z)?/?", JsonHealthHandler),
                     (r"/ping/?", HealthCheckHandler),
                     (r"/favicon\.ico", FaviconHandler),
+                    (r"/r/(?P<token>[^/]+)/?", RedirectTrackerHandler),
+                    (r"/report/?", WebReportHandler),
+                    (r"/report/csv/?", WebCsvExportHandler),
                 ],
             )
 
@@ -1266,9 +1489,39 @@ def setup_webhook_health_routes() -> None:
         ptb_webhook.TelegramHandler.get = _telegram_get
         ptb_webhook.TelegramHandler.head = lambda self: self.set_status(200)
 
-        logger.info("Configured web routes for Render health check: /, /health, /healthz, /ping")
+        logger.info("Configured web routes: /, /health, /ping, /r/, /report, /report/csv")
     except Exception as exc:
         logger.warning("Could not setup webhook health routes: %s", exc)
+
+
+def start_local_tracking_server_if_needed(port: int = 10000) -> None:
+    """Start lightweight local Tornado server in polling mode so /r/ and /report work locally."""
+    is_render = bool(os.getenv("RENDER") or os.getenv("RENDER_EXTERNAL_URL") or os.getenv("USE_WEBHOOK"))
+    if is_render:
+        return
+
+    import threading
+    import tornado.ioloop
+    import tornado.web
+
+    local_app = tornado.web.Application([
+        (r"/r/(?P<token>[^/]+)/?", RedirectTrackerHandler),
+        (r"/report/?", WebReportHandler),
+        (r"/report/csv/?", WebCsvExportHandler),
+    ])
+
+    def _run():
+        try:
+            loop = tornado.ioloop.IOLoop()
+            loop.make_current()
+            local_app.listen(port)
+            logger.info("Local tracking server running on http://127.0.0.1:%s", port)
+            loop.start()
+        except Exception as e:
+            logger.warning("Could not start local tracking server on port %s: %s", port, e)
+
+    t = threading.Thread(target=_run, daemon=True)
+    t.start()
 
 
 def main() -> None:
@@ -1316,6 +1569,14 @@ def main() -> None:
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("showcontact", show_contact))
     app.add_handler(CommandHandler("clearcontact", clear_contact_command))
+    app.add_handler(CommandHandler("report", report_command))
+    app.add_handler(CommandHandler("reports", report_command))
+    app.add_handler(CommandHandler("stats", report_command))
+    app.add_handler(
+        CallbackQueryHandler(
+            report_callback_handler, pattern="^rep_(home|month|csv):?.*$"
+        )
+    )
     app.add_handler(contact_conv_handler)
     app.add_handler(post_conv_handler)
     app.add_handler(CallbackQueryHandler(handle_contact_admin, pattern="^contact_admin_8824663759$"))
@@ -1356,6 +1617,7 @@ def main() -> None:
             drop_pending_updates=True,
         )
     else:
+        start_local_tracking_server_if_needed(port=int(os.getenv("PORT", 10000)))
         logger.info("Bot is running with Polling (Local Development Mode)...")
         app.run_polling(drop_pending_updates=True, allowed_updates=Update.ALL_TYPES)
 
