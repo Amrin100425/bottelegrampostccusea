@@ -300,32 +300,20 @@ def build_admin_contact_url(
 ) -> str:
     """
     Construct URL to redirect to Admin Career Center (https://t.me/USEACCAD)
-    with pre-filled text containing greeting, post URL, and post summary.
+    with pre-filled text containing greeting and post URL.
     """
-    if not post_url and not post_text:
-        return base_url
-
-    parts = ["ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ"]
-
+    target_base = base_url or STATIC_ADMIN_BUTTON_URL
     if post_url:
-        parts.append(f"🔗 {post_url}")
+        msg_text = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 {post_url}"
+    elif post_text:
+        msg_text = "ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ"
+    else:
+        return target_base
 
-    if post_text:
-        # Strip HTML tags
-        clean = re.sub(r"<[^>]+>", "", post_text).strip()
-        # Collapse excessive newlines
-        clean = re.sub(r"\n{3,}", "\n\n", clean)
-        # Limit text length to avoid overflowing Telegram URL limits (~1024-2048 chars)
-        if len(clean) > 350:
-            clean = clean[:347].rstrip() + "..."
-        if clean:
-            parts.append(clean)
-
-    msg_text = "\n\n".join(parts)
     import urllib.parse
     encoded_text = urllib.parse.quote(msg_text)
-    sep = "&" if "?" in base_url else "?"
-    return f"{base_url}{sep}text={encoded_text}"
+    sep = "&" if "?" in target_base else "?"
+    return f"{target_base}{sep}text={encoded_text}"
 
 
 def get_contact_keyboard(post_url: str = None, post_text: str = None) -> InlineKeyboardMarkup:
