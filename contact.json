@@ -6,7 +6,8 @@
     },
     "admin": {
       "label": "👤 ទំនាក់ទំនង Admin USEA Career Center",
-      "url": "https://t.me/USEACCAD"
+      "url": "https://t.me/USEACCAD",
+      "btn_style": "success"
     }
   },
   "fixed_buttons": [
