@@ -334,7 +334,7 @@ def get_contact_keyboard(
     post_url: str = None,
     post_text: str = None,
     post_id: str = None,
-    enable_tracking: bool = True,
+    enable_tracking: bool = False,
 ) -> InlineKeyboardMarkup:
     data = load_contact_data()
     apply_contacts = data.get("apply_contacts") or {}
@@ -343,32 +343,14 @@ def get_contact_keyboard(
     emp_url = (employer.get("url") or "").strip()
     emp_label = (employer.get("label") or "").strip() or "Apply Now"
 
-    # If post_url is provided but post_id is not, extract post_id from post_url
-    if post_url and not post_id:
-        try:
-            candidate_id = post_url.rstrip("/").split("/")[-1]
-            if candidate_id.isdigit():
-                post_id = candidate_id
-        except Exception:
-            post_id = None
-
-    post_param = f"_{post_id}" if post_id else ""
-
-    # Option 1: Native Telegram deep links — 100% inside Telegram, NO Render, NO web browser!
-    # When post_url or post_id is present (published to channel), link to bot deep link for tracking
-    if (post_url or post_id) and enable_tracking:
-        final_admin_url = f"https://t.me/{BOT_USERNAME}?start=admin{post_param}"
-        final_emp_url = f"https://t.me/{BOT_USERNAME}?start=apply{post_param}" if emp_url else ""
-        final_bot_url = f"https://t.me/{BOT_USERNAME}?start=tips{post_param}"
-    else:
-        # In Admin private chat preview: direct link so admin can test destination
-        final_admin_url = build_admin_contact_url(
-            base_url=STATIC_ADMIN_BUTTON_URL,
-            post_url=post_url,
-            post_text=post_text,
-        )
-        final_emp_url = emp_url
-        final_bot_url = STATIC_BOT_BUTTON_URL
+    # Contact Admin button redirects directly to Admin Career Center (@USEACCAD) with post link & greeting
+    final_admin_url = build_admin_contact_url(
+        base_url=STATIC_ADMIN_BUTTON_URL,
+        post_url=post_url,
+        post_text=post_text,
+    )
+    final_emp_url = emp_url
+    final_bot_url = STATIC_BOT_BUTTON_URL
 
     kb_rows = []
 
@@ -390,7 +372,7 @@ def get_contact_keyboard(
         )
     kb_rows.append(row1)
 
-    # Row 2: Static bot redirect button
+    # Row 2: Static bot redirect button directly to career tips bot
     kb_rows.append([
         InlineKeyboardButton(
             STATIC_BOT_BUTTON_LABEL,
