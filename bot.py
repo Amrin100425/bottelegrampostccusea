@@ -334,7 +334,7 @@ def get_contact_keyboard(
     post_url: str = None,
     post_text: str = None,
     post_id: str = None,
-    enable_tracking: bool = False,
+    enable_tracking: bool = True,
 ) -> InlineKeyboardMarkup:
     data = load_contact_data()
     apply_contacts = data.get("apply_contacts") or {}
@@ -343,14 +343,56 @@ def get_contact_keyboard(
     emp_url = (employer.get("url") or "").strip()
     emp_label = (employer.get("label") or "").strip() or "Apply Now"
 
-    # Contact Admin button redirects directly to Admin Career Center (@USEACCAD) with post link & greeting
-    final_admin_url = build_admin_contact_url(
+    # If post_url is provided but post_id is not, extract post_id from post_url
+    if post_url and not post_id:
+        try:
+            candidate_id = post_url.rstrip("/").split("/")[-1]
+            if candidate_id.isdigit():
+                post_id = candidate_id
+        except Exception:
+            post_id = None
+
+    admin_contact_url = build_admin_contact_url(
         base_url=STATIC_ADMIN_BUTTON_URL,
         post_url=post_url,
         post_text=post_text,
     )
-    final_emp_url = emp_url
-    final_bot_url = STATIC_BOT_BUTTON_URL
+
+    should_track = enable_tracking and bool(post_url or post_id) and bool(WEBHOOK_URL)
+
+    if should_track:
+        final_admin_url = register_tracking_link(
+            base_url=WEBHOOK_URL,
+            target_url=admin_contact_url,
+            label=STATIC_ADMIN_BUTTON_LABEL,
+            link_type="admin",
+            post_id=post_id,
+            post_url=post_url,
+        )
+        final_bot_url = register_tracking_link(
+            base_url=WEBHOOK_URL,
+            target_url=STATIC_BOT_BUTTON_URL,
+            label=STATIC_BOT_BUTTON_LABEL,
+            link_type="bot",
+            post_id=post_id,
+            post_url=post_url,
+        )
+        final_emp_url = (
+            register_tracking_link(
+                base_url=WEBHOOK_URL,
+                target_url=emp_url,
+                label=emp_label,
+                link_type="employer",
+                post_id=post_id,
+                post_url=post_url,
+            )
+            if emp_url
+            else ""
+        )
+    else:
+        final_admin_url = admin_contact_url
+        final_bot_url = STATIC_BOT_BUTTON_URL
+        final_emp_url = emp_url
 
     kb_rows = []
 
