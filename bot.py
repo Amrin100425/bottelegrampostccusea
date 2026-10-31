@@ -37,6 +37,7 @@ from telegram.ext import (
 from tracker import (
     register_tracking_link,
     record_click,
+    record_telegram_button_click,
     get_available_months,
     get_monthly_report_data,
     format_telegram_report,
@@ -351,50 +352,23 @@ def get_contact_keyboard(
         except Exception:
             post_id = None
 
-    # Contact Admin button redirects to Admin Career Center with post text & link attached
-    admin_contact_url = build_admin_contact_url(
-        base_url=STATIC_ADMIN_BUTTON_URL,
-        post_url=post_url,
-        post_text=post_text,
-    )
+    post_param = f"_{post_id}" if post_id else ""
 
-    # Wrap buttons with tracking redirect URLs only when post_url is known (channel posts)
-    # Previews in admin chat or /showcontact retain direct URLs so tests don't skew real analytics
-    should_track = enable_tracking and bool(post_url) and bool(WEBHOOK_URL)
-
-    if should_track:
-        final_admin_url = register_tracking_link(
-            base_url=WEBHOOK_URL,
-            target_url=admin_contact_url,
-            label=STATIC_ADMIN_BUTTON_LABEL,
-            link_type="admin",
-            post_id=post_id,
-            post_url=post_url,
-        )
-        final_bot_url = register_tracking_link(
-            base_url=WEBHOOK_URL,
-            target_url=STATIC_BOT_BUTTON_URL,
-            label=STATIC_BOT_BUTTON_LABEL,
-            link_type="bot",
-            post_id=post_id,
-            post_url=post_url,
-        )
-        final_emp_url = (
-            register_tracking_link(
-                base_url=WEBHOOK_URL,
-                target_url=emp_url,
-                label=emp_label,
-                link_type="employer",
-                post_id=post_id,
-                post_url=post_url,
-            )
-            if emp_url
-            else ""
-        )
+    # Option 1: Native Telegram deep links — 100% inside Telegram, NO Render, NO web browser!
+    # When post_url or post_id is present (published to channel), link to bot deep link for tracking
+    if (post_url or post_id) and enable_tracking:
+        final_admin_url = f"https://t.me/{BOT_USERNAME}?start=admin{post_param}"
+        final_emp_url = f"https://t.me/{BOT_USERNAME}?start=apply{post_param}" if emp_url else ""
+        final_bot_url = f"https://t.me/{BOT_USERNAME}?start=tips{post_param}"
     else:
-        final_admin_url = admin_contact_url
-        final_bot_url = STATIC_BOT_BUTTON_URL
+        # In Admin private chat preview: direct link so admin can test destination
+        final_admin_url = build_admin_contact_url(
+            base_url=STATIC_ADMIN_BUTTON_URL,
+            post_url=post_url,
+            post_text=post_text,
+        )
         final_emp_url = emp_url
+        final_bot_url = STATIC_BOT_BUTTON_URL
 
     kb_rows = []
 
@@ -1097,75 +1071,194 @@ async def standalone_confirm_callback(update: Update, context: ContextTypes.DEFA
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
     args = context.args or []
+    arg = args[0] if args else ""
 
-    # 1. Handle applicant clicking "Apply for This Job"
-    if args and args[0].startswith("apply"):
-        data = load_contact_data()
-        apply_contacts = data.get("apply_contacts", DEFAULT_APPLY_CONTACTS)
-        employer = apply_contacts.get("employer", {})
-        admin = apply_contacts.get("admin", {})
+    # 1. Handle native Telegram deep-link button clicks from channel posts (Option 1)
+    if arg:
+        post_id = ""
+        action = arg
+        if "_" in arg:
+            parts = arg.split("_", 1)
+            action = parts[0]
+            post_id = parts[1]
 
-        post_id = args[0].replace("apply_", "") if "_" in args[0] else ""
         post_link = f"https://t.me/useacareercenter/{post_id}" if post_id else ""
-
-        kb_btns = []
-        if employer.get("url"):
-            emp_label = employer.get("label") or "🏢 ទំនាក់ទំនងកន្លែងជ្រើសរើសបុគ្គលិក (Place Looking for Staff)"
-            kb_btns.append([
-                InlineKeyboardButton(emp_label, url=employer["url"], api_kwargs={"style": "primary"})
-            ])
-
-        if admin.get("url"):
-            adm_label = admin.get("label") or "👤 ទំនាក់ទំនង Admin USEA Career Center"
-            admin_url = admin["url"]
-            prefix = "ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ"
-            msg_text = f"{prefix} {post_link}" if post_link else prefix
-            import urllib.parse
-            encoded_text = urllib.parse.quote(msg_text)
-            sep = "&" if "?" in admin_url else "?"
-            adm_final_url = f"{admin_url}{sep}text={encoded_text}"
-            kb_btns.append([
-                InlineKeyboardButton(adm_label, url=adm_final_url, api_kwargs={"style": "primary"})
-            ])
-
-        if post_link:
-            kb_btns.append([
-                InlineKeyboardButton("📢 មើលការងារក្នុង Channel (View Job Post)", url=post_link, api_kwargs={"style": "primary"})
-            ])
-
-        msg_body = (
-            "💼 <b>ដាក់ពាក្យស្នើសុំការងារ / Job Application</b>\n\n"
-            "សូមជ្រើសរើសទំនាក់ទំនងខាងក្រោមដើម្បីដាក់ពាក្យ៖\n"
-            "(Please choose a contact below to apply):\n\n"
-            "1️⃣ <b>កន្លែងជ្រើសរើសបុគ្គលិក (Place Looking for Staff)</b>\n"
-            "2️⃣ <b>Admin ផ្សព្វផ្សាយ (Admin that Posted)</b>"
-        )
-        if post_link:
-            msg_body += f"\n\n🔗 <b>តំណភ្ជាប់ការងារ:</b> {post_link}"
-
-        await update.message.reply_text(
-            msg_body,
-            reply_markup=InlineKeyboardMarkup(kb_btns),
-            parse_mode="HTML",
-        )
-
-        # Notify admins about the applicant
         username_str = f"@{user.username}" if user.username else "គ្មាន (No username)"
-        applicant_alert = (
-            f"👤 <b>បេក្ខជនថ្មីចាប់អារម្មណ៍ការងារ (New Applicant!)</b>\n\n"
-            f"• ឈ្មោះ: {user.full_name}\n"
-            f"• Username: {username_str}\n"
-            f"• Profile: <a href='tg://user?id={user.id}'>ចុចមើល Profile</a>"
-        )
-        if post_link:
-            applicant_alert += f"\n• ការងារ: {post_link}"
+        user_disp = f"{user.full_name} ({username_str})"
 
-        for aid in ADMIN_IDS:
-            try:
-                await context.bot.send_message(chat_id=aid, text=applicant_alert, parse_mode="HTML")
-            except Exception:
-                pass
-        return
+        # A. Clicked "📞 Contact Admin"
+        if action == "admin":
+            admin_msg = (
+                f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 {post_link}"
+                if post_link
+                else "ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ"
+            )
+            import urllib.parse
+            encoded_text = urllib.parse.quote(admin_msg)
+            sep = "&" if "?" in STATIC_ADMIN_BUTTON_URL else "?"
+            admin_direct_url = f"{STATIC_ADMIN_BUTTON_URL}{sep}text={encoded_text}"
+
+            record_telegram_button_click(
+                link_type="admin",
+                user_id=user.id,
+                user_display=user_disp,
+                label=STATIC_ADMIN_BUTTON_LABEL,
+                post_id=post_id,
+                post_url=post_link,
+                target_url=admin_direct_url,
+            )
+
+            kb = [
+                [
+                    InlineKeyboardButton(
+                        "💬 ផ្ញើសារទៅកាន់ Admin @USEACCAD",
+                        url=admin_direct_url,
+                        api_kwargs={"style": "primary"},
+                    )
+                ]
+            ]
+            if post_link:
+                kb.append([
+                    InlineKeyboardButton(
+                        "📢 មើលការងារក្នុង Channel",
+                        url=post_link,
+                        api_kwargs={"style": "primary"},
+                    )
+                ])
+
+            resp_text = (
+                f"👋 <b>សួស្តី {user.first_name}!</b>\n\n"
+                f"សូមចុចប៊ូតុងខាងក្រោមដើម្បីផ្ញើសារទាក់ទងទៅកាន់ Admin USEA Career Center ផ្ទាល់៖\n"
+                f"(Click button below to message Admin):"
+            )
+            if post_link:
+                resp_text += f"\n\n🔗 <b>ការងារដែលចាប់អារម្មណ៍:</b> {post_link}"
+
+            await update.message.reply_text(
+                resp_text,
+                reply_markup=InlineKeyboardMarkup(kb),
+                parse_mode="HTML",
+                disable_web_page_preview=True,
+            )
+            return
+
+        # B. Clicked "Apply Now" (Employer contact)
+        elif action in ("apply", "employer"):
+            data = load_contact_data()
+            apply_contacts = data.get("apply_contacts", DEFAULT_APPLY_CONTACTS)
+            employer = apply_contacts.get("employer", {})
+            emp_url = (employer.get("url") or "").strip()
+            emp_label = (employer.get("label") or "").strip() or "🏢 ទំនាក់ទំនងកន្លែងជ្រើសរើសបុគ្គលិក (Place Looking for Staff)"
+
+            record_telegram_button_click(
+                link_type="employer",
+                user_id=user.id,
+                user_display=user_disp,
+                label=emp_label,
+                post_id=post_id,
+                post_url=post_link,
+                target_url=emp_url,
+            )
+
+            kb = []
+            if emp_url:
+                kb.append([
+                    InlineKeyboardButton(
+                        f"👉 {emp_label}",
+                        url=emp_url,
+                        api_kwargs={"style": "primary"},
+                    )
+                ])
+
+            admin_msg = (
+                f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 {post_link}"
+                if post_link
+                else "ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ"
+            )
+            import urllib.parse
+            encoded_text = urllib.parse.quote(admin_msg)
+            sep = "&" if "?" in STATIC_ADMIN_BUTTON_URL else "?"
+            admin_direct_url = f"{STATIC_ADMIN_BUTTON_URL}{sep}text={encoded_text}"
+            kb.append([
+                InlineKeyboardButton(
+                    "👤 ទំនាក់ទំនង Admin USEA Career Center",
+                    url=admin_direct_url,
+                    api_kwargs={"style": "primary"},
+                )
+            ])
+            if post_link:
+                kb.append([
+                    InlineKeyboardButton(
+                        "📢 មើលការងារក្នុង Channel",
+                        url=post_link,
+                        api_kwargs={"style": "primary"},
+                    )
+                ])
+
+            resp_text = (
+                f"💼 <b>ដាក់ពាក្យស្នើសុំការងារ / Job Application</b>\n\n"
+                f"សូមជ្រើសរើសទំនាក់ទំនងខាងក្រោមដើម្បីដាក់ពាក្យ៖\n"
+                f"(Please choose a contact below to apply):"
+            )
+            if post_link:
+                resp_text += f"\n\n🔗 <b>ការងារ:</b> {post_link}"
+
+            await update.message.reply_text(
+                resp_text,
+                reply_markup=InlineKeyboardMarkup(kb),
+                parse_mode="HTML",
+                disable_web_page_preview=True,
+            )
+
+            # Notify admins about the applicant
+            applicant_alert = (
+                f"👤 <b>បេក្ខជនថ្មីចាប់អារម្មណ៍ការងារ (New Applicant!)</b>\n\n"
+                f"• ឈ្មោះ: {user.full_name}\n"
+                f"• Username: {username_str}\n"
+                f"• Profile: <a href='tg://user?id={user.id}'>ចុចមើល Profile</a>"
+            )
+            if post_link:
+                applicant_alert += f"\n• ការងារ: {post_link}"
+
+            for aid in ADMIN_IDS:
+                try:
+                    await context.bot.send_message(chat_id=aid, text=applicant_alert, parse_mode="HTML")
+                except Exception:
+                    pass
+            return
+
+        # C. Clicked "Career Tips, CV & Cover Letter"
+        elif action in ("tips", "bot"):
+            record_telegram_button_click(
+                link_type="bot",
+                user_id=user.id,
+                user_display=user_disp,
+                label=STATIC_BOT_BUTTON_LABEL,
+                post_id=post_id,
+                post_url=post_link,
+                target_url=STATIC_BOT_BUTTON_URL,
+            )
+            kb = [
+                [
+                    InlineKeyboardButton(
+                        "🚀 ចូលទៅកាន់ Bot @careercentercvbot",
+                        url=STATIC_BOT_BUTTON_URL,
+                        api_kwargs={"style": "primary"},
+                    )
+                ]
+            ]
+            resp_text = (
+                f"👋 <b>សួស្តី {user.first_name}!</b>\n\n"
+                f"🤖 <b>Career Tips, CV & Cover Letter Bot</b>\n\n"
+                f"សូមចុចប៊ូតុងខាងក្រោមដើម្បីចូលទៅកាន់ Bot គន្លឹះការងារ រៀនសរសេរ CV និង Cover Letter ឥតគិតថ្លៃ៖\n"
+                f"(Click button below to access career tips, CV & Cover letter):"
+            )
+            await update.message.reply_text(
+                resp_text,
+                reply_markup=InlineKeyboardMarkup(kb),
+                parse_mode="HTML",
+            )
+            return
 
     # 2. Non-admin visitor
     if not is_admin(user.id):

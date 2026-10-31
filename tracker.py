@@ -251,6 +251,99 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
     return target_url
 
 
+def record_telegram_button_click(
+    link_type: str,
+    user_id: int,
+    user_display: str = "",
+    label: str = "",
+    post_id: str = "",
+    post_url: str = "",
+    target_url: str = "",
+) -> None:
+    """
+    Record a button click event triggered directly from Telegram deep links (Option 1).
+    100% inside Telegram without web browser or Render redirection.
+    """
+    data = load_click_data()
+    now = datetime.now()
+    month_key = now.strftime("%Y-%m")
+    now_iso = now.isoformat()
+    uid_str = str(user_id)
+
+    default_labels = {
+        "admin": "📞 Contact Admin",
+        "employer": "💼 Apply Now",
+        "bot": "🤖 Career Tips Bot",
+    }
+    btn_label = label or default_labels.get(link_type, link_type)
+
+    # 1. Update month aggregated stats
+    months = data.setdefault("months", {})
+    m_data = months.setdefault(
+        month_key,
+        {
+            "total_clicks": 0,
+            "unique_users": [],
+            "by_type": {},
+            "by_link": {},
+            "by_post": {},
+        },
+    )
+
+    m_data["total_clicks"] = m_data.get("total_clicks", 0) + 1
+    u_list = m_data.setdefault("unique_users", [])
+    if uid_str not in u_list:
+        u_list.append(uid_str)
+
+    # By button type (admin, employer, bot)
+    by_type = m_data.setdefault("by_type", {})
+    t_entry = by_type.setdefault(link_type, {"label": btn_label, "clicks": 0, "users": []})
+    t_entry["clicks"] = t_entry.get("clicks", 0) + 1
+    t_entry["label"] = btn_label
+    t_users = t_entry.setdefault("users", [])
+    if uid_str not in t_users:
+        t_users.append(uid_str)
+
+    # By post ID
+    if post_id:
+        by_post = m_data.setdefault("by_post", {})
+        p_entry = by_post.setdefault(
+            str(post_id),
+            {
+                "post_id": str(post_id),
+                "post_url": post_url or f"https://t.me/useacareercenter/{post_id}",
+                "clicks": 0,
+                "users": [],
+            },
+        )
+        p_entry["clicks"] = p_entry.get("clicks", 0) + 1
+        p_users = p_entry.setdefault("users", [])
+        if uid_str not in p_users:
+            p_users.append(uid_str)
+
+    # 2. Append to recent clicks log
+    recent = data.setdefault("recent_clicks", [])
+    recent.append(
+        {
+            "timestamp": now_iso,
+            "month": month_key,
+            "token": f"tg_{link_type}_{post_id}",
+            "label": btn_label,
+            "link_type": link_type,
+            "post_id": str(post_id),
+            "post_url": post_url or (f"https://t.me/useacareercenter/{post_id}" if post_id else ""),
+            "target_url": target_url,
+            "user_hash": uid_str,
+            "user_display": user_display,
+        }
+    )
+    if len(recent) > 5000:
+        data["recent_clicks"] = recent[-5000:]
+
+    save_click_data(data)
+    logger.info("Recorded Telegram button click: type=%s, user=%s (%s), post=%s, month=%s", link_type, uid_str, user_display, post_id, month_key)
+
+
 def get_available_months() -> List[str]:
     """Return sorted list of month strings (YYYY-MM), newest first."""
     data = load_click_data()
@@ -446,7 +539,8 @@ def generate_csv_report(month: Optional[str] = None) -> bytes:
         "Post ID",
         "Post URL",
         "Destination Target URL",
-        "Visitor Anonymized ID",
+        "Visitor Telegram ID",
+        "Visitor Name / Username",
     ])
 
     rows_written = 0
@@ -464,6 +558,7 @@ def generate_csv_report(month: Optional[str] = None) -> bytes:
             c.get("post_url", ""),
             c.get("target_url", ""),
             c.get("user_hash", ""),
+            c.get("user_display", ""),
         ])
         rows_written += 1
 
