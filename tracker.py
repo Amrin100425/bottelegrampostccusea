@@ -24,6 +24,29 @@ logger = logging.getLogger(__name__)
 CLICK_STORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "clicks.json")
 _data_lock = threading.Lock()
 
+# Mapping for past posts (3866-3882) where each post has its own employer contact
+PAST_POST_CONTACTS = {
+    "3866": {"url": "https://t.me/+855962669708", "label": "Apply Now - 0962669708"},
+    "3867": {
+        "url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3867",
+        "label": "More information",
+    },
+    "3868": {"url": "https://t.me/USEACCAD", "label": "Apply Now"},
+    "3869": {"url": "https://t.me/USEACCAD", "label": "Apply Now"},
+    "3871": {"url": "https://t.me/belikekhmersiemreap", "label": "Apply Now - Be Like Khmer"},
+    "3872": {"url": "https://t.me/+85515344663", "label": "Apply Now - 015344663"},
+    "3873": {"url": "https://t.me/RAIS_SCHOOL", "label": "Apply Now - @RAIS_SCHOOL"},
+    "3874": {"url": "https://t.me/+85570588000", "label": "Apply Now - 070588000"},
+    "3875": {"url": "https://t.me/cjftec", "label": "Apply Now - CJFTEC"},
+    "3876": {"url": "https://t.me/+85581787985", "label": "Apply Now - 081787985"},
+    "3877": {"url": "https://t.me/cjftec", "label": "Apply Now - CJFTEC"},
+    "3878": {"url": "https://t.me/+85516757174", "label": "Apply Now - 016757174"},
+    "3879": {"url": "https://t.me/USEACCAD", "label": "Apply Now"},
+    "3880": {"url": "https://t.me/+85578555671", "label": "Apply Now - 078555671"},
+    "3881": {"url": "https://t.me/+85595473808", "label": "Apple Now - 095473808"},
+    "3882": {"url": "https://t.me/+855962080434", "label": "Apply Now - 0962080434"},
+}
+
 
 def _get_default_data() -> dict:
     return {
@@ -146,7 +169,15 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
             parts = token[1:].split("_", 1)
             post_id = parts[0]
             link_type = parts[1]
-            if link_type == "admin":
+            if link_type in ("bot", "tips"):
+                label = "Career Tips, CV & Cover Letter"
+                target_url = "https://t.me/careercentercvbot"
+            elif post_id in PAST_POST_CONTACTS and (link_type in ("employer", "apply") or post_id != "3866"):
+                # For past single-button posts (3868-3882), token was _admin but represented Apply Now
+                info = PAST_POST_CONTACTS[post_id]
+                label = info.get("label", "Apply Now")
+                target_url = info.get("url", "https://t.me/USEACCAD")
+            elif link_type == "admin":
                 label = "📞 Contact Admin"
                 target_url = "https://t.me/USEACCAD"
                 if post_id:
@@ -168,9 +199,6 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
                                 label = emp.get("label")
                 except Exception:
                     pass
-            elif link_type in ("bot", "tips"):
-                label = "Career Tips, CV & Cover Letter"
-                target_url = "https://t.me/careercentercvbot"
             post_url = f"https://t.me/useacareercenter/{post_id}"
         except Exception:
             pass
