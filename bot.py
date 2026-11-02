@@ -218,6 +218,7 @@ DEFAULT_APPLY_CONTACTS = {
     "admin": {
         "label": "👤 ទំនាក់ទំនង Admin USEA Career Center",
         "url": STATIC_ADMIN_BUTTON_URL,
+        "btn_style": "success",
     },
 }
 
@@ -396,12 +397,12 @@ def get_contact_keyboard(
 
     kb_rows = []
 
-    # Row 1: Contact Admin button + Optional Apply Now button (side by side only when contact is set)
+    # Row 1: Contact Admin button (GREEN) + Optional Apply Now button (RED, only when contact is set)
     row1 = [
         InlineKeyboardButton(
             STATIC_ADMIN_BUTTON_LABEL,
             url=final_admin_url,
-            api_kwargs={"style": "primary"},
+            api_kwargs={"style": "success"},
         ),
     ]
     if final_emp_url:
@@ -409,12 +410,12 @@ def get_contact_keyboard(
             InlineKeyboardButton(
                 emp_label,
                 url=final_emp_url,
-                api_kwargs={"style": "primary"},
+                api_kwargs={"style": "danger"},
             )
         )
     kb_rows.append(row1)
 
-    # Row 2: Static bot redirect button directly to career tips bot
+    # Row 2: Static bot redirect button directly to career tips bot (BLUE)
     kb_rows.append([
         InlineKeyboardButton(
             STATIC_BOT_BUTTON_LABEL,
@@ -540,6 +541,7 @@ def parse_apply_contacts_input(raw_text: str):
     apply_contacts["employer"] = {
         "label": clean_label,
         "url": contact_url,
+        "btn_style": "danger",
     }
 
     return apply_contacts
@@ -1137,7 +1139,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     InlineKeyboardButton(
                         "💬 ផ្ញើសារទៅកាន់ Admin @USEACCAD",
                         url=admin_direct_url,
-                        api_kwargs={"style": "primary"},
+                        api_kwargs={"style": "success"},
                     )
                 ]
             ]
@@ -1190,7 +1192,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     InlineKeyboardButton(
                         f"👉 {emp_label}",
                         url=emp_url,
-                        api_kwargs={"style": "primary"},
+                        api_kwargs={"style": "danger"},
                     )
                 ])
 
@@ -1207,7 +1209,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 InlineKeyboardButton(
                     "👤 ទំនាក់ទំនង Admin USEA Career Center",
                     url=admin_direct_url,
-                    api_kwargs={"style": "primary"},
+                    api_kwargs={"style": "success"},
                 )
             ])
             if post_link:
