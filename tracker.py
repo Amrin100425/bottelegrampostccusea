@@ -171,7 +171,7 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
             link_type = parts[1]
             if link_type in ("bot", "tips"):
                 label = "Career Tips, CV & Cover Letter"
-                target_url = "https://t.me/careercentercvbot"
+                target_url = "https://t.me/USEACCASTbot"
             elif post_id in PAST_POST_CONTACTS and (link_type in ("employer", "apply") or post_id != "3866"):
                 # For past single-button posts (3868-3882), token was _admin but represented Apply Now
                 info = PAST_POST_CONTACTS[post_id]

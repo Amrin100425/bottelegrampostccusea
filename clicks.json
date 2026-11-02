@@ -11,7 +11,7 @@
     },
     "p3866_bot": {
       "token": "p3866_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3866",
@@ -47,7 +47,7 @@
     },
     "p3867_bot": {
       "token": "p3867_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3867",
@@ -74,7 +74,7 @@
     },
     "p3868_bot": {
       "token": "p3868_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3868",
@@ -101,7 +101,7 @@
     },
     "p3869_bot": {
       "token": "p3869_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3869",
@@ -128,7 +128,7 @@
     },
     "p3871_bot": {
       "token": "p3871_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3871",
@@ -155,7 +155,7 @@
     },
     "p3872_bot": {
       "token": "p3872_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3872",
@@ -182,7 +182,7 @@
     },
     "p3873_bot": {
       "token": "p3873_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3873",
@@ -209,7 +209,7 @@
     },
     "p3874_bot": {
       "token": "p3874_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3874",
@@ -236,7 +236,7 @@
     },
     "p3875_bot": {
       "token": "p3875_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3875",
@@ -263,7 +263,7 @@
     },
     "p3876_bot": {
       "token": "p3876_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3876",
@@ -290,7 +290,7 @@
     },
     "p3877_bot": {
       "token": "p3877_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3877",
@@ -317,7 +317,7 @@
     },
     "p3878_bot": {
       "token": "p3878_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3878",
@@ -344,7 +344,7 @@
     },
     "p3879_bot": {
       "token": "p3879_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3879",
@@ -371,7 +371,7 @@
     },
     "p3880_bot": {
       "token": "p3880_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3880",
@@ -398,7 +398,7 @@
     },
     "p3881_bot": {
       "token": "p3881_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3881",
@@ -425,7 +425,7 @@
     },
     "p3882_bot": {
       "token": "p3882_bot",
-      "target_url": "https://t.me/careercentercvbot",
+      "target_url": "https://t.me/USEACCASTbot",
       "label": "Career Tips, CV & Cover Letter",
       "link_type": "bot",
       "post_id": "3882",
@@ -435,7 +435,7 @@
   },
   "months": {
     "2026-11": {
-      "total_clicks": 17,
+      "total_clicks": 19,
       "unique_users": [
         "6f749e0b9493"
       ],
@@ -456,7 +456,7 @@
         },
         "bot": {
           "label": "Career Tips, CV & Cover Letter",
-          "clicks": 2,
+          "clicks": 4,
           "users": [
             "6f749e0b9493"
           ]
@@ -638,6 +638,18 @@
           "post_id": "3882",
           "post_url": "https://t.me/useacareercenter/3882",
           "target_url": "https://t.me/careercentercvbot",
+          "clicks": 2,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p9999_bot": {
+          "token": "p9999_bot",
+          "label": "Career Tips, CV & Cover Letter",
+          "link_type": "bot",
+          "post_id": "9999",
+          "post_url": "https://t.me/useacareercenter/9999",
+          "target_url": "https://t.me/USEACCASTbot",
           "clicks": 1,
           "users": [
             "6f749e0b9493"
@@ -736,7 +748,15 @@
         "3882": {
           "post_id": "3882",
           "post_url": "https://t.me/useacareercenter/3882",
-          "clicks": 2,
+          "clicks": 3,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "9999": {
+          "post_id": "9999",
+          "post_url": "https://t.me/useacareercenter/9999",
+          "clicks": 1,
           "users": [
             "6f749e0b9493"
           ]
@@ -930,6 +950,28 @@
       "post_id": "3882",
       "post_url": "https://t.me/useacareercenter/3882",
       "target_url": "https://t.me/careercentercvbot",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T19:33:25.560466",
+      "month": "2026-11",
+      "token": "p3882_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3882",
+      "post_url": "https://t.me/useacareercenter/3882",
+      "target_url": "https://t.me/USEACCASTbot",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T19:33:25.602088",
+      "month": "2026-11",
+      "token": "p9999_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "9999",
+      "post_url": "https://t.me/useacareercenter/9999",
+      "target_url": "https://t.me/USEACCASTbot",
       "user_hash": "6f749e0b9493"
     }
   ]

@@ -211,7 +211,7 @@ STATIC_ADMIN_BUTTON_URL = "https://t.me/USEACCAD"
 
 # Static button 3: Bot redirect — never changes
 STATIC_BOT_BUTTON_LABEL = "Career Tips, CV & Cover Letter"
-STATIC_BOT_BUTTON_URL = "https://t.me/careercentercvbot"
+STATIC_BOT_BUTTON_URL = "https://t.me/USEACCASTbot"
 
 DEFAULT_APPLY_CONTACTS = {
     "employer": {},
@@ -797,25 +797,9 @@ async def _save_and_preview_post(update: Update, context: ContextTypes.DEFAULT_T
 
     keyboard = get_contact_keyboard(post_text=info)
 
-    # Send preview
-    if msg.photo:
-        if _needs_split_caption(raw_length):
-            await update.message.reply_photo(photo=msg.photo[-1].file_id)
-            await update.message.reply_text(
-                caption_html or "", parse_mode="HTML", reply_markup=keyboard
-            )
-        else:
-            await update.message.reply_photo(
-                photo=msg.photo[-1].file_id,
-                caption=caption_html,
-                parse_mode="HTML" if caption_html else None,
-                reply_markup=keyboard,
-            )
-    elif msg.text:
-        await update.message.reply_text(
-            text_html, parse_mode="HTML", reply_markup=keyboard
-        )
-    else:
+    # Send preview: Prioritize copy_message to perfectly preserve Telegram Premium custom/animated emojis!
+    preview_copied = False
+    if not (msg.photo and _needs_split_caption(raw_length)):
         try:
             await context.bot.copy_message(
                 chat_id=msg.chat_id,
@@ -823,24 +807,46 @@ async def _save_and_preview_post(update: Update, context: ContextTypes.DEFAULT_T
                 message_id=msg.message_id,
                 reply_markup=keyboard,
             )
-        except Exception:
-            if msg.video:
-                await update.message.reply_video(
-                    video=msg.video.file_id,
+            preview_copied = True
+        except Exception as copy_err:
+            logger.warning("Preview copy_message failed (%s), falling back to standard send.", copy_err)
+            preview_copied = False
+
+    if not preview_copied:
+        if msg.photo:
+            if _needs_split_caption(raw_length):
+                await update.message.reply_photo(photo=msg.photo[-1].file_id)
+                await update.message.reply_text(
+                    caption_html or "", parse_mode="HTML", reply_markup=keyboard
+                )
+            else:
+                await update.message.reply_photo(
+                    photo=msg.photo[-1].file_id,
                     caption=caption_html,
                     parse_mode="HTML" if caption_html else None,
                     reply_markup=keyboard,
                 )
-            elif msg.document:
-                await update.message.reply_document(
-                    document=msg.document.file_id,
-                    caption=caption_html,
-                    parse_mode="HTML" if caption_html else None,
-                    reply_markup=keyboard,
-                )
-            elif msg.sticker:
-                await update.message.reply_sticker(sticker=msg.sticker.file_id)
-                await update.message.reply_text("​", reply_markup=keyboard)
+        elif msg.text:
+            await update.message.reply_text(
+                text_html, parse_mode="HTML", reply_markup=keyboard
+            )
+        elif msg.video:
+            await update.message.reply_video(
+                video=msg.video.file_id,
+                caption=caption_html,
+                parse_mode="HTML" if caption_html else None,
+                reply_markup=keyboard,
+            )
+        elif msg.document:
+            await update.message.reply_document(
+                document=msg.document.file_id,
+                caption=caption_html,
+                parse_mode="HTML" if caption_html else None,
+                reply_markup=keyboard,
+            )
+        elif msg.sticker:
+            await update.message.reply_sticker(sticker=msg.sticker.file_id)
+            await update.message.reply_text("​", reply_markup=keyboard)
 
 
 async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -1267,7 +1273,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             kb = [
                 [
                     InlineKeyboardButton(
-                        "🚀 ចូលទៅកាន់ Bot @careercentercvbot",
+                        "🚀 ចូលទៅកាន់ Bot @USEACCASTbot",
                         url=STATIC_BOT_BUTTON_URL,
                         api_kwargs={"style": "primary"},
                     )
