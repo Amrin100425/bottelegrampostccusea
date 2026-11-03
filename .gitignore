@@ -1,0 +1,13 @@
+# Environment variables (SECRETS - NEVER COMMIT)
+.env
+.env.local
+.env.*.local
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary files
+*.tmp
+*.log

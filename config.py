@@ -2,7 +2,7 @@
 # (config.py is where the bot actually reads its settings from.)
 
 # Token from @BotFather, e.g. "123456789:AAExxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-# BOT_TOKEN = "8684591169:AAFaLx0qR5b3T7ZaCOk04yvUo8Bp5l5nQVE"
+# BOT_TOKEN = "your_bot_token_here"
 
 # Your numeric Telegram user id (the only person allowed to approve/reject).
 # Find it by messaging @userinfobot.
