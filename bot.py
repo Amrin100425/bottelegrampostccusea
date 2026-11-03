@@ -51,14 +51,14 @@ from tracker import (
 # ការកំណត់រចនាសម្ព័ន្ធ (CONFIG)
 # ------------------------------------------------------------------
 BOT_TOKEN = os.getenv("BOT_TOKEN")
-raw_channel = os.getenv("CHANNEL_ID")
+raw_channel = (os.getenv("CHANNEL_ID") or "-1001535612806").strip()
 if raw_channel:
     try:
         CHANNEL_ID = int(raw_channel)
     except ValueError:
         CHANNEL_ID = raw_channel
 else:
-    CHANNEL_ID = None
+    CHANNEL_ID = -1001535612806
 
 try:
     admin_env = os.getenv("ADMIN_IDS") or os.getenv("ADMIN_ID") or "[1147056937, 468517256, 1287745757, 8824663759]"
