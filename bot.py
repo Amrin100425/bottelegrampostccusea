@@ -444,11 +444,20 @@ def get_contact_keyboard(
         else:
             final_b_url = b_url
 
+        dynamic_kwargs = {"style": b_style}
+        apply_emoji_id = (
+            b.get("icon_custom_emoji_id")
+            or os.getenv("ADMIN_APPLY_NOW")
+            or os.getenv("APPLY_NOW_EMOJI_ID")
+        )
+        if enable_custom_emoji and apply_emoji_id:
+            dynamic_kwargs["icon_custom_emoji_id"] = str(apply_emoji_id).strip()
+
         dynamic_btns.append(
             InlineKeyboardButton(
                 b_label,
                 url=final_b_url,
-                api_kwargs={"style": b_style},
+                api_kwargs=dynamic_kwargs,
             )
         )
 
@@ -457,6 +466,7 @@ def get_contact_keyboard(
     admin_kwargs = {"style": admin_data.get("btn_style") or "success"}
     admin_emoji_id = (
         admin_data.get("icon_custom_emoji_id")
+        or os.getenv("ADMIN_CONTACT")
         or os.getenv("ADMIN_CUSTOM_EMOJI_ID")
         or os.getenv("ADMIN_ICON_EMOJI_ID")
         or os.getenv("CUSTOM_EMOJI_ID")
@@ -492,11 +502,20 @@ def get_contact_keyboard(
             kb_rows.append(rem[i : i + 2])
 
     # Bottom Row: Static bot redirect button directly to career tips bot (BLUE)
+    bot_kwargs = {"style": "primary"}
+    cv_emoji_id = (
+        os.getenv("ADMIN_CV")
+        or os.getenv("ADMIN_CV_EMOJI_ID")
+        or os.getenv("CV_EMOJI_ID")
+    )
+    if enable_custom_emoji and cv_emoji_id:
+        bot_kwargs["icon_custom_emoji_id"] = str(cv_emoji_id).strip()
+
     kb_rows.append([
         InlineKeyboardButton(
             STATIC_BOT_BUTTON_LABEL,
             url=final_bot_url,
-            api_kwargs={"style": "primary"},
+            api_kwargs=bot_kwargs,
         )
     ])
 
@@ -1866,14 +1885,16 @@ async def get_emoji_id_command(update: Update, context: ContextTypes.DEFAULT_TYP
         await update.message.reply_text(
             f"🎉 <b>រកឃើញ Custom Animated Emoji ID:</b>\n\n{ids_text}\n\n"
             f"💡 <b>របៀបប្រើប្រាស់ក្នុង <code>.env</code>:</b>\n"
-            f"<code>ADMIN_CUSTOM_EMOJI_ID={found_ids[0]}</code>",
+            f"• Contact Admin: <code>ADMIN_CONTACT={found_ids[0]}</code>\n"
+            f"• Apply Now: <code>ADMIN_APPLY_NOW={found_ids[0]}</code>\n"
+            f"• CV & Tips: <code>ADMIN_CV={found_ids[0]}</code>",
             parse_mode="HTML",
         )
     else:
         await update.message.reply_text(
             "ℹ️ <b>របៀបស្វែងរក Animated Emoji ID:</b>\n\n"
             "1. ផ្ញើ Animated Emoji ពី Telegram Premium របស់អ្នកមកកាន់ Bot នេះ (ឬ Reply លើសារនោះជាមួយ <code>/getemoji</code>)\n"
-            "2. Bot នឹងបង្ហាញលេខ ID សម្រាប់អ្នកយកទៅដាក់ក្នុង <code>.env</code> (ADMIN_CUSTOM_EMOJI_ID=...) ភ្លាមៗ!",
+            "2. Bot នឹងបង្ហាញលេខ ID សម្រាប់អ្នកយកទៅដាក់ក្នុង <code>.env</code> (ADMIN_CONTACT=...) ភ្លាមៗ!",
             parse_mode="HTML",
         )
 
