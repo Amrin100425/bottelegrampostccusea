@@ -578,7 +578,26 @@ def parse_apply_contacts_input(raw_text: str):
     raw_lower = raw_text.strip().lower()
 
     # Clear options
-    if raw_lower in ("clear", "none", "off", "0", "del", "delete", "remove", "គ្មាន", "លុប", "បិទ", "clear all", "clear contact", "clearcontact"):
+    if raw_lower in (
+        "clear",
+        "none",
+        "off",
+        "0",
+        "del",
+        "delete",
+        "remove",
+        "គ្មាន",
+        "លុប",
+        "បិទ",
+        "clear all",
+        "clear contact",
+        "clear contacts",
+        "clearcontact",
+        "/clearcontact",
+        "/clear",
+        "លុប contact",
+        "លុបទាំងអស់",
+    ):
         return {
             "buttons": [],
             "employer": {},
@@ -698,12 +717,18 @@ def is_contact_setting_text(text: str) -> bool:
             "clear",
             "clear all",
             "clear contact",
+            "clear contacts",
             "clearcontact",
             "clearemail",
             "clear email",
             "clear employer",
+            "/clear",
+            "/clearcontact",
+            "/clearemail",
             "លុប",
             "គ្មាន",
+            "លុប contact",
+            "លុបទាំងអស់",
             "off",
             "none",
             "0",
@@ -824,7 +849,14 @@ async def set_contact_process(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 
 async def cancel_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    context.user_data.clear()
     await update.message.reply_text("❌ បានបោះបង់ការកំណត់ Contact Buttons។")
+    return ConversationHandler.END
+
+
+async def cancel_all_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    context.user_data.clear()
+    await update.message.reply_text("❌ បានបោះបង់ដំណើរការ (Cancelled)។")
     return ConversationHandler.END
 
 
@@ -841,25 +873,38 @@ async def clear_contact_command(update: Update, context: ContextTypes.DEFAULT_TY
 
     if arg in ("email", "mail"):
         apply_contacts["email"] = {}
+        apply_contacts["buttons"] = [
+            b for b in apply_contacts.get("buttons", [])
+            if not (b.get("url") or "").startswith("mailto:")
+        ]
         msg_action = "បានលុប Contact សម្រាប់ប៊ូតុង Email រួចរាល់!"
         msg_sub = "👉 ប៊ូតុង Email នឹងមិនបង្ហាញក្នុង Post ទៀតទេ (លុះត្រាតែកំណត់ម្តងទៀត)។"
     elif arg in ("employer", "telegram", "phone", "tg"):
         apply_contacts["employer"] = {}
+        apply_contacts["buttons"] = [
+            b for b in apply_contacts.get("buttons", [])
+            if (b.get("url") or "").startswith("mailto:")
+        ]
         msg_action = "បានលុប Contact សម្រាប់ប៊ូតុង Apply Now រួចរាល់!"
         msg_sub = "👉 ប៊ូតុង Apply Now នឹងមិនបង្ហាញក្នុង Post ទៀតទេ (លុះត្រាតែកំណត់ម្តងទៀត)។"
     else:
+        apply_contacts["buttons"] = []
         apply_contacts["employer"] = {}
         apply_contacts["email"] = {}
-        msg_action = "បានលុប Contact សម្រាប់ប៊ូតុង Apply Now និង Email រួចរាល់!"
-        msg_sub = "👉 ប៊ូតុងទាំងពីរនឹងមិនបង្ហាញក្នុង Post ទៀតទេ (លុះត្រាតែកំណត់ម្តងទៀត)។"
+        msg_action = "បានលុប Contact ទាំងអស់ (Dynamic Buttons) រួចរាល់!"
+        msg_sub = "👉 ប៊ូតុង Dynamic ទាំងអស់នឹងមិនបង្ហាញក្នុង Post ទៀតទេ (លុះត្រាតែកំណត់ម្តងទៀត)។"
 
     save_contact_data(apply_contacts, fixed_buttons=data.get("fixed_buttons", DEFAULT_FIXED_BUTTONS))
 
     keyboard = get_contact_keyboard()
-    await update.message.reply_text(
-        f"✅ {msg_action}\n{msg_sub}\n\nទម្រង់ប៊ូតុងបច្ចុប្បន្ន៖",
-        reply_markup=keyboard,
-    )
+    try:
+        await update.message.reply_text(
+            f"✅ {msg_action}\n{msg_sub}\n\nទម្រង់ប៊ូតុងបច្ចុប្បន្ន៖",
+            reply_markup=keyboard,
+        )
+    except Exception as err:
+        logger.error("clear_contact_command reply error: %s", err)
+        await update.message.reply_text(f"✅ {msg_action}\n{msg_sub}")
 
 
 async def clear_email_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -871,15 +916,23 @@ async def clear_email_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     data = load_contact_data()
     apply_contacts = data.get("apply_contacts") or {}
     apply_contacts["email"] = {}
+    apply_contacts["buttons"] = [
+        b for b in apply_contacts.get("buttons", [])
+        if not (b.get("url") or "").startswith("mailto:")
+    ]
     save_contact_data(apply_contacts, fixed_buttons=data.get("fixed_buttons", DEFAULT_FIXED_BUTTONS))
 
     keyboard = get_contact_keyboard()
-    await update.message.reply_text(
-        "✅ បានលុប Contact សម្រាប់ប៊ូតុង Email រួចរាល់!\n"
-        "👉 ប៊ូតុង Email នឹងមិនបង្ហាញក្នុង Post ទៀតទេ (លុះត្រាតែកំណត់ម្តងទៀតតាមរយៈ /setemail ឬ /setcontact)។\n\n"
-        "ទម្រង់ប៊ូតុងបច្ចុប្បន្ន៖",
-        reply_markup=keyboard,
-    )
+    try:
+        await update.message.reply_text(
+            "✅ បានលុប Contact សម្រាប់ប៊ូតុង Email រួចរាល់!\n"
+            "👉 ប៊ូតុង Email នឹងមិនបង្ហាញក្នុង Post ទៀតទេ (លុះត្រាតែកំណត់ម្តងទៀតតាមរយៈ /setemail ឬ /setcontact)។\n\n"
+            "ទម្រង់ប៊ូតុងបច្ចុប្បន្ន៖",
+            reply_markup=keyboard,
+        )
+    except Exception as err:
+        logger.error("clear_email_command error: %s", err)
+        await update.message.reply_text("✅ បានលុប Contact សម្រាប់ប៊ូតុង Email រួចរាល់!")
 
 
 async def set_email_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -1327,6 +1380,12 @@ async def handle_standalone_message(update: Update, context: ContextTypes.DEFAUL
         return
 
     msg = update.message
+
+    # Check if this plain text message is intended to cancel
+    if msg.text and not msg.photo and msg.text.strip().lower() in ("cancel", "/cancel", "cancel contact", "/cancelcontact", "បោះបង់"):
+        context.user_data.clear()
+        await update.message.reply_text("❌ បានបោះបង់ដំណើរការ (Cancelled)។")
+        return
 
     # Check if this plain text message is intended to set or clear contact buttons
     if msg.text and not msg.photo and is_contact_setting_text(msg.text):
@@ -1975,6 +2034,7 @@ def main() -> None:
     )
 
     app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("cancel", cancel_all_command))
     app.add_handler(CommandHandler("showcontact", show_contact))
     app.add_handler(CommandHandler("clearcontact", clear_contact_command))
     app.add_handler(CommandHandler("setemail", set_email_command))
