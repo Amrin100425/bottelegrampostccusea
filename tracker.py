@@ -21,8 +21,108 @@ import tornado.web
 
 logger = logging.getLogger(__name__)
 
-CLICK_STORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "clicks.json")
+DATA_DIR = os.getenv("DATA_DIR", "").strip()
+_DEFAULT_CLICK_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "clicks.json")
+if DATA_DIR and os.path.exists(DATA_DIR):
+    CLICK_STORE_FILE = os.path.join(DATA_DIR, "clicks.json")
+    if not os.path.exists(CLICK_STORE_FILE) and os.path.exists(_DEFAULT_CLICK_FILE):
+        try:
+            import shutil
+            shutil.copy2(_DEFAULT_CLICK_FILE, CLICK_STORE_FILE)
+            logger.info("Initialized persistent CLICK_STORE_FILE at %s", CLICK_STORE_FILE)
+        except Exception as copy_e:
+            logger.warning("Failed to initialize CLICK_STORE_FILE in DATA_DIR: %s", copy_e)
+else:
+    CLICK_STORE_FILE = _DEFAULT_CLICK_FILE
+
 _data_lock = threading.Lock()
+
+
+def merge_click_data(base: dict, incoming: dict) -> dict:
+    """Merge incoming click data into base without losing any higher click counts or unique users."""
+    if not isinstance(base, dict):
+        base = _get_default_data()
+    if not isinstance(incoming, dict):
+        return base
+
+    # 1. Merge links
+    base_links = base.setdefault("links", {})
+    incoming_links = incoming.get("links", {})
+    for token, info in incoming_links.items():
+        if token not in base_links or (info.get("updated_at", "") > base_links[token].get("updated_at", "")):
+            base_links[token] = info
+
+    # 2. Merge months
+    base_months = base.setdefault("months", {})
+    incoming_months = incoming.get("months", {})
+    for m_key, in_m in incoming_months.items():
+        if m_key not in base_months:
+            base_months[m_key] = in_m
+            continue
+
+        bm = base_months[m_key]
+        # Merge unique users
+        bm_users = set(bm.get("unique_users", []))
+        bm_users.update(in_m.get("unique_users", []))
+        bm["unique_users"] = list(bm_users)
+
+        # Merge by_type
+        b_type = bm.setdefault("by_type", {})
+        for t_k, in_t in in_m.get("by_type", {}).items():
+            if t_k not in b_type:
+                b_type[t_k] = in_t
+            else:
+                b_t_users = set(b_type[t_k].get("users", []))
+                b_t_users.update(in_t.get("users", []))
+                b_type[t_k]["users"] = list(b_t_users)
+                b_type[t_k]["clicks"] = max(b_type[t_k].get("clicks", 0), in_t.get("clicks", 0))
+                if in_t.get("label"):
+                    b_type[t_k]["label"] = in_t["label"]
+
+        # Merge by_link
+        b_link = bm.setdefault("by_link", {})
+        for l_k, in_l in in_m.get("by_link", {}).items():
+            if l_k not in b_link:
+                b_link[l_k] = in_l
+            else:
+                b_l_users = set(b_link[l_k].get("users", []))
+                b_l_users.update(in_l.get("users", []))
+                b_link[l_k]["users"] = list(b_l_users)
+                b_link[l_k]["clicks"] = max(b_link[l_k].get("clicks", 0), in_l.get("clicks", 0))
+                for attr in ("target_url", "label", "post_url", "post_id"):
+                    if in_l.get(attr):
+                        b_link[l_k][attr] = in_l[attr]
+
+        # Merge by_post
+        b_post = bm.setdefault("by_post", {})
+        for p_k, in_p in in_m.get("by_post", {}).items():
+            if p_k not in b_post:
+                b_post[p_k] = in_p
+            else:
+                b_p_users = set(b_post[p_k].get("users", []))
+                b_p_users.update(in_p.get("users", []))
+                b_post[p_k]["users"] = list(b_p_users)
+                b_post[p_k]["clicks"] = max(b_post[p_k].get("clicks", 0), in_p.get("clicks", 0))
+
+        # Re-evaluate total clicks for month
+        link_clicks_sum = sum(v.get("clicks", 0) for v in b_link.values())
+        bm["total_clicks"] = max(bm.get("total_clicks", 0), in_m.get("total_clicks", 0), link_clicks_sum)
+
+    # 3. Merge recent_clicks (keep deduplicated, newest first, max 500)
+    seen_clicks = set()
+    merged_recent = []
+    combined_recent = base.get("recent_clicks", []) + incoming.get("recent_clicks", [])
+    combined_recent.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    for c in combined_recent:
+        key = (c.get("timestamp"), c.get("token"), c.get("user_hash"))
+        if key not in seen_clicks:
+            seen_clicks.add(key)
+            merged_recent.append(c)
+        if len(merged_recent) >= 500:
+            break
+    base["recent_clicks"] = merged_recent
+
+    return base
 
 # Mapping for past posts (3866-3882) where each post has its own employer contact
 PAST_POST_CONTACTS = {
@@ -52,6 +152,7 @@ PAST_POST_CONTACTS = {
     "3887": {"url": "https://t.me/+85586703338", "label": "Apply Now - 086703338"},
     "3888": {"url": "https://t.me/+85577967755", "label": "Apply Now - 077967755"},
     "3889": {"url": "https://t.me/+85516499099", "label": "Apply Now - 016499099"},
+    "3890": {"url": "https://t.me/+85595465668", "label": "Apply Now - 095465668"},
 }
 
 
@@ -194,44 +295,17 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
                 else:
                     label = "Apply Now"
                     target_url = "https://t.me/USEACCAD"
-                    try:
-                        cfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
-                        if os.path.exists(cfile):
-                            with open(cfile, "r", encoding="utf-8") as f:
-                                cdata = json.load(f)
-                                emp = cdata.get("apply_contacts", {}).get("employer", {})
-                                if emp.get("url"):
-                                    target_url = emp.get("url")
-                                if emp.get("label"):
-                                    label = emp.get("label")
-                    except Exception:
-                        pass
-                    if target_url == "https://t.me/USEACCAD" and post_id:
+                    if post_id:
                         import urllib.parse
                         admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
                         target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
             elif link_type == "email" or link_type.startswith("email"):
                 label = "Apply Now"
                 target_url = "https://t.me/USEACCAD"
-                try:
-                    cfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
-                    if os.path.exists(cfile):
-                        with open(cfile, "r", encoding="utf-8") as f:
-                            cdata = json.load(f)
-                            for b in cdata.get("apply_contacts", {}).get("buttons", []):
-                                if (b.get("url") or "").startswith("mailto:"):
-                                    target_url = b.get("url")
-                                    label = b.get("label", label)
-                                    break
-                            if target_url == "https://t.me/USEACCAD":
-                                em_data = cdata.get("apply_contacts", {}).get("email", {})
-                                if em_data.get("url"):
-                                    target_url = em_data.get("url")
-                                if em_data.get("label"):
-                                    label = em_data.get("label")
-                except Exception:
-                    pass
-                if target_url == "https://t.me/USEACCAD" and post_id:
+                if post_id:
+                    import urllib.parse
+                    admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
+                    target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
                     import urllib.parse
                     admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
                     target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
@@ -1115,3 +1189,15 @@ class WebCsvExportHandler(tornado.web.RequestHandler):
         self.set_header("Content-Type", "text/csv; charset=utf-8")
         self.set_header("Content-Disposition", f'attachment; filename="{filename}"')
         self.write(csv_bytes)
+
+
+class WebClicksJsonHandler(tornado.web.RequestHandler):
+    """
+    Handle GET /report/clicks.json: Direct clicks.json download to backup live production data.
+    """
+
+    def get(self):
+        data = load_click_data()
+        self.set_header("Content-Type", "application/json; charset=utf-8")
+        self.set_header("Content-Disposition", 'attachment; filename="clicks.json"')
+        self.write(json.dumps(data, ensure_ascii=False, indent=2))

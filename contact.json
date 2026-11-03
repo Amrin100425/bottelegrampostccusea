@@ -1,23 +1,12 @@
 {
   "apply_contacts": {
     "buttons": [],
-    "employer": {
-      "label": "Apply Now",
-      "url": "https://t.me/+85577893954",
-      "btn_style": "danger",
-      "icon_custom_emoji_id": "5472239203590888751"
-    },
-    "email": {
-      "label": "Apply Now",
-      "url": "mailto:sorcheatamrin954@gmail.com",
-      "btn_style": "danger",
-      "icon_custom_emoji_id": "5472239203590888751"
-    },
+    "employer": {},
+    "email": {},
     "admin": {
-      "label": "Contact Admin",
+      "label": "📲 Contact Admin",
       "url": "https://t.me/USEACCAD",
-      "btn_style": "success",
-      "icon_custom_emoji_id": "5850292279503228917"
+      "btn_style": "success"
     }
   },
   "fixed_buttons": [

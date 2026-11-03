@@ -1,1606 +1,1624 @@
-﻿{
-    "links":  {
-                  "p3866_admin":  {
-                                      "token":  "p3866_admin",
-                                      "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3866",
-                                      "label":  "📞 Contact Admin",
-                                      "link_type":  "admin",
-                                      "post_id":  "3866",
-                                      "post_url":  "https://t.me/useacareercenter/3866",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3866_bot":  {
-                                    "token":  "p3866_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3866",
-                                    "post_url":  "https://t.me/useacareercenter/3866",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3866_employer":  {
-                                         "token":  "p3866_employer",
-                                         "target_url":  "https://t.me/USEACCAD",
-                                         "label":  "Apply Now",
-                                         "link_type":  "employer",
-                                         "post_id":  "3866",
-                                         "post_url":  "https://t.me/useacareercenter/3866",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3867_admin":  {
-                                      "token":  "p3867_admin",
-                                      "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3867",
-                                      "label":  "More information",
-                                      "link_type":  "employer",
-                                      "post_id":  "3867",
-                                      "post_url":  "https://t.me/useacareercenter/3867",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3867_employer":  {
-                                         "token":  "p3867_employer",
-                                         "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3867",
-                                         "label":  "More information",
-                                         "link_type":  "employer",
-                                         "post_id":  "3867",
-                                         "post_url":  "https://t.me/useacareercenter/3867",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3867_bot":  {
-                                    "token":  "p3867_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3867",
-                                    "post_url":  "https://t.me/useacareercenter/3867",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3868_admin":  {
-                                      "token":  "p3868_admin",
-                                      "target_url":  "https://t.me/USEACCAD",
-                                      "label":  "Apply Now",
-                                      "link_type":  "employer",
-                                      "post_id":  "3868",
-                                      "post_url":  "https://t.me/useacareercenter/3868",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3868_employer":  {
-                                         "token":  "p3868_employer",
-                                         "target_url":  "https://t.me/USEACCAD",
-                                         "label":  "Apply Now",
-                                         "link_type":  "employer",
-                                         "post_id":  "3868",
-                                         "post_url":  "https://t.me/useacareercenter/3868",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3868_bot":  {
-                                    "token":  "p3868_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3868",
-                                    "post_url":  "https://t.me/useacareercenter/3868",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3869_admin":  {
-                                      "token":  "p3869_admin",
-                                      "target_url":  "https://t.me/USEACCAD",
-                                      "label":  "Apply Now",
-                                      "link_type":  "employer",
-                                      "post_id":  "3869",
-                                      "post_url":  "https://t.me/useacareercenter/3869",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3869_employer":  {
-                                         "token":  "p3869_employer",
-                                         "target_url":  "https://t.me/USEACCAD",
-                                         "label":  "Apply Now",
-                                         "link_type":  "employer",
-                                         "post_id":  "3869",
-                                         "post_url":  "https://t.me/useacareercenter/3869",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3869_bot":  {
-                                    "token":  "p3869_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3869",
-                                    "post_url":  "https://t.me/useacareercenter/3869",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3871_admin":  {
-                                      "token":  "p3871_admin",
-                                      "target_url":  "https://t.me/belikekhmersiemreap",
-                                      "label":  "Apply Now - Be Like Khmer",
-                                      "link_type":  "employer",
-                                      "post_id":  "3871",
-                                      "post_url":  "https://t.me/useacareercenter/3871",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3871_employer":  {
-                                         "token":  "p3871_employer",
-                                         "target_url":  "https://t.me/belikekhmersiemreap",
-                                         "label":  "Apply Now - Be Like Khmer",
-                                         "link_type":  "employer",
-                                         "post_id":  "3871",
-                                         "post_url":  "https://t.me/useacareercenter/3871",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3871_bot":  {
-                                    "token":  "p3871_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3871",
-                                    "post_url":  "https://t.me/useacareercenter/3871",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3872_admin":  {
-                                      "token":  "p3872_admin",
-                                      "target_url":  "https://t.me/+85515344663",
-                                      "label":  "Apply Now - 015344663",
-                                      "link_type":  "employer",
-                                      "post_id":  "3872",
-                                      "post_url":  "https://t.me/useacareercenter/3872",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3872_employer":  {
-                                         "token":  "p3872_employer",
-                                         "target_url":  "https://t.me/+85515344663",
-                                         "label":  "Apply Now - 015344663",
-                                         "link_type":  "employer",
-                                         "post_id":  "3872",
-                                         "post_url":  "https://t.me/useacareercenter/3872",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3872_bot":  {
-                                    "token":  "p3872_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3872",
-                                    "post_url":  "https://t.me/useacareercenter/3872",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3873_admin":  {
-                                      "token":  "p3873_admin",
-                                      "target_url":  "https://t.me/RAIS_SCHOOL",
-                                      "label":  "Apply Now - @RAIS_SCHOOL",
-                                      "link_type":  "employer",
-                                      "post_id":  "3873",
-                                      "post_url":  "https://t.me/useacareercenter/3873",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3873_employer":  {
-                                         "token":  "p3873_employer",
-                                         "target_url":  "https://t.me/RAIS_SCHOOL",
-                                         "label":  "Apply Now - @RAIS_SCHOOL",
-                                         "link_type":  "employer",
-                                         "post_id":  "3873",
-                                         "post_url":  "https://t.me/useacareercenter/3873",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3873_bot":  {
-                                    "token":  "p3873_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3873",
-                                    "post_url":  "https://t.me/useacareercenter/3873",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3874_admin":  {
-                                      "token":  "p3874_admin",
-                                      "target_url":  "https://t.me/+85570588000",
-                                      "label":  "Apply Now - 070588000",
-                                      "link_type":  "employer",
-                                      "post_id":  "3874",
-                                      "post_url":  "https://t.me/useacareercenter/3874",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3874_employer":  {
-                                         "token":  "p3874_employer",
-                                         "target_url":  "https://t.me/+85570588000",
-                                         "label":  "Apply Now - 070588000",
-                                         "link_type":  "employer",
-                                         "post_id":  "3874",
-                                         "post_url":  "https://t.me/useacareercenter/3874",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3874_bot":  {
-                                    "token":  "p3874_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3874",
-                                    "post_url":  "https://t.me/useacareercenter/3874",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3875_admin":  {
-                                      "token":  "p3875_admin",
-                                      "target_url":  "https://t.me/cjftec",
-                                      "label":  "Apply Now - CJFTEC",
-                                      "link_type":  "employer",
-                                      "post_id":  "3875",
-                                      "post_url":  "https://t.me/useacareercenter/3875",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3875_employer":  {
-                                         "token":  "p3875_employer",
-                                         "target_url":  "https://t.me/cjftec",
-                                         "label":  "Apply Now - CJFTEC",
-                                         "link_type":  "employer",
-                                         "post_id":  "3875",
-                                         "post_url":  "https://t.me/useacareercenter/3875",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3875_bot":  {
-                                    "token":  "p3875_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3875",
-                                    "post_url":  "https://t.me/useacareercenter/3875",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3876_admin":  {
-                                      "token":  "p3876_admin",
-                                      "target_url":  "https://t.me/+85581787985",
-                                      "label":  "Apply Now - 081787985",
-                                      "link_type":  "employer",
-                                      "post_id":  "3876",
-                                      "post_url":  "https://t.me/useacareercenter/3876",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3876_employer":  {
-                                         "token":  "p3876_employer",
-                                         "target_url":  "https://t.me/+85581787985",
-                                         "label":  "Apply Now - 081787985",
-                                         "link_type":  "employer",
-                                         "post_id":  "3876",
-                                         "post_url":  "https://t.me/useacareercenter/3876",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3876_bot":  {
-                                    "token":  "p3876_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3876",
-                                    "post_url":  "https://t.me/useacareercenter/3876",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3877_admin":  {
-                                      "token":  "p3877_admin",
-                                      "target_url":  "https://t.me/cjftec",
-                                      "label":  "Apply Now - CJFTEC",
-                                      "link_type":  "employer",
-                                      "post_id":  "3877",
-                                      "post_url":  "https://t.me/useacareercenter/3877",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3877_employer":  {
-                                         "token":  "p3877_employer",
-                                         "target_url":  "https://t.me/cjftec",
-                                         "label":  "Apply Now - CJFTEC",
-                                         "link_type":  "employer",
-                                         "post_id":  "3877",
-                                         "post_url":  "https://t.me/useacareercenter/3877",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3877_bot":  {
-                                    "token":  "p3877_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3877",
-                                    "post_url":  "https://t.me/useacareercenter/3877",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3878_admin":  {
-                                      "token":  "p3878_admin",
-                                      "target_url":  "https://t.me/+85516757174",
-                                      "label":  "Apply Now - 016757174",
-                                      "link_type":  "employer",
-                                      "post_id":  "3878",
-                                      "post_url":  "https://t.me/useacareercenter/3878",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3878_employer":  {
-                                         "token":  "p3878_employer",
-                                         "target_url":  "https://t.me/+85516757174",
-                                         "label":  "Apply Now - 016757174",
-                                         "link_type":  "employer",
-                                         "post_id":  "3878",
-                                         "post_url":  "https://t.me/useacareercenter/3878",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3878_bot":  {
-                                    "token":  "p3878_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3878",
-                                    "post_url":  "https://t.me/useacareercenter/3878",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3879_admin":  {
-                                      "token":  "p3879_admin",
-                                      "target_url":  "https://t.me/USEACCAD",
-                                      "label":  "Apply Now",
-                                      "link_type":  "employer",
-                                      "post_id":  "3879",
-                                      "post_url":  "https://t.me/useacareercenter/3879",
-                                      "updated_at":  "2026-11-02T18:43:10.182610"
-                                  },
-                  "p3879_employer":  {
-                                         "token":  "p3879_employer",
-                                         "target_url":  "https://t.me/USEACCAD",
-                                         "label":  "Apply Now",
-                                         "link_type":  "employer",
-                                         "post_id":  "3879",
-                                         "post_url":  "https://t.me/useacareercenter/3879",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3879_bot":  {
-                                    "token":  "p3879_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3879",
-                                    "post_url":  "https://t.me/useacareercenter/3879",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3880_admin":  {
-                                      "token":  "p3880_admin",
-                                      "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3880",
-                                      "label":  "📞 Contact Admin",
-                                      "link_type":  "admin",
-                                      "post_id":  "3880",
-                                      "post_url":  "https://t.me/useacareercenter/3880",
-                                      "updated_at":  "2026-11-03T10:26:56.917542"
-                                  },
-                  "p3880_employer":  {
-                                         "token":  "p3880_employer",
-                                         "target_url":  "https://t.me/+85578555671",
-                                         "label":  "Apply Now - 078555671",
-                                         "link_type":  "employer",
-                                         "post_id":  "3880",
-                                         "post_url":  "https://t.me/useacareercenter/3880",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3880_bot":  {
-                                    "token":  "p3880_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3880",
-                                    "post_url":  "https://t.me/useacareercenter/3880",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3881_admin":  {
-                                      "token":  "p3881_admin",
-                                      "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3881",
-                                      "label":  "📞 Contact Admin",
-                                      "link_type":  "admin",
-                                      "post_id":  "3881",
-                                      "post_url":  "https://t.me/useacareercenter/3881",
-                                      "updated_at":  "2026-11-03T10:26:56.917542"
-                                  },
-                  "p3881_employer":  {
-                                         "token":  "p3881_employer",
-                                         "target_url":  "https://t.me/+85595473808",
-                                         "label":  "Apple Now - 095473808",
-                                         "link_type":  "employer",
-                                         "post_id":  "3881",
-                                         "post_url":  "https://t.me/useacareercenter/3881",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3881_bot":  {
-                                    "token":  "p3881_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3881",
-                                    "post_url":  "https://t.me/useacareercenter/3881",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3882_admin":  {
-                                      "token":  "p3882_admin",
-                                      "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3882",
-                                      "label":  "📞 Contact Admin",
-                                      "link_type":  "admin",
-                                      "post_id":  "3882",
-                                      "post_url":  "https://t.me/useacareercenter/3882",
-                                      "updated_at":  "2026-11-03T10:26:56.917542"
-                                  },
-                  "p3882_employer":  {
-                                         "token":  "p3882_employer",
-                                         "target_url":  "https://t.me/+855962080434",
-                                         "label":  "Apply Now - 0962080434",
-                                         "link_type":  "employer",
-                                         "post_id":  "3882",
-                                         "post_url":  "https://t.me/useacareercenter/3882",
-                                         "updated_at":  "2026-11-02T18:43:10.182610"
-                                     },
-                  "p3882_bot":  {
-                                    "token":  "p3882_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3882",
-                                    "post_url":  "https://t.me/useacareercenter/3882",
-                                    "updated_at":  "2026-11-02T18:43:10.182610"
-                                },
-                  "p3883_admin":  {
-                                      "token":  "p3883_admin",
-                                      "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3883",
-                                      "label":  "📞 Contact Admin",
-                                      "link_type":  "admin",
-                                      "post_id":  "3883",
-                                      "post_url":  "https://t.me/useacareercenter/3883",
-                                      "updated_at":  "2026-11-03T10:26:56.917542"
-                                  },
-                  "p3883_employer":  {
-                                         "token":  "p3883_employer",
-                                         "target_url":  "https://t.me/recruitment_SSR",
-                                         "label":  "Apply Now - Sokha Hotels",
-                                         "link_type":  "employer",
-                                         "post_id":  "3883",
-                                         "post_url":  "https://t.me/useacareercenter/3883",
-                                         "updated_at":  "2026-11-03T10:26:56.917542"
-                                     },
-                  "p3883_bot":  {
-                                    "token":  "p3883_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3883",
-                                    "post_url":  "https://t.me/useacareercenter/3883",
-                                    "updated_at":  "2026-11-03T10:26:56.917542"
-                                },
-                  "p3884_admin":  {
-                                      "token":  "p3884_admin",
-                                      "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3884",
-                                      "label":  "📞 Contact Admin",
-                                      "link_type":  "admin",
-                                      "post_id":  "3884",
-                                      "post_url":  "https://t.me/useacareercenter/3884",
-                                      "updated_at":  "2026-11-03T10:26:56.917542"
-                                  },
-                  "p3884_employer":  {
-                                         "token":  "p3884_employer",
-                                         "target_url":  "https://t.me/+855975406969",
-                                         "label":  "Apply Now - 0975406969",
-                                         "link_type":  "employer",
-                                         "post_id":  "3884",
-                                         "post_url":  "https://t.me/useacareercenter/3884",
-                                         "updated_at":  "2026-11-03T10:26:56.917542"
-                                     },
-                  "p3884_bot":  {
-                                    "token":  "p3884_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3884",
-                                    "post_url":  "https://t.me/useacareercenter/3884",
-                                    "updated_at":  "2026-11-03T10:26:56.917542"
-                                },
-                  "p3885_admin":  {
-                                      "token":  "p3885_admin",
-                                      "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3885",
-                                      "label":  "📞 Contact Admin",
-                                      "link_type":  "admin",
-                                      "post_id":  "3885",
-                                      "post_url":  "https://t.me/useacareercenter/3885",
-                                      "updated_at":  "2026-11-03T10:26:56.917542"
-                                  },
-                  "p3885_employer":  {
-                                         "token":  "p3885_employer",
-                                         "target_url":  "https://t.me/+85581808237",
-                                         "label":  "Apply Now - 081808237",
-                                         "link_type":  "employer",
-                                         "post_id":  "3885",
-                                         "post_url":  "https://t.me/useacareercenter/3885",
-                                         "updated_at":  "2026-11-03T10:26:56.917542"
-                                     },
-                  "p3885_bot":  {
-                                    "token":  "p3885_bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "post_id":  "3885",
-                                    "post_url":  "https://t.me/useacareercenter/3885",
-                                    "updated_at":  "2026-11-03T10:26:56.917542"
-                                },
-                  "p3887_admin":  {
-                                      "post_url":  "https://t.me/useacareercenter/3887",
-                                      "label":  "📲 Contact Admin",
-                                      "link_type":  "admin",
-                                      "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3887",
-                                      "token":  "p3887_admin",
-                                      "post_id":  "3887",
-                                      "updated_at":  "2026-11-03T18:43:00.000000"
-                                  },
-                  "p3889_bot":  {
-                                    "post_url":  "https://t.me/useacareercenter/3889",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "token":  "p3889_bot",
-                                    "post_id":  "3889",
-                                    "updated_at":  "2026-11-03T18:43:00.000000"
-                                },
-                  "p3889_admin":  {
-                                      "post_url":  "https://t.me/useacareercenter/3889",
-                                      "label":  "📲 Contact Admin",
-                                      "link_type":  "admin",
-                                      "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3889",
-                                      "token":  "p3889_admin",
-                                      "post_id":  "3889",
-                                      "updated_at":  "2026-11-03T18:43:00.000000"
-                                  },
-                  "p3888_bot":  {
-                                    "post_url":  "https://t.me/useacareercenter/3888",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "token":  "p3888_bot",
-                                    "post_id":  "3888",
-                                    "updated_at":  "2026-11-03T18:43:00.000000"
-                                },
-                  "p3888_admin":  {
-                                      "post_url":  "https://t.me/useacareercenter/3888",
-                                      "label":  "📲 Contact Admin",
-                                      "link_type":  "admin",
-                                      "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3888",
-                                      "token":  "p3888_admin",
-                                      "post_id":  "3888",
-                                      "updated_at":  "2026-11-03T18:43:00.000000"
-                                  },
-                  "p3889_employer":  {
-                                         "post_url":  "https://t.me/useacareercenter/3889",
-                                         "label":  "Apply Now - 016499099",
-                                         "link_type":  "employer",
-                                         "target_url":  "https://t.me/+85516499099",
-                                         "token":  "p3889_employer",
-                                         "post_id":  "3889",
-                                         "updated_at":  "2026-11-03T18:43:00.000000"
-                                     },
-                  "p3888_employer":  {
-                                         "post_url":  "https://t.me/useacareercenter/3888",
-                                         "label":  "Apply Now - 077967755",
-                                         "link_type":  "employer",
-                                         "target_url":  "https://t.me/+85577967755",
-                                         "token":  "p3888_employer",
-                                         "post_id":  "3888",
-                                         "updated_at":  "2026-11-03T18:43:00.000000"
-                                     },
-                  "p3887_apply1":  {
-                                       "post_url":  "https://t.me/useacareercenter/3887",
-                                       "label":  "Apply Now - 086703338",
-                                       "link_type":  "employer",
-                                       "target_url":  "https://t.me/+85586703338",
-                                       "token":  "p3887_apply1",
-                                       "post_id":  "3887",
-                                       "updated_at":  "2026-11-03T18:43:00.000000"
-                                   },
-                  "p3887_bot":  {
-                                    "post_url":  "https://t.me/useacareercenter/3887",
-                                    "label":  "Career Tips, CV \u0026 Cover Letter",
-                                    "link_type":  "bot",
-                                    "target_url":  "https://t.me/USEACCASTbot",
-                                    "token":  "p3887_bot",
-                                    "post_id":  "3887",
-                                    "updated_at":  "2026-11-03T18:43:00.000000"
-                                },
-                  "p3889_apply1":  {
-                                       "post_url":  "https://t.me/useacareercenter/3889",
-                                       "label":  "Apply Now - 016499099",
-                                       "link_type":  "employer",
-                                       "target_url":  "https://t.me/+85516499099",
-                                       "token":  "p3889_apply1",
-                                       "post_id":  "3889",
-                                       "updated_at":  "2026-11-03T18:43:00.000000"
-                                   },
-                  "p3887_employer":  {
-                                         "post_url":  "https://t.me/useacareercenter/3887",
-                                         "label":  "Apply Now - 086703338",
-                                         "link_type":  "employer",
-                                         "target_url":  "https://t.me/+85586703338",
-                                         "token":  "p3887_employer",
-                                         "post_id":  "3887",
-                                         "updated_at":  "2026-11-03T18:43:00.000000"
-                                     },
-                  "p3888_apply1":  {
-                                       "post_url":  "https://t.me/useacareercenter/3888",
-                                       "label":  "Apply Now - 077967755",
-                                       "link_type":  "employer",
-                                       "target_url":  "https://t.me/+85577967755",
-                                       "token":  "p3888_apply1",
-                                       "post_id":  "3888",
-                                       "updated_at":  "2026-11-03T18:43:00.000000"
-                                   }
-              },
-    "months":  {
-                   "2026-11":  {
-                                   "total_clicks":  39,
-                                   "unique_users":  [
-                                                        "6f749e0b9493",
-                                                        "816207a460cc"
-                                                    ],
-                                   "by_type":  {
-                                                   "admin":  {
-                                                                 "label":  "📞 Contact Admin",
-                                                                 "clicks":  9,
-                                                                 "users":  [
-                                                                               "6f749e0b9493",
-                                                                               "816207a460cc"
-                                                                           ]
-                                                             },
-                                                   "employer":  {
-                                                                    "label":  "Apply Now",
-                                                                    "clicks":  20,
-                                                                    "users":  [
-                                                                                  "6f749e0b9493",
-                                                                                  "816207a460cc"
-                                                                              ]
-                                                                },
-                                                   "bot":  {
-                                                               "label":  "Career Tips, CV \u0026 Cover Letter",
-                                                               "clicks":  8,
-                                                               "users":  [
-                                                                             "6f749e0b9493",
-                                                                             "816207a460cc"
-                                                                         ]
-                                                           },
-                                                   "general":  {
-                                                                   "label":  "Button",
-                                                                   "clicks":  1,
-                                                                   "users":  [
-                                                                                 "816207a460cc"
-                                                                             ]
-                                                               },
-                                                   "email":  {
-                                                                 "label":  "Apply via Email",
-                                                                 "clicks":  1,
-                                                                 "users":  [
-                                                                               "816207a460cc"
-                                                                           ]
-                                                             }
-                                               },
-                                   "by_link":  {
-                                                   "p3866_admin":  {
-                                                                       "token":  "p3866_admin",
-                                                                       "label":  "📞 Contact Admin",
-                                                                       "link_type":  "admin",
-                                                                       "post_id":  "3866",
-                                                                       "post_url":  "https://t.me/useacareercenter/3866",
-                                                                       "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3866",
-                                                                       "clicks":  3,
-                                                                       "users":  [
-                                                                                     "6f749e0b9493",
-                                                                                     "816207a460cc"
-                                                                                 ]
-                                                                   },
-                                                   "p3866_employer":  {
-                                                                          "token":  "p3866_employer",
-                                                                          "label":  "Apply Now",
-                                                                          "link_type":  "employer",
-                                                                          "post_id":  "3866",
-                                                                          "post_url":  "https://t.me/useacareercenter/3866",
-                                                                          "target_url":  "https://t.me/USEACCAD",
-                                                                          "clicks":  3,
-                                                                          "users":  [
-                                                                                        "6f749e0b9493",
-                                                                                        "816207a460cc"
-                                                                                    ]
-                                                                      },
-                                                   "p3866_bot":  {
-                                                                     "token":  "p3866_bot",
-                                                                     "label":  "Career Tips, CV \u0026 Cover Letter",
-                                                                     "link_type":  "bot",
-                                                                     "post_id":  "3866",
-                                                                     "post_url":  "https://t.me/useacareercenter/3866",
-                                                                     "target_url":  "https://t.me/careercentercvbot",
-                                                                     "clicks":  1,
-                                                                     "users":  [
-                                                                                   "6f749e0b9493"
-                                                                               ]
-                                                                 },
-                                                   "p3871_admin":  {
-                                                                       "token":  "p3871_admin",
-                                                                       "label":  "Apply Now - Be Like Khmer",
-                                                                       "link_type":  "employer",
-                                                                       "post_id":  "3871",
-                                                                       "post_url":  "https://t.me/useacareercenter/3871",
-                                                                       "target_url":  "https://t.me/belikekhmersiemreap",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "6f749e0b9493"
-                                                                                 ]
-                                                                   },
-                                                   "p3872_admin":  {
-                                                                       "token":  "p3872_admin",
-                                                                       "label":  "Apply Now - 015344663",
-                                                                       "link_type":  "employer",
-                                                                       "post_id":  "3872",
-                                                                       "post_url":  "https://t.me/useacareercenter/3872",
-                                                                       "target_url":  "https://t.me/+85515344663",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "6f749e0b9493"
-                                                                                 ]
-                                                                   },
-                                                   "p3873_admin":  {
-                                                                       "token":  "p3873_admin",
-                                                                       "label":  "Apply Now - @RAIS_SCHOOL",
-                                                                       "link_type":  "employer",
-                                                                       "post_id":  "3873",
-                                                                       "post_url":  "https://t.me/useacareercenter/3873",
-                                                                       "target_url":  "https://t.me/RAIS_SCHOOL",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "6f749e0b9493"
-                                                                                 ]
-                                                                   },
-                                                   "p3874_admin":  {
-                                                                       "token":  "p3874_admin",
-                                                                       "label":  "Apply Now - 070588000",
-                                                                       "link_type":  "employer",
-                                                                       "post_id":  "3874",
-                                                                       "post_url":  "https://t.me/useacareercenter/3874",
-                                                                       "target_url":  "https://t.me/+85570588000",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "6f749e0b9493"
-                                                                                 ]
-                                                                   },
-                                                   "p3875_admin":  {
-                                                                       "token":  "p3875_admin",
-                                                                       "label":  "Apply Now - CJFTEC",
-                                                                       "link_type":  "employer",
-                                                                       "post_id":  "3875",
-                                                                       "post_url":  "https://t.me/useacareercenter/3875",
-                                                                       "target_url":  "https://t.me/cjftec",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "6f749e0b9493"
-                                                                                 ]
-                                                                   },
-                                                   "p3876_admin":  {
-                                                                       "token":  "p3876_admin",
-                                                                       "label":  "Apply Now - 081787985",
-                                                                       "link_type":  "employer",
-                                                                       "post_id":  "3876",
-                                                                       "post_url":  "https://t.me/useacareercenter/3876",
-                                                                       "target_url":  "https://t.me/+85581787985",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "6f749e0b9493"
-                                                                                 ]
-                                                                   },
-                                                   "p3877_admin":  {
-                                                                       "token":  "p3877_admin",
-                                                                       "label":  "Apply Now - CJFTEC",
-                                                                       "link_type":  "employer",
-                                                                       "post_id":  "3877",
-                                                                       "post_url":  "https://t.me/useacareercenter/3877",
-                                                                       "target_url":  "https://t.me/cjftec",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "6f749e0b9493"
-                                                                                 ]
-                                                                   },
-                                                   "p3878_admin":  {
-                                                                       "token":  "p3878_admin",
-                                                                       "label":  "Apply Now - 016757174",
-                                                                       "link_type":  "employer",
-                                                                       "post_id":  "3878",
-                                                                       "post_url":  "https://t.me/useacareercenter/3878",
-                                                                       "target_url":  "https://t.me/+85516757174",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "6f749e0b9493"
-                                                                                 ]
-                                                                   },
-                                                   "p3880_admin":  {
-                                                                       "token":  "p3880_admin",
-                                                                       "label":  "Apply Now - 078555671",
-                                                                       "link_type":  "employer",
-                                                                       "post_id":  "3880",
-                                                                       "post_url":  "https://t.me/useacareercenter/3880",
-                                                                       "target_url":  "https://t.me/+85578555671",
-                                                                       "clicks":  2,
-                                                                       "users":  [
-                                                                                     "6f749e0b9493",
-                                                                                     "816207a460cc"
-                                                                                 ]
-                                                                   },
-                                                   "p3881_admin":  {
-                                                                       "token":  "p3881_admin",
-                                                                       "label":  "Apple Now - 095473808",
-                                                                       "link_type":  "employer",
-                                                                       "post_id":  "3881",
-                                                                       "post_url":  "https://t.me/useacareercenter/3881",
-                                                                       "target_url":  "https://t.me/+85595473808",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "6f749e0b9493"
-                                                                                 ]
-                                                                   },
-                                                   "p3882_admin":  {
-                                                                       "token":  "p3882_admin",
-                                                                       "label":  "Apply Now - 0962080434",
-                                                                       "link_type":  "employer",
-                                                                       "post_id":  "3882",
-                                                                       "post_url":  "https://t.me/useacareercenter/3882",
-                                                                       "target_url":  "https://t.me/+855962080434",
-                                                                       "clicks":  2,
-                                                                       "users":  [
-                                                                                     "6f749e0b9493",
-                                                                                     "816207a460cc"
-                                                                                 ]
-                                                                   },
-                                                   "p3882_bot":  {
-                                                                     "token":  "p3882_bot",
-                                                                     "label":  "Career Tips, CV \u0026 Cover Letter",
-                                                                     "link_type":  "bot",
-                                                                     "post_id":  "3882",
-                                                                     "post_url":  "https://t.me/useacareercenter/3882",
-                                                                     "target_url":  "https://t.me/careercentercvbot",
-                                                                     "clicks":  2,
-                                                                     "users":  [
-                                                                                   "6f749e0b9493"
-                                                                               ]
-                                                                 },
-                                                   "p9999_bot":  {
-                                                                     "token":  "p9999_bot",
-                                                                     "label":  "Career Tips, CV \u0026 Cover Letter",
-                                                                     "link_type":  "bot",
-                                                                     "post_id":  "9999",
-                                                                     "post_url":  "https://t.me/useacareercenter/9999",
-                                                                     "target_url":  "https://t.me/USEACCASTbot",
-                                                                     "clicks":  1,
-                                                                     "users":  [
-                                                                                   "6f749e0b9493"
-                                                                               ]
-                                                                 },
-                                                   "p3880_employer":  {
-                                                                          "token":  "p3880_employer",
-                                                                          "label":  "Apply Now - 078555671",
-                                                                          "link_type":  "employer",
-                                                                          "post_id":  "3880",
-                                                                          "post_url":  "https://t.me/useacareercenter/3880",
-                                                                          "target_url":  "https://t.me/+85578555671",
-                                                                          "clicks":  1,
-                                                                          "users":  [
-                                                                                        "816207a460cc"
-                                                                                    ]
-                                                                      },
-                                                   "p3880_bot":  {
-                                                                     "token":  "p3880_bot",
-                                                                     "label":  "Career Tips, CV \u0026 Cover Letter",
-                                                                     "link_type":  "bot",
-                                                                     "post_id":  "3880",
-                                                                     "post_url":  "https://t.me/useacareercenter/3880",
-                                                                     "target_url":  "https://t.me/USEACCASTbot",
-                                                                     "clicks":  1,
-                                                                     "users":  [
-                                                                                   "816207a460cc"
-                                                                               ]
-                                                                 },
-                                                   "p3882_employer":  {
-                                                                          "token":  "p3882_employer",
-                                                                          "label":  "Apply Now - 0962080434",
-                                                                          "link_type":  "employer",
-                                                                          "post_id":  "3882",
-                                                                          "post_url":  "https://t.me/useacareercenter/3882",
-                                                                          "target_url":  "https://t.me/+855962080434",
-                                                                          "clicks":  1,
-                                                                          "users":  [
-                                                                                        "816207a460cc"
-                                                                                    ]
-                                                                      },
-                                                   "p3883_admin":  {
-                                                                       "token":  "p3883_admin",
-                                                                       "label":  "📞 Contact Admin",
-                                                                       "link_type":  "admin",
-                                                                       "post_id":  "3883",
-                                                                       "post_url":  "https://t.me/useacareercenter/3883",
-                                                                       "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3883",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "816207a460cc"
-                                                                                 ]
-                                                                   },
-                                                   "p3883_employer":  {
-                                                                          "token":  "p3883_employer",
-                                                                          "label":  "Apply Now - Sokha Hotels",
-                                                                          "link_type":  "employer",
-                                                                          "post_id":  "3883",
-                                                                          "post_url":  "https://t.me/useacareercenter/3883",
-                                                                          "target_url":  "https://t.me/recruitment_SSR",
-                                                                          "clicks":  1,
-                                                                          "users":  [
-                                                                                        "816207a460cc"
-                                                                                    ]
-                                                                      },
-                                                   "p3883_bot":  {
-                                                                     "token":  "p3883_bot",
-                                                                     "label":  "Career Tips, CV \u0026 Cover Letter",
-                                                                     "link_type":  "bot",
-                                                                     "post_id":  "3883",
-                                                                     "post_url":  "https://t.me/useacareercenter/3883",
-                                                                     "target_url":  "https://t.me/USEACCASTbot",
-                                                                     "clicks":  1,
-                                                                     "users":  [
-                                                                                   "816207a460cc"
-                                                                               ]
-                                                                 },
-                                                   "p3884_admin":  {
-                                                                       "token":  "p3884_admin",
-                                                                       "label":  "📞 Contact Admin",
-                                                                       "link_type":  "admin",
-                                                                       "post_id":  "3884",
-                                                                       "post_url":  "https://t.me/useacareercenter/3884",
-                                                                       "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3884",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "816207a460cc"
-                                                                                 ]
-                                                                   },
-                                                   "p3884_employer":  {
-                                                                          "token":  "p3884_employer",
-                                                                          "label":  "Apply Now - 0975406969",
-                                                                          "link_type":  "employer",
-                                                                          "post_id":  "3884",
-                                                                          "post_url":  "https://t.me/useacareercenter/3884",
-                                                                          "target_url":  "https://t.me/+855975406969",
-                                                                          "clicks":  1,
-                                                                          "users":  [
-                                                                                        "816207a460cc"
-                                                                                    ]
-                                                                      },
-                                                   "p3884_bot":  {
-                                                                     "token":  "p3884_bot",
-                                                                     "label":  "Career Tips, CV \u0026 Cover Letter",
-                                                                     "link_type":  "bot",
-                                                                     "post_id":  "3884",
-                                                                     "post_url":  "https://t.me/useacareercenter/3884",
-                                                                     "target_url":  "https://t.me/USEACCASTbot",
-                                                                     "clicks":  1,
-                                                                     "users":  [
-                                                                                   "816207a460cc"
-                                                                               ]
-                                                                 },
-                                                   "p3885_admin":  {
-                                                                       "token":  "p3885_admin",
-                                                                       "label":  "📞 Contact Admin",
-                                                                       "link_type":  "admin",
-                                                                       "post_id":  "3885",
-                                                                       "post_url":  "https://t.me/useacareercenter/3885",
-                                                                       "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3885",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "816207a460cc"
-                                                                                 ]
-                                                                   },
-                                                   "p3885_employer":  {
-                                                                          "token":  "p3885_employer",
-                                                                          "label":  "Apply Now - 081808237",
-                                                                          "link_type":  "employer",
-                                                                          "post_id":  "3885",
-                                                                          "post_url":  "https://t.me/useacareercenter/3885",
-                                                                          "target_url":  "https://t.me/+85581808237",
-                                                                          "clicks":  1,
-                                                                          "users":  [
-                                                                                        "816207a460cc"
-                                                                                    ]
-                                                                      },
-                                                   "p3885_bot":  {
-                                                                     "token":  "p3885_bot",
-                                                                     "label":  "Career Tips, CV \u0026 Cover Letter",
-                                                                     "link_type":  "bot",
-                                                                     "post_id":  "3885",
-                                                                     "post_url":  "https://t.me/useacareercenter/3885",
-                                                                     "target_url":  "https://t.me/USEACCASTbot",
-                                                                     "clicks":  1,
-                                                                     "users":  [
-                                                                                   "816207a460cc"
-                                                                               ]
-                                                                 },
-                                                   "p9999_employer":  {
-                                                                          "token":  "p9999_employer",
-                                                                          "label":  "Apply Now",
-                                                                          "link_type":  "employer",
-                                                                          "post_id":  "9999",
-                                                                          "post_url":  "https://t.me/useacareercenter/9999",
-                                                                          "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/9999",
-                                                                          "clicks":  1,
-                                                                          "users":  [
-                                                                                        "816207a460cc"
-                                                                                    ]
-                                                                      },
-                                                   "p9999_admin":  {
-                                                                       "token":  "p9999_admin",
-                                                                       "label":  "📞 Contact Admin",
-                                                                       "link_type":  "admin",
-                                                                       "post_id":  "9999",
-                                                                       "post_url":  "https://t.me/useacareercenter/9999",
-                                                                       "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/9999",
-                                                                       "clicks":  1,
-                                                                       "users":  [
-                                                                                     "816207a460cc"
-                                                                                 ]
-                                                                   },
-                                                   "random_token":  {
-                                                                        "token":  "random_token",
-                                                                        "label":  "Button",
-                                                                        "link_type":  "general",
-                                                                        "post_id":  "",
-                                                                        "post_url":  "",
-                                                                        "target_url":  "https://t.me/USEACCAD",
-                                                                        "clicks":  1,
-                                                                        "users":  [
-                                                                                      "816207a460cc"
-                                                                                  ]
-                                                                    }
-                                               },
-                                   "by_post":  {
-                                                   "3866":  {
-                                                                "post_id":  "3866",
-                                                                "post_url":  "https://t.me/useacareercenter/3866",
-                                                                "clicks":  7,
-                                                                "users":  [
-                                                                              "6f749e0b9493",
-                                                                              "816207a460cc"
-                                                                          ]
-                                                            },
-                                                   "3871":  {
-                                                                "post_id":  "3871",
-                                                                "post_url":  "https://t.me/useacareercenter/3871",
-                                                                "clicks":  1,
-                                                                "users":  [
-                                                                              "6f749e0b9493"
-                                                                          ]
-                                                            },
-                                                   "3872":  {
-                                                                "post_id":  "3872",
-                                                                "post_url":  "https://t.me/useacareercenter/3872",
-                                                                "clicks":  1,
-                                                                "users":  [
-                                                                              "6f749e0b9493"
-                                                                          ]
-                                                            },
-                                                   "3873":  {
-                                                                "post_id":  "3873",
-                                                                "post_url":  "https://t.me/useacareercenter/3873",
-                                                                "clicks":  1,
-                                                                "users":  [
-                                                                              "6f749e0b9493"
-                                                                          ]
-                                                            },
-                                                   "3874":  {
-                                                                "post_id":  "3874",
-                                                                "post_url":  "https://t.me/useacareercenter/3874",
-                                                                "clicks":  1,
-                                                                "users":  [
-                                                                              "6f749e0b9493"
-                                                                          ]
-                                                            },
-                                                   "3875":  {
-                                                                "post_id":  "3875",
-                                                                "post_url":  "https://t.me/useacareercenter/3875",
-                                                                "clicks":  1,
-                                                                "users":  [
-                                                                              "6f749e0b9493"
-                                                                          ]
-                                                            },
-                                                   "3876":  {
-                                                                "post_id":  "3876",
-                                                                "post_url":  "https://t.me/useacareercenter/3876",
-                                                                "clicks":  1,
-                                                                "users":  [
-                                                                              "6f749e0b9493"
-                                                                          ]
-                                                            },
-                                                   "3877":  {
-                                                                "post_id":  "3877",
-                                                                "post_url":  "https://t.me/useacareercenter/3877",
-                                                                "clicks":  1,
-                                                                "users":  [
-                                                                              "6f749e0b9493"
-                                                                          ]
-                                                            },
-                                                   "3878":  {
-                                                                "post_id":  "3878",
-                                                                "post_url":  "https://t.me/useacareercenter/3878",
-                                                                "clicks":  1,
-                                                                "users":  [
-                                                                              "6f749e0b9493"
-                                                                          ]
-                                                            },
-                                                   "3880":  {
-                                                                "post_id":  "3880",
-                                                                "post_url":  "https://t.me/useacareercenter/3880",
-                                                                "clicks":  4,
-                                                                "users":  [
-                                                                              "6f749e0b9493",
-                                                                              "816207a460cc"
-                                                                          ]
-                                                            },
-                                                   "3881":  {
-                                                                "post_id":  "3881",
-                                                                "post_url":  "https://t.me/useacareercenter/3881",
-                                                                "clicks":  1,
-                                                                "users":  [
-                                                                              "6f749e0b9493"
-                                                                          ]
-                                                            },
-                                                   "3882":  {
-                                                                "post_id":  "3882",
-                                                                "post_url":  "https://t.me/useacareercenter/3882",
-                                                                "clicks":  5,
-                                                                "users":  [
-                                                                              "6f749e0b9493",
-                                                                              "816207a460cc"
-                                                                          ]
-                                                            },
-                                                   "9999":  {
-                                                                "post_id":  "9999",
-                                                                "post_url":  "https://t.me/useacareercenter/9999",
-                                                                "clicks":  3,
-                                                                "users":  [
-                                                                              "6f749e0b9493",
-                                                                              "816207a460cc"
-                                                                          ]
-                                                            },
-                                                   "3883":  {
-                                                                "post_id":  "3883",
-                                                                "post_url":  "https://t.me/useacareercenter/3883",
-                                                                "clicks":  3,
-                                                                "users":  [
-                                                                              "816207a460cc"
-                                                                          ]
-                                                            },
-                                                   "3884":  {
-                                                                "post_id":  "3884",
-                                                                "post_url":  "https://t.me/useacareercenter/3884",
-                                                                "clicks":  3,
-                                                                "users":  [
-                                                                              "816207a460cc"
-                                                                          ]
-                                                            },
-                                                   "3885":  {
-                                                                "post_id":  "3885",
-                                                                "post_url":  "https://t.me/useacareercenter/3885",
-                                                                "clicks":  3,
-                                                                "users":  [
-                                                                              "816207a460cc"
-                                                                          ]
-                                                            }
-                                               }
-                               }
-               },
-    "recent_clicks":  [
-                          {
-                              "timestamp":  "2026-11-02T17:45:30.265582",
-                              "month":  "2026-11",
-                              "token":  "p3866_admin",
-                              "label":  "📞 Contact Admin",
-                              "link_type":  "admin",
-                              "post_id":  "3866",
-                              "post_url":  "https://t.me/useacareercenter/3866",
-                              "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3866",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T17:45:30.322690",
-                              "month":  "2026-11",
-                              "token":  "p3866_employer",
-                              "label":  "Apply Now",
-                              "link_type":  "employer",
-                              "post_id":  "3866",
-                              "post_url":  "https://t.me/useacareercenter/3866",
-                              "target_url":  "https://t.me/+855962669708",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T17:45:30.390699",
-                              "month":  "2026-11",
-                              "token":  "p3866_bot",
-                              "label":  "Career Tips, CV \u0026 Cover Letter",
-                              "link_type":  "bot",
-                              "post_id":  "3866",
-                              "post_url":  "https://t.me/useacareercenter/3866",
-                              "target_url":  "https://t.me/careercentercvbot",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:01.787435",
-                              "month":  "2026-11",
-                              "token":  "p3866_admin",
-                              "label":  "📞 Contact Admin",
-                              "link_type":  "admin",
-                              "post_id":  "3866",
-                              "post_url":  "https://t.me/useacareercenter/3866",
-                              "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3866",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:01.824327",
-                              "month":  "2026-11",
-                              "token":  "p3866_employer",
-                              "label":  "Apply Now - 0962669708",
-                              "link_type":  "employer",
-                              "post_id":  "3866",
-                              "post_url":  "https://t.me/useacareercenter/3866",
-                              "target_url":  "https://t.me/+855962669708",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:01.859018",
-                              "month":  "2026-11",
-                              "token":  "p3871_admin",
-                              "label":  "Apply Now - Be Like Khmer",
-                              "link_type":  "employer",
-                              "post_id":  "3871",
-                              "post_url":  "https://t.me/useacareercenter/3871",
-                              "target_url":  "https://t.me/belikekhmersiemreap",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:01.893637",
-                              "month":  "2026-11",
-                              "token":  "p3872_admin",
-                              "label":  "Apply Now - 015344663",
-                              "link_type":  "employer",
-                              "post_id":  "3872",
-                              "post_url":  "https://t.me/useacareercenter/3872",
-                              "target_url":  "https://t.me/+85515344663",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:01.929761",
-                              "month":  "2026-11",
-                              "token":  "p3873_admin",
-                              "label":  "Apply Now - @RAIS_SCHOOL",
-                              "link_type":  "employer",
-                              "post_id":  "3873",
-                              "post_url":  "https://t.me/useacareercenter/3873",
-                              "target_url":  "https://t.me/RAIS_SCHOOL",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:01.964285",
-                              "month":  "2026-11",
-                              "token":  "p3874_admin",
-                              "label":  "Apply Now - 070588000",
-                              "link_type":  "employer",
-                              "post_id":  "3874",
-                              "post_url":  "https://t.me/useacareercenter/3874",
-                              "target_url":  "https://t.me/+85570588000",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:01.996099",
-                              "month":  "2026-11",
-                              "token":  "p3875_admin",
-                              "label":  "Apply Now - CJFTEC",
-                              "link_type":  "employer",
-                              "post_id":  "3875",
-                              "post_url":  "https://t.me/useacareercenter/3875",
-                              "target_url":  "https://t.me/cjftec",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:02.029963",
-                              "month":  "2026-11",
-                              "token":  "p3876_admin",
-                              "label":  "Apply Now - 081787985",
-                              "link_type":  "employer",
-                              "post_id":  "3876",
-                              "post_url":  "https://t.me/useacareercenter/3876",
-                              "target_url":  "https://t.me/+85581787985",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:02.063134",
-                              "month":  "2026-11",
-                              "token":  "p3877_admin",
-                              "label":  "Apply Now - CJFTEC",
-                              "link_type":  "employer",
-                              "post_id":  "3877",
-                              "post_url":  "https://t.me/useacareercenter/3877",
-                              "target_url":  "https://t.me/cjftec",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:02.097843",
-                              "month":  "2026-11",
-                              "token":  "p3878_admin",
-                              "label":  "Apply Now - 016757174",
-                              "link_type":  "employer",
-                              "post_id":  "3878",
-                              "post_url":  "https://t.me/useacareercenter/3878",
-                              "target_url":  "https://t.me/+85516757174",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:02.131005",
-                              "month":  "2026-11",
-                              "token":  "p3880_admin",
-                              "label":  "Apply Now - 078555671",
-                              "link_type":  "employer",
-                              "post_id":  "3880",
-                              "post_url":  "https://t.me/useacareercenter/3880",
-                              "target_url":  "https://t.me/+85578555671",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:02.167341",
-                              "month":  "2026-11",
-                              "token":  "p3881_admin",
-                              "label":  "Apple Now - 095473808",
-                              "link_type":  "employer",
-                              "post_id":  "3881",
-                              "post_url":  "https://t.me/useacareercenter/3881",
-                              "target_url":  "https://t.me/+85595473808",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:02.224340",
-                              "month":  "2026-11",
-                              "token":  "p3882_admin",
-                              "label":  "Apply Now - 0962080434",
-                              "link_type":  "employer",
-                              "post_id":  "3882",
-                              "post_url":  "https://t.me/useacareercenter/3882",
-                              "target_url":  "https://t.me/+855962080434",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T18:45:02.275012",
-                              "month":  "2026-11",
-                              "token":  "p3882_bot",
-                              "label":  "Career Tips, CV \u0026 Cover Letter",
-                              "link_type":  "bot",
-                              "post_id":  "3882",
-                              "post_url":  "https://t.me/useacareercenter/3882",
-                              "target_url":  "https://t.me/careercentercvbot",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T19:33:25.560466",
-                              "month":  "2026-11",
-                              "token":  "p3882_bot",
-                              "label":  "Career Tips, CV \u0026 Cover Letter",
-                              "link_type":  "bot",
-                              "post_id":  "3882",
-                              "post_url":  "https://t.me/useacareercenter/3882",
-                              "target_url":  "https://t.me/USEACCASTbot",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-02T19:33:25.602088",
-                              "month":  "2026-11",
-                              "token":  "p9999_bot",
-                              "label":  "Career Tips, CV \u0026 Cover Letter",
-                              "link_type":  "bot",
-                              "post_id":  "9999",
-                              "post_url":  "https://t.me/useacareercenter/9999",
-                              "target_url":  "https://t.me/USEACCASTbot",
-                              "user_hash":  "6f749e0b9493"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:46.648870",
-                              "month":  "2026-11",
-                              "token":  "p3880_admin",
-                              "label":  "📞 Contact Admin",
-                              "link_type":  "admin",
-                              "post_id":  "3880",
-                              "post_url":  "https://t.me/useacareercenter/3880",
-                              "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3880",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:46.746145",
-                              "month":  "2026-11",
-                              "token":  "p3880_employer",
-                              "label":  "Apply Now - 078555671",
-                              "link_type":  "employer",
-                              "post_id":  "3880",
-                              "post_url":  "https://t.me/useacareercenter/3880",
-                              "target_url":  "https://t.me/+85578555671",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:46.843624",
-                              "month":  "2026-11",
-                              "token":  "p3880_bot",
-                              "label":  "Career Tips, CV \u0026 Cover Letter",
-                              "link_type":  "bot",
-                              "post_id":  "3880",
-                              "post_url":  "https://t.me/useacareercenter/3880",
-                              "target_url":  "https://t.me/USEACCASTbot",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:46.954600",
-                              "month":  "2026-11",
-                              "token":  "p3882_admin",
-                              "label":  "📞 Contact Admin",
-                              "link_type":  "admin",
-                              "post_id":  "3882",
-                              "post_url":  "https://t.me/useacareercenter/3882",
-                              "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3882",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:47.124537",
-                              "month":  "2026-11",
-                              "token":  "p3882_employer",
-                              "label":  "Apply Now - 0962080434",
-                              "link_type":  "employer",
-                              "post_id":  "3882",
-                              "post_url":  "https://t.me/useacareercenter/3882",
-                              "target_url":  "https://t.me/+855962080434",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:47.288454",
-                              "month":  "2026-11",
-                              "token":  "p3883_admin",
-                              "label":  "📞 Contact Admin",
-                              "link_type":  "admin",
-                              "post_id":  "3883",
-                              "post_url":  "https://t.me/useacareercenter/3883",
-                              "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3883",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:47.426440",
-                              "month":  "2026-11",
-                              "token":  "p3883_employer",
-                              "label":  "Apply Now - Sokha Hotels",
-                              "link_type":  "employer",
-                              "post_id":  "3883",
-                              "post_url":  "https://t.me/useacareercenter/3883",
-                              "target_url":  "https://t.me/recruitment_SSR",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:47.530792",
-                              "month":  "2026-11",
-                              "token":  "p3883_bot",
-                              "label":  "Career Tips, CV \u0026 Cover Letter",
-                              "link_type":  "bot",
-                              "post_id":  "3883",
-                              "post_url":  "https://t.me/useacareercenter/3883",
-                              "target_url":  "https://t.me/USEACCASTbot",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:47.673760",
-                              "month":  "2026-11",
-                              "token":  "p3884_admin",
-                              "label":  "📞 Contact Admin",
-                              "link_type":  "admin",
-                              "post_id":  "3884",
-                              "post_url":  "https://t.me/useacareercenter/3884",
-                              "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3884",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:47.828933",
-                              "month":  "2026-11",
-                              "token":  "p3884_employer",
-                              "label":  "Apply Now - 0975406969",
-                              "link_type":  "employer",
-                              "post_id":  "3884",
-                              "post_url":  "https://t.me/useacareercenter/3884",
-                              "target_url":  "https://t.me/+855975406969",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:47.908390",
-                              "month":  "2026-11",
-                              "token":  "p3884_bot",
-                              "label":  "Career Tips, CV \u0026 Cover Letter",
-                              "link_type":  "bot",
-                              "post_id":  "3884",
-                              "post_url":  "https://t.me/useacareercenter/3884",
-                              "target_url":  "https://t.me/USEACCASTbot",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:47.994501",
-                              "month":  "2026-11",
-                              "token":  "p3885_admin",
-                              "label":  "📞 Contact Admin",
-                              "link_type":  "admin",
-                              "post_id":  "3885",
-                              "post_url":  "https://t.me/useacareercenter/3885",
-                              "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3885",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:48.089853",
-                              "month":  "2026-11",
-                              "token":  "p3885_employer",
-                              "label":  "Apply Now - 081808237",
-                              "link_type":  "employer",
-                              "post_id":  "3885",
-                              "post_url":  "https://t.me/useacareercenter/3885",
-                              "target_url":  "https://t.me/+85581808237",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T10:29:48.198883",
-                              "month":  "2026-11",
-                              "token":  "p3885_bot",
-                              "label":  "Career Tips, CV \u0026 Cover Letter",
-                              "link_type":  "bot",
-                              "post_id":  "3885",
-                              "post_url":  "https://t.me/useacareercenter/3885",
-                              "target_url":  "https://t.me/USEACCASTbot",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T16:01:01.911097",
-                              "month":  "2026-11",
-                              "token":  "p3866_employer",
-                              "label":  "Apply Now",
-                              "link_type":  "employer",
-                              "post_id":  "3866",
-                              "post_url":  "https://t.me/useacareercenter/3866",
-                              "target_url":  "https://t.me/USEACCAD",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T16:01:01.946534",
-                              "month":  "2026-11",
-                              "token":  "p3866_admin",
-                              "label":  "📞 Contact Admin",
-                              "link_type":  "admin",
-                              "post_id":  "3866",
-                              "post_url":  "https://t.me/useacareercenter/3866",
-                              "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3866",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T16:01:01.982368",
-                              "month":  "2026-11",
-                              "token":  "p9999_employer",
-                              "label":  "Apply Now",
-                              "link_type":  "employer",
-                              "post_id":  "9999",
-                              "post_url":  "https://t.me/useacareercenter/9999",
-                              "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/9999",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T16:01:02.015575",
-                              "month":  "2026-11",
-                              "token":  "p9999_admin",
-                              "label":  "📞 Contact Admin",
-                              "link_type":  "admin",
-                              "post_id":  "9999",
-                              "post_url":  "https://t.me/useacareercenter/9999",
-                              "target_url":  "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/9999",
-                              "user_hash":  "816207a460cc"
-                          },
-                          {
-                              "timestamp":  "2026-11-03T16:01:02.049099",
-                              "month":  "2026-11",
-                              "token":  "random_token",
-                              "label":  "Button",
-                              "link_type":  "general",
-                              "post_id":  "",
-                              "post_url":  "",
-                              "target_url":  "https://t.me/USEACCAD",
-                              "user_hash":  "816207a460cc"
-                          }
-                      ]
+{
+  "links": {
+    "p3866_admin": {
+      "token": "p3866_admin",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3866",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3866_bot": {
+      "token": "p3866_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3866_employer": {
+      "token": "p3866_employer",
+      "target_url": "https://t.me/USEACCAD",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3867_admin": {
+      "token": "p3867_admin",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3867",
+      "label": "More information",
+      "link_type": "employer",
+      "post_id": "3867",
+      "post_url": "https://t.me/useacareercenter/3867",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3867_employer": {
+      "token": "p3867_employer",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3867",
+      "label": "More information",
+      "link_type": "employer",
+      "post_id": "3867",
+      "post_url": "https://t.me/useacareercenter/3867",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3867_bot": {
+      "token": "p3867_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3867",
+      "post_url": "https://t.me/useacareercenter/3867",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3868_admin": {
+      "token": "p3868_admin",
+      "target_url": "https://t.me/USEACCAD",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "3868",
+      "post_url": "https://t.me/useacareercenter/3868",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3868_employer": {
+      "token": "p3868_employer",
+      "target_url": "https://t.me/USEACCAD",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "3868",
+      "post_url": "https://t.me/useacareercenter/3868",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3868_bot": {
+      "token": "p3868_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3868",
+      "post_url": "https://t.me/useacareercenter/3868",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3869_admin": {
+      "token": "p3869_admin",
+      "target_url": "https://t.me/USEACCAD",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "3869",
+      "post_url": "https://t.me/useacareercenter/3869",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3869_employer": {
+      "token": "p3869_employer",
+      "target_url": "https://t.me/USEACCAD",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "3869",
+      "post_url": "https://t.me/useacareercenter/3869",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3869_bot": {
+      "token": "p3869_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3869",
+      "post_url": "https://t.me/useacareercenter/3869",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3871_admin": {
+      "token": "p3871_admin",
+      "target_url": "https://t.me/belikekhmersiemreap",
+      "label": "Apply Now - Be Like Khmer",
+      "link_type": "employer",
+      "post_id": "3871",
+      "post_url": "https://t.me/useacareercenter/3871",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3871_employer": {
+      "token": "p3871_employer",
+      "target_url": "https://t.me/belikekhmersiemreap",
+      "label": "Apply Now - Be Like Khmer",
+      "link_type": "employer",
+      "post_id": "3871",
+      "post_url": "https://t.me/useacareercenter/3871",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3871_bot": {
+      "token": "p3871_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3871",
+      "post_url": "https://t.me/useacareercenter/3871",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3872_admin": {
+      "token": "p3872_admin",
+      "target_url": "https://t.me/+85515344663",
+      "label": "Apply Now - 015344663",
+      "link_type": "employer",
+      "post_id": "3872",
+      "post_url": "https://t.me/useacareercenter/3872",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3872_employer": {
+      "token": "p3872_employer",
+      "target_url": "https://t.me/+85515344663",
+      "label": "Apply Now - 015344663",
+      "link_type": "employer",
+      "post_id": "3872",
+      "post_url": "https://t.me/useacareercenter/3872",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3872_bot": {
+      "token": "p3872_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3872",
+      "post_url": "https://t.me/useacareercenter/3872",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3873_admin": {
+      "token": "p3873_admin",
+      "target_url": "https://t.me/RAIS_SCHOOL",
+      "label": "Apply Now - @RAIS_SCHOOL",
+      "link_type": "employer",
+      "post_id": "3873",
+      "post_url": "https://t.me/useacareercenter/3873",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3873_employer": {
+      "token": "p3873_employer",
+      "target_url": "https://t.me/RAIS_SCHOOL",
+      "label": "Apply Now - @RAIS_SCHOOL",
+      "link_type": "employer",
+      "post_id": "3873",
+      "post_url": "https://t.me/useacareercenter/3873",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3873_bot": {
+      "token": "p3873_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3873",
+      "post_url": "https://t.me/useacareercenter/3873",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3874_admin": {
+      "token": "p3874_admin",
+      "target_url": "https://t.me/+85570588000",
+      "label": "Apply Now - 070588000",
+      "link_type": "employer",
+      "post_id": "3874",
+      "post_url": "https://t.me/useacareercenter/3874",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3874_employer": {
+      "token": "p3874_employer",
+      "target_url": "https://t.me/+85570588000",
+      "label": "Apply Now - 070588000",
+      "link_type": "employer",
+      "post_id": "3874",
+      "post_url": "https://t.me/useacareercenter/3874",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3874_bot": {
+      "token": "p3874_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3874",
+      "post_url": "https://t.me/useacareercenter/3874",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3875_admin": {
+      "token": "p3875_admin",
+      "target_url": "https://t.me/cjftec",
+      "label": "Apply Now - CJFTEC",
+      "link_type": "employer",
+      "post_id": "3875",
+      "post_url": "https://t.me/useacareercenter/3875",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3875_employer": {
+      "token": "p3875_employer",
+      "target_url": "https://t.me/cjftec",
+      "label": "Apply Now - CJFTEC",
+      "link_type": "employer",
+      "post_id": "3875",
+      "post_url": "https://t.me/useacareercenter/3875",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3875_bot": {
+      "token": "p3875_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3875",
+      "post_url": "https://t.me/useacareercenter/3875",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3876_admin": {
+      "token": "p3876_admin",
+      "target_url": "https://t.me/+85581787985",
+      "label": "Apply Now - 081787985",
+      "link_type": "employer",
+      "post_id": "3876",
+      "post_url": "https://t.me/useacareercenter/3876",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3876_employer": {
+      "token": "p3876_employer",
+      "target_url": "https://t.me/+85581787985",
+      "label": "Apply Now - 081787985",
+      "link_type": "employer",
+      "post_id": "3876",
+      "post_url": "https://t.me/useacareercenter/3876",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3876_bot": {
+      "token": "p3876_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3876",
+      "post_url": "https://t.me/useacareercenter/3876",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3877_admin": {
+      "token": "p3877_admin",
+      "target_url": "https://t.me/cjftec",
+      "label": "Apply Now - CJFTEC",
+      "link_type": "employer",
+      "post_id": "3877",
+      "post_url": "https://t.me/useacareercenter/3877",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3877_employer": {
+      "token": "p3877_employer",
+      "target_url": "https://t.me/cjftec",
+      "label": "Apply Now - CJFTEC",
+      "link_type": "employer",
+      "post_id": "3877",
+      "post_url": "https://t.me/useacareercenter/3877",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3877_bot": {
+      "token": "p3877_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3877",
+      "post_url": "https://t.me/useacareercenter/3877",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3878_admin": {
+      "token": "p3878_admin",
+      "target_url": "https://t.me/+85516757174",
+      "label": "Apply Now - 016757174",
+      "link_type": "employer",
+      "post_id": "3878",
+      "post_url": "https://t.me/useacareercenter/3878",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3878_employer": {
+      "token": "p3878_employer",
+      "target_url": "https://t.me/+85516757174",
+      "label": "Apply Now - 016757174",
+      "link_type": "employer",
+      "post_id": "3878",
+      "post_url": "https://t.me/useacareercenter/3878",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3878_bot": {
+      "token": "p3878_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3878",
+      "post_url": "https://t.me/useacareercenter/3878",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3879_admin": {
+      "token": "p3879_admin",
+      "target_url": "https://t.me/USEACCAD",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "3879",
+      "post_url": "https://t.me/useacareercenter/3879",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3879_employer": {
+      "token": "p3879_employer",
+      "target_url": "https://t.me/USEACCAD",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "3879",
+      "post_url": "https://t.me/useacareercenter/3879",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3879_bot": {
+      "token": "p3879_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3879",
+      "post_url": "https://t.me/useacareercenter/3879",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3880_admin": {
+      "token": "p3880_admin",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3880",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3880",
+      "post_url": "https://t.me/useacareercenter/3880",
+      "updated_at": "2026-11-03T10:26:56.917542"
+    },
+    "p3880_employer": {
+      "token": "p3880_employer",
+      "target_url": "https://t.me/+85578555671",
+      "label": "Apply Now - 078555671",
+      "link_type": "employer",
+      "post_id": "3880",
+      "post_url": "https://t.me/useacareercenter/3880",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3880_bot": {
+      "token": "p3880_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3880",
+      "post_url": "https://t.me/useacareercenter/3880",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3881_admin": {
+      "token": "p3881_admin",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3881",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3881",
+      "post_url": "https://t.me/useacareercenter/3881",
+      "updated_at": "2026-11-03T10:26:56.917542"
+    },
+    "p3881_employer": {
+      "token": "p3881_employer",
+      "target_url": "https://t.me/+85595473808",
+      "label": "Apple Now - 095473808",
+      "link_type": "employer",
+      "post_id": "3881",
+      "post_url": "https://t.me/useacareercenter/3881",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3881_bot": {
+      "token": "p3881_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3881",
+      "post_url": "https://t.me/useacareercenter/3881",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3882_admin": {
+      "token": "p3882_admin",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3882",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3882",
+      "post_url": "https://t.me/useacareercenter/3882",
+      "updated_at": "2026-11-03T10:26:56.917542"
+    },
+    "p3882_employer": {
+      "token": "p3882_employer",
+      "target_url": "https://t.me/+855962080434",
+      "label": "Apply Now - 0962080434",
+      "link_type": "employer",
+      "post_id": "3882",
+      "post_url": "https://t.me/useacareercenter/3882",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3882_bot": {
+      "token": "p3882_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3882",
+      "post_url": "https://t.me/useacareercenter/3882",
+      "updated_at": "2026-11-02T18:43:10.182610"
+    },
+    "p3883_admin": {
+      "token": "p3883_admin",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3883",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3883",
+      "post_url": "https://t.me/useacareercenter/3883",
+      "updated_at": "2026-11-03T10:26:56.917542"
+    },
+    "p3883_employer": {
+      "token": "p3883_employer",
+      "target_url": "https://t.me/recruitment_SSR",
+      "label": "Apply Now - Sokha Hotels",
+      "link_type": "employer",
+      "post_id": "3883",
+      "post_url": "https://t.me/useacareercenter/3883",
+      "updated_at": "2026-11-03T10:26:56.917542"
+    },
+    "p3883_bot": {
+      "token": "p3883_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3883",
+      "post_url": "https://t.me/useacareercenter/3883",
+      "updated_at": "2026-11-03T10:26:56.917542"
+    },
+    "p3884_admin": {
+      "token": "p3884_admin",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3884",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3884",
+      "post_url": "https://t.me/useacareercenter/3884",
+      "updated_at": "2026-11-03T10:26:56.917542"
+    },
+    "p3884_employer": {
+      "token": "p3884_employer",
+      "target_url": "https://t.me/+855975406969",
+      "label": "Apply Now - 0975406969",
+      "link_type": "employer",
+      "post_id": "3884",
+      "post_url": "https://t.me/useacareercenter/3884",
+      "updated_at": "2026-11-03T10:26:56.917542"
+    },
+    "p3884_bot": {
+      "token": "p3884_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3884",
+      "post_url": "https://t.me/useacareercenter/3884",
+      "updated_at": "2026-11-03T10:26:56.917542"
+    },
+    "p3885_admin": {
+      "token": "p3885_admin",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3885",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3885",
+      "post_url": "https://t.me/useacareercenter/3885",
+      "updated_at": "2026-11-03T10:26:56.917542"
+    },
+    "p3885_employer": {
+      "token": "p3885_employer",
+      "target_url": "https://t.me/+85581808237",
+      "label": "Apply Now - 081808237",
+      "link_type": "employer",
+      "post_id": "3885",
+      "post_url": "https://t.me/useacareercenter/3885",
+      "updated_at": "2026-11-03T10:26:56.917542"
+    },
+    "p3885_bot": {
+      "token": "p3885_bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3885",
+      "post_url": "https://t.me/useacareercenter/3885",
+      "updated_at": "2026-11-03T10:26:56.917542"
+    },
+    "p3887_admin": {
+      "post_url": "https://t.me/useacareercenter/3887",
+      "label": "📲 Contact Admin",
+      "link_type": "admin",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3887",
+      "token": "p3887_admin",
+      "post_id": "3887",
+      "updated_at": "2026-11-03T18:43:00.000000"
+    },
+    "p3889_bot": {
+      "post_url": "https://t.me/useacareercenter/3889",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "token": "p3889_bot",
+      "post_id": "3889",
+      "updated_at": "2026-11-03T18:43:00.000000"
+    },
+    "p3889_admin": {
+      "post_url": "https://t.me/useacareercenter/3889",
+      "label": "📲 Contact Admin",
+      "link_type": "admin",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3889",
+      "token": "p3889_admin",
+      "post_id": "3889",
+      "updated_at": "2026-11-03T18:43:00.000000"
+    },
+    "p3888_bot": {
+      "post_url": "https://t.me/useacareercenter/3888",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "token": "p3888_bot",
+      "post_id": "3888",
+      "updated_at": "2026-11-03T18:43:00.000000"
+    },
+    "p3888_admin": {
+      "post_url": "https://t.me/useacareercenter/3888",
+      "label": "📲 Contact Admin",
+      "link_type": "admin",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3888",
+      "token": "p3888_admin",
+      "post_id": "3888",
+      "updated_at": "2026-11-03T18:43:00.000000"
+    },
+    "p3889_employer": {
+      "post_url": "https://t.me/useacareercenter/3889",
+      "label": "Apply Now - 016499099",
+      "link_type": "employer",
+      "target_url": "https://t.me/+85516499099",
+      "token": "p3889_employer",
+      "post_id": "3889",
+      "updated_at": "2026-11-03T18:43:00.000000"
+    },
+    "p3888_employer": {
+      "post_url": "https://t.me/useacareercenter/3888",
+      "label": "Apply Now - 077967755",
+      "link_type": "employer",
+      "target_url": "https://t.me/+85577967755",
+      "token": "p3888_employer",
+      "post_id": "3888",
+      "updated_at": "2026-11-03T18:43:00.000000"
+    },
+    "p3887_apply1": {
+      "post_url": "https://t.me/useacareercenter/3887",
+      "label": "Apply Now - 086703338",
+      "link_type": "employer",
+      "target_url": "https://t.me/+85586703338",
+      "token": "p3887_apply1",
+      "post_id": "3887",
+      "updated_at": "2026-11-03T18:43:00.000000"
+    },
+    "p3887_bot": {
+      "post_url": "https://t.me/useacareercenter/3887",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "target_url": "https://t.me/USEACCASTbot",
+      "token": "p3887_bot",
+      "post_id": "3887",
+      "updated_at": "2026-11-03T18:43:00.000000"
+    },
+    "p3889_apply1": {
+      "post_url": "https://t.me/useacareercenter/3889",
+      "label": "Apply Now - 016499099",
+      "link_type": "employer",
+      "target_url": "https://t.me/+85516499099",
+      "token": "p3889_apply1",
+      "post_id": "3889",
+      "updated_at": "2026-11-03T18:43:00.000000"
+    },
+    "p3887_employer": {
+      "post_url": "https://t.me/useacareercenter/3887",
+      "label": "Apply Now - 086703338",
+      "link_type": "employer",
+      "target_url": "https://t.me/+85586703338",
+      "token": "p3887_employer",
+      "post_id": "3887",
+      "updated_at": "2026-11-03T18:43:00.000000"
+    },
+    "p3888_apply1": {
+      "post_url": "https://t.me/useacareercenter/3888",
+      "label": "Apply Now - 077967755",
+      "link_type": "employer",
+      "target_url": "https://t.me/+85577967755",
+      "token": "p3888_apply1",
+      "post_id": "3888",
+      "updated_at": "2026-11-03T18:43:00.000000"
+    },
+    "p3890_employer": {
+      "post_url": "https://t.me/useacareercenter/3890",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "target_url": "https://t.me/+85595465668",
+      "token": "p3890_employer",
+      "post_id": "3890",
+      "updated_at": "2026-11-03T20:00:00.000000"
+    },
+    "p3890_apply1": {
+      "post_url": "https://t.me/useacareercenter/3890",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "target_url": "https://t.me/+85595465668",
+      "token": "p3890_apply1",
+      "post_id": "3890",
+      "updated_at": "2026-11-03T20:00:00.000000"
+    }
+  },
+  "months": {
+    "2026-11": {
+      "total_clicks": 39,
+      "unique_users": [
+        "6f749e0b9493",
+        "816207a460cc"
+      ],
+      "by_type": {
+        "admin": {
+          "label": "📞 Contact Admin",
+          "clicks": 9,
+          "users": [
+            "6f749e0b9493",
+            "816207a460cc"
+          ]
+        },
+        "employer": {
+          "label": "Apply Now",
+          "clicks": 20,
+          "users": [
+            "6f749e0b9493",
+            "816207a460cc"
+          ]
+        },
+        "bot": {
+          "label": "Career Tips, CV & Cover Letter",
+          "clicks": 8,
+          "users": [
+            "6f749e0b9493",
+            "816207a460cc"
+          ]
+        },
+        "general": {
+          "label": "Button",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "email": {
+          "label": "Apply via Email",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        }
+      },
+      "by_link": {
+        "p3866_admin": {
+          "token": "p3866_admin",
+          "label": "📞 Contact Admin",
+          "link_type": "admin",
+          "post_id": "3866",
+          "post_url": "https://t.me/useacareercenter/3866",
+          "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3866",
+          "clicks": 3,
+          "users": [
+            "6f749e0b9493",
+            "816207a460cc"
+          ]
+        },
+        "p3866_employer": {
+          "token": "p3866_employer",
+          "label": "Apply Now",
+          "link_type": "employer",
+          "post_id": "3866",
+          "post_url": "https://t.me/useacareercenter/3866",
+          "target_url": "https://t.me/USEACCAD",
+          "clicks": 3,
+          "users": [
+            "6f749e0b9493",
+            "816207a460cc"
+          ]
+        },
+        "p3866_bot": {
+          "token": "p3866_bot",
+          "label": "Career Tips, CV & Cover Letter",
+          "link_type": "bot",
+          "post_id": "3866",
+          "post_url": "https://t.me/useacareercenter/3866",
+          "target_url": "https://t.me/careercentercvbot",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p3871_admin": {
+          "token": "p3871_admin",
+          "label": "Apply Now - Be Like Khmer",
+          "link_type": "employer",
+          "post_id": "3871",
+          "post_url": "https://t.me/useacareercenter/3871",
+          "target_url": "https://t.me/belikekhmersiemreap",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p3872_admin": {
+          "token": "p3872_admin",
+          "label": "Apply Now - 015344663",
+          "link_type": "employer",
+          "post_id": "3872",
+          "post_url": "https://t.me/useacareercenter/3872",
+          "target_url": "https://t.me/+85515344663",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p3873_admin": {
+          "token": "p3873_admin",
+          "label": "Apply Now - @RAIS_SCHOOL",
+          "link_type": "employer",
+          "post_id": "3873",
+          "post_url": "https://t.me/useacareercenter/3873",
+          "target_url": "https://t.me/RAIS_SCHOOL",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p3874_admin": {
+          "token": "p3874_admin",
+          "label": "Apply Now - 070588000",
+          "link_type": "employer",
+          "post_id": "3874",
+          "post_url": "https://t.me/useacareercenter/3874",
+          "target_url": "https://t.me/+85570588000",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p3875_admin": {
+          "token": "p3875_admin",
+          "label": "Apply Now - CJFTEC",
+          "link_type": "employer",
+          "post_id": "3875",
+          "post_url": "https://t.me/useacareercenter/3875",
+          "target_url": "https://t.me/cjftec",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p3876_admin": {
+          "token": "p3876_admin",
+          "label": "Apply Now - 081787985",
+          "link_type": "employer",
+          "post_id": "3876",
+          "post_url": "https://t.me/useacareercenter/3876",
+          "target_url": "https://t.me/+85581787985",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p3877_admin": {
+          "token": "p3877_admin",
+          "label": "Apply Now - CJFTEC",
+          "link_type": "employer",
+          "post_id": "3877",
+          "post_url": "https://t.me/useacareercenter/3877",
+          "target_url": "https://t.me/cjftec",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p3878_admin": {
+          "token": "p3878_admin",
+          "label": "Apply Now - 016757174",
+          "link_type": "employer",
+          "post_id": "3878",
+          "post_url": "https://t.me/useacareercenter/3878",
+          "target_url": "https://t.me/+85516757174",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p3880_admin": {
+          "token": "p3880_admin",
+          "label": "Apply Now - 078555671",
+          "link_type": "employer",
+          "post_id": "3880",
+          "post_url": "https://t.me/useacareercenter/3880",
+          "target_url": "https://t.me/+85578555671",
+          "clicks": 2,
+          "users": [
+            "6f749e0b9493",
+            "816207a460cc"
+          ]
+        },
+        "p3881_admin": {
+          "token": "p3881_admin",
+          "label": "Apple Now - 095473808",
+          "link_type": "employer",
+          "post_id": "3881",
+          "post_url": "https://t.me/useacareercenter/3881",
+          "target_url": "https://t.me/+85595473808",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p3882_admin": {
+          "token": "p3882_admin",
+          "label": "Apply Now - 0962080434",
+          "link_type": "employer",
+          "post_id": "3882",
+          "post_url": "https://t.me/useacareercenter/3882",
+          "target_url": "https://t.me/+855962080434",
+          "clicks": 2,
+          "users": [
+            "6f749e0b9493",
+            "816207a460cc"
+          ]
+        },
+        "p3882_bot": {
+          "token": "p3882_bot",
+          "label": "Career Tips, CV & Cover Letter",
+          "link_type": "bot",
+          "post_id": "3882",
+          "post_url": "https://t.me/useacareercenter/3882",
+          "target_url": "https://t.me/careercentercvbot",
+          "clicks": 2,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p9999_bot": {
+          "token": "p9999_bot",
+          "label": "Career Tips, CV & Cover Letter",
+          "link_type": "bot",
+          "post_id": "9999",
+          "post_url": "https://t.me/useacareercenter/9999",
+          "target_url": "https://t.me/USEACCASTbot",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p3880_employer": {
+          "token": "p3880_employer",
+          "label": "Apply Now - 078555671",
+          "link_type": "employer",
+          "post_id": "3880",
+          "post_url": "https://t.me/useacareercenter/3880",
+          "target_url": "https://t.me/+85578555671",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p3880_bot": {
+          "token": "p3880_bot",
+          "label": "Career Tips, CV & Cover Letter",
+          "link_type": "bot",
+          "post_id": "3880",
+          "post_url": "https://t.me/useacareercenter/3880",
+          "target_url": "https://t.me/USEACCASTbot",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p3882_employer": {
+          "token": "p3882_employer",
+          "label": "Apply Now - 0962080434",
+          "link_type": "employer",
+          "post_id": "3882",
+          "post_url": "https://t.me/useacareercenter/3882",
+          "target_url": "https://t.me/+855962080434",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p3883_admin": {
+          "token": "p3883_admin",
+          "label": "📞 Contact Admin",
+          "link_type": "admin",
+          "post_id": "3883",
+          "post_url": "https://t.me/useacareercenter/3883",
+          "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3883",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p3883_employer": {
+          "token": "p3883_employer",
+          "label": "Apply Now - Sokha Hotels",
+          "link_type": "employer",
+          "post_id": "3883",
+          "post_url": "https://t.me/useacareercenter/3883",
+          "target_url": "https://t.me/recruitment_SSR",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p3883_bot": {
+          "token": "p3883_bot",
+          "label": "Career Tips, CV & Cover Letter",
+          "link_type": "bot",
+          "post_id": "3883",
+          "post_url": "https://t.me/useacareercenter/3883",
+          "target_url": "https://t.me/USEACCASTbot",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p3884_admin": {
+          "token": "p3884_admin",
+          "label": "📞 Contact Admin",
+          "link_type": "admin",
+          "post_id": "3884",
+          "post_url": "https://t.me/useacareercenter/3884",
+          "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3884",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p3884_employer": {
+          "token": "p3884_employer",
+          "label": "Apply Now - 0975406969",
+          "link_type": "employer",
+          "post_id": "3884",
+          "post_url": "https://t.me/useacareercenter/3884",
+          "target_url": "https://t.me/+855975406969",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p3884_bot": {
+          "token": "p3884_bot",
+          "label": "Career Tips, CV & Cover Letter",
+          "link_type": "bot",
+          "post_id": "3884",
+          "post_url": "https://t.me/useacareercenter/3884",
+          "target_url": "https://t.me/USEACCASTbot",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p3885_admin": {
+          "token": "p3885_admin",
+          "label": "📞 Contact Admin",
+          "link_type": "admin",
+          "post_id": "3885",
+          "post_url": "https://t.me/useacareercenter/3885",
+          "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3885",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p3885_employer": {
+          "token": "p3885_employer",
+          "label": "Apply Now - 081808237",
+          "link_type": "employer",
+          "post_id": "3885",
+          "post_url": "https://t.me/useacareercenter/3885",
+          "target_url": "https://t.me/+85581808237",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p3885_bot": {
+          "token": "p3885_bot",
+          "label": "Career Tips, CV & Cover Letter",
+          "link_type": "bot",
+          "post_id": "3885",
+          "post_url": "https://t.me/useacareercenter/3885",
+          "target_url": "https://t.me/USEACCASTbot",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p9999_employer": {
+          "token": "p9999_employer",
+          "label": "Apply Now",
+          "link_type": "employer",
+          "post_id": "9999",
+          "post_url": "https://t.me/useacareercenter/9999",
+          "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/9999",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p9999_admin": {
+          "token": "p9999_admin",
+          "label": "📞 Contact Admin",
+          "link_type": "admin",
+          "post_id": "9999",
+          "post_url": "https://t.me/useacareercenter/9999",
+          "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/9999",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "random_token": {
+          "token": "random_token",
+          "label": "Button",
+          "link_type": "general",
+          "post_id": "",
+          "post_url": "",
+          "target_url": "https://t.me/USEACCAD",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        }
+      },
+      "by_post": {
+        "3866": {
+          "post_id": "3866",
+          "post_url": "https://t.me/useacareercenter/3866",
+          "clicks": 7,
+          "users": [
+            "6f749e0b9493",
+            "816207a460cc"
+          ]
+        },
+        "3871": {
+          "post_id": "3871",
+          "post_url": "https://t.me/useacareercenter/3871",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "3872": {
+          "post_id": "3872",
+          "post_url": "https://t.me/useacareercenter/3872",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "3873": {
+          "post_id": "3873",
+          "post_url": "https://t.me/useacareercenter/3873",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "3874": {
+          "post_id": "3874",
+          "post_url": "https://t.me/useacareercenter/3874",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "3875": {
+          "post_id": "3875",
+          "post_url": "https://t.me/useacareercenter/3875",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "3876": {
+          "post_id": "3876",
+          "post_url": "https://t.me/useacareercenter/3876",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "3877": {
+          "post_id": "3877",
+          "post_url": "https://t.me/useacareercenter/3877",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "3878": {
+          "post_id": "3878",
+          "post_url": "https://t.me/useacareercenter/3878",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "3880": {
+          "post_id": "3880",
+          "post_url": "https://t.me/useacareercenter/3880",
+          "clicks": 4,
+          "users": [
+            "6f749e0b9493",
+            "816207a460cc"
+          ]
+        },
+        "3881": {
+          "post_id": "3881",
+          "post_url": "https://t.me/useacareercenter/3881",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "3882": {
+          "post_id": "3882",
+          "post_url": "https://t.me/useacareercenter/3882",
+          "clicks": 5,
+          "users": [
+            "6f749e0b9493",
+            "816207a460cc"
+          ]
+        },
+        "3883": {
+          "post_id": "3883",
+          "post_url": "https://t.me/useacareercenter/3883",
+          "clicks": 3,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "3884": {
+          "post_id": "3884",
+          "post_url": "https://t.me/useacareercenter/3884",
+          "clicks": 3,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "3885": {
+          "post_id": "3885",
+          "post_url": "https://t.me/useacareercenter/3885",
+          "clicks": 3,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "9999": {
+          "post_id": "9999",
+          "post_url": "https://t.me/useacareercenter/9999",
+          "clicks": 3,
+          "users": [
+            "6f749e0b9493",
+            "816207a460cc"
+          ]
+        }
+      }
+    }
+  },
+  "recent_clicks": [
+    {
+      "timestamp": "2026-11-02T17:45:30.265582",
+      "month": "2026-11",
+      "token": "p3866_admin",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3866",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T17:45:30.322690",
+      "month": "2026-11",
+      "token": "p3866_employer",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "target_url": "https://t.me/+855962669708",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T17:45:30.390699",
+      "month": "2026-11",
+      "token": "p3866_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "target_url": "https://t.me/careercentercvbot",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:01.787435",
+      "month": "2026-11",
+      "token": "p3866_admin",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3866",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:01.824327",
+      "month": "2026-11",
+      "token": "p3866_employer",
+      "label": "Apply Now - 0962669708",
+      "link_type": "employer",
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "target_url": "https://t.me/+855962669708",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:01.859018",
+      "month": "2026-11",
+      "token": "p3871_admin",
+      "label": "Apply Now - Be Like Khmer",
+      "link_type": "employer",
+      "post_id": "3871",
+      "post_url": "https://t.me/useacareercenter/3871",
+      "target_url": "https://t.me/belikekhmersiemreap",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:01.893637",
+      "month": "2026-11",
+      "token": "p3872_admin",
+      "label": "Apply Now - 015344663",
+      "link_type": "employer",
+      "post_id": "3872",
+      "post_url": "https://t.me/useacareercenter/3872",
+      "target_url": "https://t.me/+85515344663",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:01.929761",
+      "month": "2026-11",
+      "token": "p3873_admin",
+      "label": "Apply Now - @RAIS_SCHOOL",
+      "link_type": "employer",
+      "post_id": "3873",
+      "post_url": "https://t.me/useacareercenter/3873",
+      "target_url": "https://t.me/RAIS_SCHOOL",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:01.964285",
+      "month": "2026-11",
+      "token": "p3874_admin",
+      "label": "Apply Now - 070588000",
+      "link_type": "employer",
+      "post_id": "3874",
+      "post_url": "https://t.me/useacareercenter/3874",
+      "target_url": "https://t.me/+85570588000",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:01.996099",
+      "month": "2026-11",
+      "token": "p3875_admin",
+      "label": "Apply Now - CJFTEC",
+      "link_type": "employer",
+      "post_id": "3875",
+      "post_url": "https://t.me/useacareercenter/3875",
+      "target_url": "https://t.me/cjftec",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:02.029963",
+      "month": "2026-11",
+      "token": "p3876_admin",
+      "label": "Apply Now - 081787985",
+      "link_type": "employer",
+      "post_id": "3876",
+      "post_url": "https://t.me/useacareercenter/3876",
+      "target_url": "https://t.me/+85581787985",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:02.063134",
+      "month": "2026-11",
+      "token": "p3877_admin",
+      "label": "Apply Now - CJFTEC",
+      "link_type": "employer",
+      "post_id": "3877",
+      "post_url": "https://t.me/useacareercenter/3877",
+      "target_url": "https://t.me/cjftec",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:02.097843",
+      "month": "2026-11",
+      "token": "p3878_admin",
+      "label": "Apply Now - 016757174",
+      "link_type": "employer",
+      "post_id": "3878",
+      "post_url": "https://t.me/useacareercenter/3878",
+      "target_url": "https://t.me/+85516757174",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:02.131005",
+      "month": "2026-11",
+      "token": "p3880_admin",
+      "label": "Apply Now - 078555671",
+      "link_type": "employer",
+      "post_id": "3880",
+      "post_url": "https://t.me/useacareercenter/3880",
+      "target_url": "https://t.me/+85578555671",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:02.167341",
+      "month": "2026-11",
+      "token": "p3881_admin",
+      "label": "Apple Now - 095473808",
+      "link_type": "employer",
+      "post_id": "3881",
+      "post_url": "https://t.me/useacareercenter/3881",
+      "target_url": "https://t.me/+85595473808",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:02.224340",
+      "month": "2026-11",
+      "token": "p3882_admin",
+      "label": "Apply Now - 0962080434",
+      "link_type": "employer",
+      "post_id": "3882",
+      "post_url": "https://t.me/useacareercenter/3882",
+      "target_url": "https://t.me/+855962080434",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T18:45:02.275012",
+      "month": "2026-11",
+      "token": "p3882_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3882",
+      "post_url": "https://t.me/useacareercenter/3882",
+      "target_url": "https://t.me/careercentercvbot",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T19:33:25.560466",
+      "month": "2026-11",
+      "token": "p3882_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3882",
+      "post_url": "https://t.me/useacareercenter/3882",
+      "target_url": "https://t.me/USEACCASTbot",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-02T19:33:25.602088",
+      "month": "2026-11",
+      "token": "p9999_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "9999",
+      "post_url": "https://t.me/useacareercenter/9999",
+      "target_url": "https://t.me/USEACCASTbot",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:46.648870",
+      "month": "2026-11",
+      "token": "p3880_admin",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3880",
+      "post_url": "https://t.me/useacareercenter/3880",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3880",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:46.746145",
+      "month": "2026-11",
+      "token": "p3880_employer",
+      "label": "Apply Now - 078555671",
+      "link_type": "employer",
+      "post_id": "3880",
+      "post_url": "https://t.me/useacareercenter/3880",
+      "target_url": "https://t.me/+85578555671",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:46.843624",
+      "month": "2026-11",
+      "token": "p3880_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3880",
+      "post_url": "https://t.me/useacareercenter/3880",
+      "target_url": "https://t.me/USEACCASTbot",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:46.954600",
+      "month": "2026-11",
+      "token": "p3882_admin",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3882",
+      "post_url": "https://t.me/useacareercenter/3882",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3882",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:47.124537",
+      "month": "2026-11",
+      "token": "p3882_employer",
+      "label": "Apply Now - 0962080434",
+      "link_type": "employer",
+      "post_id": "3882",
+      "post_url": "https://t.me/useacareercenter/3882",
+      "target_url": "https://t.me/+855962080434",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:47.288454",
+      "month": "2026-11",
+      "token": "p3883_admin",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3883",
+      "post_url": "https://t.me/useacareercenter/3883",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3883",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:47.426440",
+      "month": "2026-11",
+      "token": "p3883_employer",
+      "label": "Apply Now - Sokha Hotels",
+      "link_type": "employer",
+      "post_id": "3883",
+      "post_url": "https://t.me/useacareercenter/3883",
+      "target_url": "https://t.me/recruitment_SSR",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:47.530792",
+      "month": "2026-11",
+      "token": "p3883_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3883",
+      "post_url": "https://t.me/useacareercenter/3883",
+      "target_url": "https://t.me/USEACCASTbot",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:47.673760",
+      "month": "2026-11",
+      "token": "p3884_admin",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3884",
+      "post_url": "https://t.me/useacareercenter/3884",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3884",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:47.828933",
+      "month": "2026-11",
+      "token": "p3884_employer",
+      "label": "Apply Now - 0975406969",
+      "link_type": "employer",
+      "post_id": "3884",
+      "post_url": "https://t.me/useacareercenter/3884",
+      "target_url": "https://t.me/+855975406969",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:47.908390",
+      "month": "2026-11",
+      "token": "p3884_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3884",
+      "post_url": "https://t.me/useacareercenter/3884",
+      "target_url": "https://t.me/USEACCASTbot",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:47.994501",
+      "month": "2026-11",
+      "token": "p3885_admin",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3885",
+      "post_url": "https://t.me/useacareercenter/3885",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3885",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:48.089853",
+      "month": "2026-11",
+      "token": "p3885_employer",
+      "label": "Apply Now - 081808237",
+      "link_type": "employer",
+      "post_id": "3885",
+      "post_url": "https://t.me/useacareercenter/3885",
+      "target_url": "https://t.me/+85581808237",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T10:29:48.198883",
+      "month": "2026-11",
+      "token": "p3885_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "3885",
+      "post_url": "https://t.me/useacareercenter/3885",
+      "target_url": "https://t.me/USEACCASTbot",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T16:01:01.911097",
+      "month": "2026-11",
+      "token": "p3866_employer",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "target_url": "https://t.me/USEACCAD",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T16:01:01.946534",
+      "month": "2026-11",
+      "token": "p3866_admin",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3866",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T16:01:01.982368",
+      "month": "2026-11",
+      "token": "p9999_employer",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "9999",
+      "post_url": "https://t.me/useacareercenter/9999",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/9999",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T16:01:02.015575",
+      "month": "2026-11",
+      "token": "p9999_admin",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "9999",
+      "post_url": "https://t.me/useacareercenter/9999",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/9999",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T16:01:02.049099",
+      "month": "2026-11",
+      "token": "random_token",
+      "label": "Button",
+      "link_type": "general",
+      "post_id": "",
+      "post_url": "",
+      "target_url": "https://t.me/USEACCAD",
+      "user_hash": "816207a460cc"
+    }
+  ]
 }

@@ -46,6 +46,10 @@ from tracker import (
     RedirectTrackerHandler,
     WebReportHandler,
     WebCsvExportHandler,
+    WebClicksJsonHandler,
+    load_click_data,
+    save_click_data,
+    merge_click_data,
 )
 
 # ------------------------------------------------------------------
@@ -73,7 +77,19 @@ WEBHOOK_URL = (os.getenv("RENDER_EXTERNAL_URL") or os.getenv("WEBHOOK_URL") or "
 #     [{"label": "📞 Contact Us", "url": "https://t.me/USEACCAD"}],
 # ]
 
-CONTACT_STORE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
+DATA_DIR = os.getenv("DATA_DIR", "").strip()
+_DEFAULT_CONTACT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
+if DATA_DIR and os.path.exists(DATA_DIR):
+    CONTACT_STORE_FILE = os.path.join(DATA_DIR, "contact.json")
+    if not os.path.exists(CONTACT_STORE_FILE) and os.path.exists(_DEFAULT_CONTACT_FILE):
+        try:
+            import shutil
+            shutil.copy2(_DEFAULT_CONTACT_FILE, CONTACT_STORE_FILE)
+            logger.info("Initialized persistent CONTACT_STORE_FILE at %s", CONTACT_STORE_FILE)
+        except Exception as copy_e:
+            logger.warning("Failed to initialize CONTACT_STORE_FILE in DATA_DIR: %s", copy_e)
+else:
+    CONTACT_STORE_FILE = _DEFAULT_CONTACT_FILE
 
 # Telegram Native Solid Button Background Colors (Bot API 9.4+)
 # Blue (primary), Red (danger), Green (success)
@@ -220,7 +236,7 @@ DEFAULT_ADMIN_APPLY_NOW_EMOJI = "5472239203590888751"
 DEFAULT_ADMIN_CV_EMOJI = "5431420628978641216"
 
 # Static button 1: Admin contact — never changes
-STATIC_ADMIN_BUTTON_LABEL = "Contact Admin"
+STATIC_ADMIN_BUTTON_LABEL = "📲 Contact Admin"
 STATIC_ADMIN_BUTTON_URL = "https://t.me/USEACCAD"
 
 # Static button 3: Bot redirect — never changes
@@ -232,18 +248,15 @@ DEFAULT_APPLY_CONTACTS = {
     "employer": {
         "label": "Apply Now",
         "btn_style": "danger",
-        "icon_custom_emoji_id": DEFAULT_ADMIN_APPLY_NOW_EMOJI,
     },
     "email": {
         "label": "Apply via Email",
         "btn_style": "danger",
-        "icon_custom_emoji_id": DEFAULT_ADMIN_APPLY_NOW_EMOJI,
     },
     "admin": {
         "label": STATIC_ADMIN_BUTTON_LABEL,
         "url": STATIC_ADMIN_BUTTON_URL,
         "btn_style": "success",
-        "icon_custom_emoji_id": DEFAULT_ADMIN_CONTACT_EMOJI,
     },
 }
 
@@ -458,46 +471,20 @@ def get_contact_keyboard(
         else:
             final_b_url = b_url
 
-        dynamic_kwargs = {"style": b_style}
-        apply_emoji_id = (
-            b.get("icon_custom_emoji_id")
-            or os.getenv("ADMIN_APPLY_NOW")
-            or os.getenv("APPLY_NOW_EMOJI_ID")
-            or DEFAULT_ADMIN_APPLY_NOW_EMOJI
-        )
-        if enable_custom_emoji and apply_emoji_id:
-            dynamic_kwargs["icon_custom_emoji_id"] = str(apply_emoji_id).strip()
-
         dynamic_btns.append(
             InlineKeyboardButton(
                 b_label,
                 url=final_b_url,
-                api_kwargs=dynamic_kwargs,
+                api_kwargs={"style": b_style},
             )
         )
 
     kb_rows = []
     admin_data = apply_contacts.get("admin") or {}
-    admin_kwargs = {"style": admin_data.get("btn_style") or "success"}
-    admin_emoji_id = (
-        admin_data.get("icon_custom_emoji_id")
-        or os.getenv("ADMIN_CONTACT")
-        or os.getenv("ADMIN_CUSTOM_EMOJI_ID")
-        or os.getenv("ADMIN_ICON_EMOJI_ID")
-        or os.getenv("CUSTOM_EMOJI_ID")
-        or os.getenv("EMOJI_ID")
-        or DEFAULT_ADMIN_CONTACT_EMOJI
-    )
-    if enable_custom_emoji and admin_emoji_id:
-        admin_kwargs["icon_custom_emoji_id"] = str(admin_emoji_id).strip()
-        admin_label = "Contact Admin"
-    else:
-        admin_label = STATIC_ADMIN_BUTTON_LABEL
-
     admin_btn = InlineKeyboardButton(
-        admin_label,
+        STATIC_ADMIN_BUTTON_LABEL,
         url=final_admin_url,
-        api_kwargs=admin_kwargs,
+        api_kwargs={"style": admin_data.get("btn_style") or "success"},
     )
 
     if len(dynamic_btns) == 0:
@@ -518,21 +505,11 @@ def get_contact_keyboard(
             kb_rows.append(rem[i : i + 2])
 
     # Bottom Row: Static bot redirect button directly to career tips bot (BLUE)
-    bot_kwargs = {"style": "primary"}
-    cv_emoji_id = (
-        os.getenv("ADMIN_CV")
-        or os.getenv("ADMIN_CV_EMOJI_ID")
-        or os.getenv("CV_EMOJI_ID")
-        or DEFAULT_ADMIN_CV_EMOJI
-    )
-    if enable_custom_emoji and cv_emoji_id:
-        bot_kwargs["icon_custom_emoji_id"] = str(cv_emoji_id).strip()
-
     kb_rows.append([
         InlineKeyboardButton(
             STATIC_BOT_BUTTON_LABEL,
             url=final_bot_url,
-            api_kwargs=bot_kwargs,
+            api_kwargs={"style": "primary"},
         )
     ])
 
@@ -701,16 +678,10 @@ def parse_apply_contacts_input(raw_text: str):
             else:
                 clean_label = "Apply Now"
 
-        apply_emoji_id = (
-            os.getenv("ADMIN_APPLY_NOW")
-            or os.getenv("APPLY_NOW_EMOJI_ID")
-            or DEFAULT_ADMIN_APPLY_NOW_EMOJI
-        )
         btn_dict = {
             "label": clean_label,
             "url": url,
             "btn_style": "danger",
-            "icon_custom_emoji_id": apply_emoji_id,
         }
         buttons.append(btn_dict)
 
@@ -1027,16 +998,10 @@ async def set_email_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     data = load_contact_data()
     apply_contacts = data.get("apply_contacts") or {}
-    apply_emoji_id = (
-        os.getenv("ADMIN_APPLY_NOW")
-        or os.getenv("APPLY_NOW_EMOJI_ID")
-        or DEFAULT_ADMIN_APPLY_NOW_EMOJI
-    )
     email_btn = {
         "label": clean_label,
         "url": url,
         "btn_style": "danger",
-        "icon_custom_emoji_id": apply_emoji_id,
     }
     apply_contacts["email"] = email_btn
     btns = apply_contacts.get("buttons") or []
@@ -1933,6 +1898,109 @@ async def get_emoji_id_command(update: Update, context: ContextTypes.DEFAULT_TYP
         )
 
 
+async def backup_clicks_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Send live clicks.json directly to admin chat as a backup file."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⚠️ បញ្ជានេះសម្រាប់តែ Admin ប៉ុណ្ណោះ (Admins only)។")
+        return
+
+    data = load_click_data()
+    data_bytes = json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
+    now_str = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    filename = f"clicks_backup_{now_str}.json"
+
+    total_links = len(data.get("links", {}))
+    curr_m = datetime.now().strftime("%Y-%m")
+    m_clicks = data.get("months", {}).get(curr_m, {}).get("total_clicks", 0)
+
+    caption = (
+        f"📦 <b>Backup ទិន្នន័យ Clicks Tracker ({now_str})</b>\n\n"
+        f"🔗 Links សរុប: <b>{total_links}</b>\n"
+        f"📊 Clicks ខែនេះ ({curr_m}): <b>{m_clicks}</b>\n\n"
+        f"💡 <b>របៀបការពារទិន្នន័យពេល redeploy:</b>\n"
+        f"1. មុនពេល update code ទៅ GitHub ចុច save file នេះទុក\n"
+        f"2. ឬប្រសិនបើ redeploy នៅ Render ហើយឃើញ click បាត់ សូមគ្រាន់តែផ្ញើ file នេះត្រឡប់មក bot វិញ "
+        f"ជាមួយ caption <code>/restore</code> នោះ Bot នឹង merge ស្តារទិន្នន័យទាំងអស់មកវិញភ្លាមៗ 100%!"
+    )
+    await context.bot.send_document(
+        chat_id=update.effective_chat.id,
+        document=io.BytesIO(data_bytes),
+        filename=filename,
+        caption=caption,
+        parse_mode="HTML",
+    )
+
+
+async def restore_clicks_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Restore and merge clicks.json from an uploaded file."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⚠️ បញ្ជានេះសម្រាប់តែ Admin ប៉ុណ្ណោះ (Admins only)។")
+        return
+
+    msg = update.message
+    doc = msg.document
+    if not doc and msg.reply_to_message and msg.reply_to_message.document:
+        doc = msg.reply_to_message.document
+
+    if not doc or not (doc.file_name or "").lower().endswith(".json"):
+        await msg.reply_text(
+            "⚠️ <b>របៀប Restore ទិន្នន័យ Clicks:</b>\n\n"
+            "សូមផ្ញើ file <code>clicks.json</code> មកកាន់ Bot នេះ "
+            "ហើយដាក់ Caption <code>/restore</code> ឬ Reply លើ file នោះជាមួយ command <code>/restore</code>។",
+            parse_mode="HTML",
+        )
+        return
+
+    try:
+        file_obj = await context.bot.get_file(doc.file_id)
+        content_bytes = await file_obj.download_as_bytearray()
+        incoming = json.loads(content_bytes.decode("utf-8"))
+
+        if not isinstance(incoming, dict) or ("links" not in incoming and "months" not in incoming):
+            await msg.reply_text("❌ File នេះមិនមែនជាទម្រង់ clicks.json ត្រឹមត្រូវទេ។")
+            return
+
+        current = load_click_data()
+        merged = merge_click_data(current, incoming)
+        save_click_data(merged)
+
+        total_links = len(merged.get("links", {}))
+        curr_m = datetime.now().strftime("%Y-%m")
+        m_clicks = merged.get("months", {}).get(curr_m, {}).get("total_clicks", 0)
+
+        await msg.reply_text(
+            f"🎉 <b>បាន Restore & Merge ទិន្នន័យ Clicks ដោយជោគជ័យ!</b>\n\n"
+            f"🔗 Links សរុបក្នុងប្រព័ន្ធ: <b>{total_links}</b>\n"
+            f"📊 Clicks ខែនេះ ({curr_m}): <b>{m_clicks}</b>\n"
+            f"💾 រាល់ click counts ទាំងអស់ត្រូវបានបញ្ចូលរួមគ្នា ដោយមិនបាត់បង់ទិន្នន័យចាស់ឡើយ!",
+            parse_mode="HTML",
+        )
+    except Exception as err:
+        logger.error("Restore clicks failed: %s", err, exc_info=True)
+        await msg.reply_text(f"❌ បរាជ័យក្នុងការ Restore: {err}")
+
+
+async def auto_backup_clicks_job(context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Daily silent auto-backup of clicks.json to primary admin."""
+    try:
+        primary_admin_id = 8824663759
+        data = load_click_data()
+        now_str = datetime.now().strftime("%Y-%m-%d")
+        data_bytes = json.dumps(data, ensure_ascii=False, indent=2).encode("utf-8")
+        await context.bot.send_document(
+            chat_id=primary_admin_id,
+            document=io.BytesIO(data_bytes),
+            filename=f"clicks_auto_backup_{now_str}.json",
+            caption=f"🤖 <b>Auto-Backup Tracker Data ({now_str})</b>\n💡 សារ Backup ប្រចាំថ្ងៃសម្រាប់ទុក Restore ពេល redeploy។",
+            parse_mode="HTML",
+            disable_notification=True,
+        )
+    except Exception as e:
+        logger.debug("Auto backup job notice: %s", e)
+
+
 def setup_webhook_health_routes() -> None:
     """
     Patch python-telegram-bot's internal Tornado webhook server to provide
@@ -2069,6 +2137,7 @@ def setup_webhook_health_routes() -> None:
                     (r"/r/(?P<token>[^/]+)/?", RedirectTrackerHandler),
                     (r"/report/?", WebReportHandler),
                     (r"/report/csv/?", WebCsvExportHandler),
+                    (r"/report/clicks\.json/?", WebClicksJsonHandler),
                 ],
             )
 
@@ -2103,6 +2172,7 @@ def start_local_tracking_server_if_needed(port: int = 10000) -> None:
         (r"/r/(?P<token>[^/]+)/?", RedirectTrackerHandler),
         (r"/report/?", WebReportHandler),
         (r"/report/csv/?", WebCsvExportHandler),
+        (r"/report/clicks\.json/?", WebClicksJsonHandler),
     ])
 
     def _run():
@@ -2121,6 +2191,9 @@ def start_local_tracking_server_if_needed(port: int = 10000) -> None:
 
 def main() -> None:
     app = ApplicationBuilder().token(BOT_TOKEN).build()
+
+    if app.job_queue:
+        app.job_queue.run_repeating(auto_backup_clicks_job, interval=86400, first=3600)
 
     # Conversation handler សម្រាប់ /setcontact (ការពារកុំឱ្យច្រឡំផ្ញើជា post ពេលកំពុង edit)
     contact_conv_handler = ConversationHandler(
@@ -2172,6 +2245,14 @@ def main() -> None:
     app.add_handler(CommandHandler("report", report_command))
     app.add_handler(CommandHandler("reports", report_command))
     app.add_handler(CommandHandler("stats", report_command))
+    app.add_handler(CommandHandler(["backup", "backupclicks", "exportclicks"], backup_clicks_command))
+    app.add_handler(CommandHandler(["restore", "restoreclicks", "importclicks"], restore_clicks_command))
+    app.add_handler(
+        MessageHandler(
+            filters.Document.FileExtension("json") & filters.ChatType.PRIVATE,
+            restore_clicks_command,
+        )
+    )
     app.add_handler(
         CallbackQueryHandler(
             report_callback_handler, pattern="^rep_(home|month|csv):?.*$"
