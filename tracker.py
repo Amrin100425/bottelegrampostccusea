@@ -206,6 +206,25 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
                         import urllib.parse
                         admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
                         target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
+            elif link_type == "email":
+                label = "✉️ Apply via Email"
+                target_url = "https://t.me/USEACCAD"
+                try:
+                    cfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
+                    if os.path.exists(cfile):
+                        with open(cfile, "r", encoding="utf-8") as f:
+                            cdata = json.load(f)
+                            em_data = cdata.get("apply_contacts", {}).get("email", {})
+                            if em_data.get("url"):
+                                target_url = em_data.get("url")
+                            if em_data.get("label"):
+                                label = em_data.get("label")
+                except Exception:
+                    pass
+                if target_url == "https://t.me/USEACCAD" and post_id:
+                    import urllib.parse
+                    admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
+                    target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
 
             post_url = f"https://t.me/useacareercenter/{post_id}"
         except Exception:

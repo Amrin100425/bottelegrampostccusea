@@ -158,8 +158,16 @@ def format_phone_number(raw: str) -> str:
 
 
 def build_contact_url(raw: str) -> str:
-    """បំប្លែង username ឬលេខទូរស័ព្ទ (Telegram/WhatsApp) ឬ Web URL ទៅជា Link ត្រឹមត្រូវសម្រាប់ប៊ូតុង"""
+    """បំប្លែង username ឬលេខទូរស័ព្ទ (Telegram/WhatsApp) ឬ Email ឬ Web URL ទៅជា Link ត្រឹមត្រូវសម្រាប់ប៊ូតុង"""
     raw = raw.strip()
+
+    # 0. Email detection: mailto:, email:, mail:, or user@domain.com
+    if raw.lower().startswith(("mailto:", "email:", "mail:")):
+        email_part = raw.split(":", 1)[1].strip()
+        return f"mailto:{email_part}"
+
+    if "@" in raw and "." in raw and not raw.startswith("@") and "/" not in raw:
+        return f"mailto:{raw}"
 
     # 1. WhatsApp prefix: wa:012345678 or whatsapp:012345678
     if raw.lower().startswith(("wa:", "whatsapp:")):
@@ -215,6 +223,7 @@ STATIC_BOT_BUTTON_URL = "https://t.me/USEACCASTbot"
 
 DEFAULT_APPLY_CONTACTS = {
     "employer": {},
+    "email": {},
     "admin": {
         "label": "👤 ទំនាក់ទំនង Admin USEA Career Center",
         "url": STATIC_ADMIN_BUTTON_URL,
@@ -256,6 +265,7 @@ def load_contact_data() -> dict:
     return {
         "apply_contacts": {
             "employer": {},
+            "email": {},
             "admin": DEFAULT_APPLY_CONTACTS.get("admin", {}),
         },
         "fixed_buttons": DEFAULT_FIXED_BUTTONS,
@@ -344,6 +354,10 @@ def get_contact_keyboard(
     emp_url = (employer.get("url") or "").strip()
     emp_label = (employer.get("label") or "").strip() or "Apply Now"
 
+    email_c = apply_contacts.get("email") or {}
+    email_url = (email_c.get("url") or "").strip()
+    email_label = (email_c.get("label") or "").strip() or "✉️ Apply via Email"
+
     # If post_url is provided but post_id is not, extract post_id from post_url
     if post_url and not post_id:
         try:
@@ -390,32 +404,65 @@ def get_contact_keyboard(
             if emp_url
             else ""
         )
+        final_email_url = (
+            register_tracking_link(
+                base_url=WEBHOOK_URL,
+                target_url=email_url,
+                label=email_label,
+                link_type="email",
+                post_id=post_id,
+                post_url=post_url,
+            )
+            if email_url
+            else ""
+        )
     else:
         final_admin_url = admin_contact_url
         final_bot_url = STATIC_BOT_BUTTON_URL
         final_emp_url = emp_url
+        final_email_url = email_url
 
     kb_rows = []
 
-    # Row 1: Contact Admin button (GREEN) + Optional Apply Now button (RED, only when contact is set)
-    row1 = [
-        InlineKeyboardButton(
-            STATIC_ADMIN_BUTTON_LABEL,
-            url=final_admin_url,
-            api_kwargs={"style": "success"},
-        ),
-    ]
+    admin_btn = InlineKeyboardButton(
+        STATIC_ADMIN_BUTTON_LABEL,
+        url=final_admin_url,
+        api_kwargs={"style": "success"},
+    )
+
+    # Dynamic apply buttons (both RED / danger style — only shown when set)
+    dynamic_apply_btns = []
     if final_emp_url:
-        row1.append(
+        dynamic_apply_btns.append(
             InlineKeyboardButton(
                 emp_label,
                 url=final_emp_url,
                 api_kwargs={"style": "danger"},
             )
         )
-    kb_rows.append(row1)
+    if final_email_url:
+        dynamic_apply_btns.append(
+            InlineKeyboardButton(
+                email_label,
+                url=final_email_url,
+                api_kwargs={"style": "danger"},
+            )
+        )
 
-    # Row 2: Static bot redirect button directly to career tips bot (BLUE)
+    if len(dynamic_apply_btns) == 0:
+        # No dynamic button set -> Row 1 has only Contact Admin
+        kb_rows.append([admin_btn])
+    elif len(dynamic_apply_btns) == 1:
+        # Only one dynamic button set (employer or email) -> Row 1 has Contact Admin + that button
+        kb_rows.append([admin_btn, dynamic_apply_btns[0]])
+    else:
+        # Both Apply Now (Telegram/Phone) and Email are set:
+        # Row 1: Contact Admin (Green) + Apply Now (Red)
+        # Row 2: Apply via Email (Red)
+        kb_rows.append([admin_btn, dynamic_apply_btns[0]])
+        kb_rows.append([dynamic_apply_btns[1]])
+
+    # Bottom Row: Static bot redirect button directly to career tips bot (BLUE)
     kb_rows.append([
         InlineKeyboardButton(
             STATIC_BOT_BUTTON_LABEL,
@@ -508,8 +555,8 @@ def parse_contact_text(raw_text: str):
 
 def parse_apply_contacts_input(raw_text: str):
     """
-    Parse 1 line for the dynamic Apply Now / employer contact button,
-    or clear it if user requests 'clear', 'none', 'off', 'គ្មាន', etc.
+    Parse input for dynamic Apply Now & Email contact buttons.
+    Supports single-line or multi-line (to set Telegram/Phone, Email, or both).
     """
     lines = [ln.strip() for ln in raw_text.splitlines() if ln.strip()]
     if not lines:
@@ -517,52 +564,79 @@ def parse_apply_contacts_input(raw_text: str):
 
     current_data = load_contact_data()
     apply_contacts = dict(current_data.get("apply_contacts") or {})
+    apply_contacts.setdefault("employer", {})
+    apply_contacts.setdefault("email", {})
+    apply_contacts.setdefault("admin", DEFAULT_APPLY_CONTACTS.get("admin", {}))
 
-    entry = lines[0].strip()
+    raw_lower = raw_text.strip().lower()
 
-    # Allow admin to remove/clear the contact so the button disappears
-    if entry.lower() in ("clear", "none", "off", "0", "del", "delete", "remove", "គ្មាន", "លុប", "បិទ"):
+    # Clear options
+    if raw_lower in ("clear", "none", "off", "0", "del", "delete", "remove", "គ្មាន", "លុប", "បិទ", "clear all"):
+        apply_contacts["employer"] = {}
+        apply_contacts["email"] = {}
+        return apply_contacts
+    elif raw_lower in ("clear email", "clear mail", "clearemail", "លុប email", "លុបអ៊ីមែល"):
+        apply_contacts["email"] = {}
+        return apply_contacts
+    elif raw_lower in ("clear employer", "clear telegram", "clear phone", "clear tg", "លុប telegram"):
         apply_contacts["employer"] = {}
         return apply_contacts
 
-    label = "Apply Now"
-    target = entry
-    if " - " in entry:
-        label, _, target = entry.rpartition(" - ")
-    elif "-" in entry and not any(ch.isdigit() for ch in entry.split("-")[0]):
-        label, _, target = entry.rpartition("-")
+    for line in lines:
+        label = ""
+        target = line
+        if " - " in line:
+            label, _, target = line.rpartition(" - ")
+        elif "-" in line and not any(ch.isdigit() for ch in line.split("-")[0]):
+            label, _, target = line.rpartition("-")
 
-    clean_target = target.strip()
-    contact_url = build_contact_url(clean_target) if clean_target else ""
-    if not contact_url:
-        return None
+        clean_target = target.strip()
+        url = build_contact_url(clean_target) if clean_target else ""
+        if not url:
+            continue
 
-    clean_label = label.strip() or "Apply Now"
-    apply_contacts["employer"] = {
-        "label": clean_label,
-        "url": contact_url,
-        "btn_style": "danger",
-    }
+        clean_label = label.strip()
+
+        # Check if email contact
+        if url.startswith("mailto:") or clean_target.lower().startswith(("email:", "mail:", "mailto:")):
+            if not clean_label:
+                clean_label = "✉️ Apply via Email"
+            apply_contacts["email"] = {
+                "label": clean_label,
+                "url": url,
+                "btn_style": "danger",
+            }
+        else:
+            if not clean_label:
+                clean_label = "Apply Now"
+            apply_contacts["employer"] = {
+                "label": clean_label,
+                "url": url,
+                "btn_style": "danger",
+            }
 
     return apply_contacts
 
 
 SETCONTACT_HELP = (
-    "📌 *របៀបកំណត់ប៊ូតុង Apply Now (Set/Change Contact)*\n\n"
-    "ប៊ូតុង Apply Now នឹងបង្ហាញតែនៅពេលអ្នកបានកំណត់ Contact ប៉ុណ្ណោះ។ "
-    "ប្រសិនបើមិនទាន់កំណត់ ឬលុបចេញ ប៊ូតុងនេះនឹងបាត់ (មិនបង្ហាញក្នុង Post ទេ)។\n\n"
-    "*👉 របៀបបញ្ចូល Contact:*\n"
-    "ផ្ញើ Contact សម្រាប់ដាក់ពាក្យ (លេខទូរស័ព្ទ, @username, ឬ Link)\n\n"
-    "*ឧទាហរណ៍៖*\n"
-    "`016736214` (ប្រើ Label: Apply Now ដោយស្វ័យប្រវត្តិ)\n"
-    "`Apply Now - 016736214`\n"
-    "`KHEV BOUSIVLY - 016736214`\n"
-    "`Apply Now - https://t.me/username`\n\n"
-    "🗑️ *របៀបលុប (ដើម្បីកុំឱ្យបង្ហាញប៊ូតុង Apply Now):*\n"
-    "វាយ `/setcontact clear` ឬ `/clearcontact`\n\n"
+    "📌 *របៀបកំណត់ប៊ូតុង Apply Now & Email*\n\n"
+    "ប៊ូតុង Apply Now និងប៊ូតុង Email (ពណ៌ក្រហម) នឹងបង្ហាញតែនៅពេលអ្នកបានកំណត់ប៉ុណ្ណោះ។ "
+    "ប្រសិនបើមិនទាន់កំណត់ ឬលុបចេញ ប៊ូតុងទាំងនោះនឹងបាត់ (មិនបង្ហាញក្នុង Post ទេ)។\n\n"
+    "*👉 របៀបកំណត់ Contact:*\n"
+    "• កំណត់ Apply Now (Telegram/ទូរស័ព្ទ): ផ្ញើលេខទូរស័ព្ទ ឬ @username\n"
+    "  ឧទាហរណ៍: `0975406969` ឬ `Apply Now - 0975406969`\n\n"
+    "• កំណត់ Email: ផ្ញើអាសយដ្ឋាន Email\n"
+    "  ឧទាហរណ៍: `hr@company.com` ឬ `Apply via Email - hr@company.com`\n\n"
+    "• កំណត់ទាំងពីរក្នុងពេលតែមួយ (ផ្ញើ ២ បន្ទាត់):\n"
+    "  `Apply Now - 0975406969`\n"
+    "  `Apply via Email - hr@company.com`\n\n"
+    "🗑️ *របៀបលុបប៊ូតុងចេញ:*\n"
+    "• លុបទាំងអស់: `/setcontact clear` ឬ `/clearcontact`\n"
+    "• លុបតែ Email: `/clearemail` ឬ `/clearcontact email`\n"
+    "• លុបតែ Telegram: `/clearcontact telegram`\n\n"
     "📌 *ប៊ូតុងថេរ (បង្ហាញជានិច្ច):*\n"
-    f"• {STATIC_ADMIN_BUTTON_LABEL} (ភ្ជាប់តំណភ្ជាប់ និងព័ត៌មានការងារដោយស្វ័យប្រវត្តិ)\n"
-    f"• {STATIC_BOT_BUTTON_LABEL}"
+    f"• {STATIC_ADMIN_BUTTON_LABEL} (ពណ៌បៃតង — ភ្ជាប់ព័ត៌មាន Admin ដោយស្វ័យប្រវត្តិ)\n"
+    f"• {STATIC_BOT_BUTTON_LABEL} (ពណ៌ខៀវ)"
 )
 
 
@@ -589,20 +663,21 @@ async def set_contact_start(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
         emp = contacts.get("employer") or {}
         emp_url = (emp.get("url") or "").strip()
+        em = contacts.get("email") or {}
+        em_url = (em.get("url") or "").strip()
+
+        lines = ["✅ បានកំណត់ Contact រួចរាល់!"]
         if emp_url:
-            msg = (
-                "✅ បានកំណត់ Contact សម្រាប់ប៊ូតុង Apply Now រួចរាល់!\n"
-                f"• Label: {emp.get('label', 'Apply Now')}\n"
-                f"• Link: {emp_url}\n\n"
-                "ឧទាហរណ៍ប៊ូតុង (នឹងបង្ហាញក្នុង Post)៖"
-            )
-        else:
-            msg = (
-                "✅ បានលុប Contact សម្រាប់ប៊ូតុង Apply Now រួចរាល់!\n"
-                "👉 ប៊ូតុង Apply Now នឹងមិនបង្ហាញក្នុង Post ទេ (លុះត្រាតែកំណត់ Contact ម្តងទៀត)។\n\n"
-                "ឧទាហរណ៍ប៊ូតុង (នឹងបង្ហាញក្នុង Post)៖"
-            )
-        await update.message.reply_text(msg, reply_markup=keyboard)
+            lines.append(f"• Apply Now: {emp.get('label', 'Apply Now')} → {emp_url}")
+        if em_url:
+            lines.append(f"• Email: {em.get('label', '✉️ Apply via Email')} → {em_url}")
+        if not emp_url and not em_url:
+            lines = [
+                "✅ បានលុប Contact សម្រាប់ប៊ូតុង Apply Now និង Email រួចរាល់!",
+                "👉 ប៊ូតុងទាំងនេះនឹងមិនបង្ហាញក្នុង Post ទេ (លុះត្រាតែកំណត់ Contact ម្តងទៀត)។",
+            ]
+        lines.append("\nឧទាហរណ៍ប៊ូតុង (នឹងបង្ហាញក្នុង Post)៖")
+        await update.message.reply_text("\n".join(lines), reply_markup=keyboard)
         return ConversationHandler.END
 
     await update.message.reply_text(
@@ -630,20 +705,21 @@ async def set_contact_process(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     emp = contacts.get("employer") or {}
     emp_url = (emp.get("url") or "").strip()
+    em = contacts.get("email") or {}
+    em_url = (em.get("url") or "").strip()
+
+    lines = ["✅ បានកំណត់ Contact រួចរាល់!"]
     if emp_url:
-        msg = (
-            "✅ បានកំណត់ Contact សម្រាប់ប៊ូតុង Apply Now រួចរាល់!\n"
-            f"• Label: {emp.get('label', 'Apply Now')}\n"
-            f"• Link: {emp_url}\n\n"
-            "ឧទាហរណ៍ប៊ូតុង (នឹងបង្ហាញក្នុង Post)៖"
-        )
-    else:
-        msg = (
-            "✅ បានលុប Contact សម្រាប់ប៊ូតុង Apply Now រួចរាល់!\n"
-            "👉 ប៊ូតុង Apply Now នឹងមិនបង្ហាញក្នុង Post ទេ (លុះត្រាតែកំណត់ Contact ម្តងទៀត)។\n\n"
-            "ឧទាហរណ៍ប៊ូតុង (នឹងបង្ហាញក្នុង Post)៖"
-        )
-    await update.message.reply_text(msg, reply_markup=keyboard)
+        lines.append(f"• Apply Now: {emp.get('label', 'Apply Now')} → {emp_url}")
+    if em_url:
+        lines.append(f"• Email: {em.get('label', '✉️ Apply via Email')} → {em_url}")
+    if not emp_url and not em_url:
+        lines = [
+            "✅ បានលុប Contact សម្រាប់ប៊ូតុង Apply Now និង Email រួចរាល់!",
+            "👉 ប៊ូតុងទាំងនេះនឹងមិនបង្ហាញក្នុង Post ទេ (លុះត្រាតែកំណត់ Contact ម្តងទៀត)។",
+        ]
+    lines.append("\nឧទាហរណ៍ប៊ូតុង (នឹងបង្ហាញក្នុង Post)៖")
+    await update.message.reply_text("\n".join(lines), reply_markup=keyboard)
     return ConversationHandler.END
 
 
@@ -658,16 +734,101 @@ async def clear_contact_command(update: Update, context: ContextTypes.DEFAULT_TY
         await update.message.reply_text("❌ អ្នកមិនមានសិទ្ធិប្រើ command នេះទេ។")
         return
 
+    arg = (context.args[0].lower() if context.args else "").strip()
+
     data = load_contact_data()
     apply_contacts = data.get("apply_contacts") or {}
-    apply_contacts["employer"] = {}
+
+    if arg in ("email", "mail"):
+        apply_contacts["email"] = {}
+        msg_action = "បានលុប Contact សម្រាប់ប៊ូតុង Email រួចរាល់!"
+        msg_sub = "👉 ប៊ូតុង Email នឹងមិនបង្ហាញក្នុង Post ទៀតទេ (លុះត្រាតែកំណត់ម្តងទៀត)។"
+    elif arg in ("employer", "telegram", "phone", "tg"):
+        apply_contacts["employer"] = {}
+        msg_action = "បានលុប Contact សម្រាប់ប៊ូតុង Apply Now រួចរាល់!"
+        msg_sub = "👉 ប៊ូតុង Apply Now នឹងមិនបង្ហាញក្នុង Post ទៀតទេ (លុះត្រាតែកំណត់ម្តងទៀត)។"
+    else:
+        apply_contacts["employer"] = {}
+        apply_contacts["email"] = {}
+        msg_action = "បានលុប Contact សម្រាប់ប៊ូតុង Apply Now និង Email រួចរាល់!"
+        msg_sub = "👉 ប៊ូតុងទាំងពីរនឹងមិនបង្ហាញក្នុង Post ទៀតទេ (លុះត្រាតែកំណត់ម្តងទៀត)។"
+
     save_contact_data(apply_contacts, fixed_buttons=data.get("fixed_buttons", DEFAULT_FIXED_BUTTONS))
 
     keyboard = get_contact_keyboard()
     await update.message.reply_text(
-        "✅ បានលុប Contact សម្រាប់ប៊ូតុង Apply Now រួចរាល់!\n"
-        "👉 ប៊ូតុង Apply Now នឹងមិនបង្ហាញក្នុង Post ទៀតទេ (លុះត្រាតែអ្នកកំណត់ម្តងទៀតតាមរយៈ /setcontact)។\n\n"
+        f"✅ {msg_action}\n{msg_sub}\n\nទម្រង់ប៊ូតុងបច្ចុប្បន្ន៖",
+        reply_markup=keyboard,
+    )
+
+
+async def clear_email_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("❌ អ្នកមិនមានសិទ្ធិប្រើ command នេះទេ។")
+        return
+
+    data = load_contact_data()
+    apply_contacts = data.get("apply_contacts") or {}
+    apply_contacts["email"] = {}
+    save_contact_data(apply_contacts, fixed_buttons=data.get("fixed_buttons", DEFAULT_FIXED_BUTTONS))
+
+    keyboard = get_contact_keyboard()
+    await update.message.reply_text(
+        "✅ បានលុប Contact សម្រាប់ប៊ូតុង Email រួចរាល់!\n"
+        "👉 ប៊ូតុង Email នឹងមិនបង្ហាញក្នុង Post ទៀតទេ (លុះត្រាតែកំណត់ម្តងទៀតតាមរយៈ /setemail ឬ /setcontact)។\n\n"
         "ទម្រង់ប៊ូតុងបច្ចុប្បន្ន៖",
+        reply_markup=keyboard,
+    )
+
+
+async def set_email_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("❌ អ្នកមិនមានសិទ្ធិប្រើ command នេះទេ។")
+        return
+
+    raw_text = update.message.text.partition(" ")[2].strip()
+    if not raw_text:
+        await update.message.reply_text(
+            "📝 *សូមផ្ញើ Email ជាមួយ command នេះ៖*\n\n"
+            "ឧទាហរណ៍៖\n"
+            "`/setemail hr@company.com`\n"
+            "`/setemail Apply via Email - hr@company.com`\n\n"
+            "ដើម្បីលុបប៊ូតុង Email ចេញ៖ `/clearemail`",
+            parse_mode="Markdown",
+        )
+        return
+
+    label = ""
+    target = raw_text
+    if " - " in raw_text:
+        label, _, target = raw_text.rpartition(" - ")
+    elif "-" in raw_text and not any(ch.isdigit() for ch in raw_text.split("-")[0]):
+        label, _, target = raw_text.rpartition("-")
+
+    clean_target = target.strip()
+    url = build_contact_url(clean_target)
+    if not url.startswith("mailto:"):
+        url = f"mailto:{clean_target}"
+
+    clean_label = label.strip() or "✉️ Apply via Email"
+
+    data = load_contact_data()
+    apply_contacts = data.get("apply_contacts") or {}
+    apply_contacts["email"] = {
+        "label": clean_label,
+        "url": url,
+        "btn_style": "danger",
+    }
+    save_contact_data(apply_contacts, fixed_buttons=data.get("fixed_buttons", DEFAULT_FIXED_BUTTONS))
+
+    keyboard = get_contact_keyboard()
+    await update.message.reply_text(
+        f"✅ បានកំណត់ប៊ូតុង Email រួចរាល់!\n"
+        f"• Label: {clean_label}\n"
+        f"• Link: {url}\n\n"
+        "ឧទាហរណ៍ប៊ូតុង (នឹងបង្ហាញក្នុង Post)៖",
         reply_markup=keyboard,
     )
 
@@ -686,17 +847,28 @@ async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     emp_label = (emp.get("label") or "").strip() or "Apply Now"
 
     if emp_url:
-        emp_status = f"✅ {emp_label} → {emp_url} (បង្ហាញក្នុង Post)"
+        emp_status = f"✅ {emp_label} → {emp_url} (បង្ហាញក្នុង Post - ពណ៌ក្រហម)"
     else:
         emp_status = "❌ មិនទាន់កំណត់ (ប៊ូតុង Apply Now នឹងមិនបង្ហាញក្នុង Post ទេ)"
 
+    em = apply_contacts.get("email") or {}
+    em_url = (em.get("url") or "").strip()
+    em_label = (em.get("label") or "").strip() or "✉️ Apply via Email"
+
+    if em_url:
+        em_status = f"✅ {em_label} → {em_url} (បង្ហាញក្នុង Post - ពណ៌ក្រហម)"
+    else:
+        em_status = "❌ មិនទាន់កំណត់ (ប៊ូតុង Email នឹងមិនបង្ហាញក្នុង Post ទេ)"
+
     lines = [
         "ℹ️ <b>ទម្រង់ប៊ូតុងបច្ចុប្បន្ន (Current Button Layout)</b>\n",
-        "🔒 <b>ប៊ូតុងថេរ (Static — មិនផ្លាស់ប្ដូរ):</b>",
-        f"1️⃣ {STATIC_ADMIN_BUTTON_LABEL} → {STATIC_ADMIN_BUTTON_URL} (ភ្ជាប់ Link & Text)",
-        f"3️⃣ {STATIC_BOT_BUTTON_LABEL} → {STATIC_BOT_BUTTON_URL}\n",
-        "🔄 <b>ប៊ូតុង Apply Now (Dynamic — ប្រើ /setcontact ឬ /clearcontact):</b>",
-        f"2️⃣ {emp_status}",
+        "🔒 <b>ប៊ូតុងថេរ (Static):</b>",
+        f"• {STATIC_ADMIN_BUTTON_LABEL} → {STATIC_ADMIN_BUTTON_URL} (ពណ៌បៃតង)",
+        f"• {STATIC_BOT_BUTTON_LABEL} → {STATIC_BOT_BUTTON_URL} (ពណ៌ខៀវ)\n",
+        "🔄 <b>ប៊ូតុង Dynamic (ពណ៌ក្រហម — បង្ហាញតែពេលកំណត់):</b>",
+        f"• Apply Now: {emp_status}",
+        f"• Email: {em_status}\n",
+        "💡 ប្រើ /setcontact ឬ /setemail ដើម្បីកំណត់ | /clearcontact ឬ /clearemail ដើម្បីលុប",
     ]
 
     keyboard = get_contact_keyboard()
@@ -1694,6 +1866,8 @@ def main() -> None:
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("showcontact", show_contact))
     app.add_handler(CommandHandler("clearcontact", clear_contact_command))
+    app.add_handler(CommandHandler("setemail", set_email_command))
+    app.add_handler(CommandHandler("clearemail", clear_email_command))
     app.add_handler(CommandHandler("report", report_command))
     app.add_handler(CommandHandler("reports", report_command))
     app.add_handler(CommandHandler("stats", report_command))

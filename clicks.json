@@ -516,7 +516,7 @@
   },
   "months": {
     "2026-11": {
-      "total_clicks": 38,
+      "total_clicks": 39,
       "unique_users": [
         "6f749e0b9493",
         "816207a460cc"
@@ -548,6 +548,13 @@
         },
         "general": {
           "label": "Button",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "email": {
+          "label": "Apply via Email",
           "clicks": 1,
           "users": [
             "816207a460cc"
