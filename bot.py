@@ -227,7 +227,7 @@ DEFAULT_APPLY_CONTACTS = {
     "employer": {},
     "email": {},
     "admin": {
-        "label": "👤 ទំនាក់ទំនង Admin USEA Career Center",
+        "label": STATIC_ADMIN_BUTTON_LABEL,
         "url": STATIC_ADMIN_BUTTON_URL,
         "btn_style": "success",
     },
@@ -463,10 +463,12 @@ def get_contact_keyboard(
         or os.getenv("EMOJI_ID")
     )
     admin_label = admin_data.get("label") or STATIC_ADMIN_BUTTON_LABEL
+    if admin_label in ("👤 ទំនាក់ទំនង Admin USEA Career Center", "Contact Admin"):
+        admin_label = STATIC_ADMIN_BUTTON_LABEL
+
     if enable_custom_emoji and admin_emoji_id:
         admin_kwargs["icon_custom_emoji_id"] = str(admin_emoji_id).strip()
-        if admin_label.startswith(("📲 ", "📞 ", "✨ 📞 ")):
-            admin_label = "Contact Admin"
+        admin_label = re.sub(r"^[\W_]+", "", admin_label).strip() or "Contact Admin"
 
     admin_btn = InlineKeyboardButton(
         admin_label,
