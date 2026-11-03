@@ -45,6 +45,9 @@ PAST_POST_CONTACTS = {
     "3880": {"url": "https://t.me/+85578555671", "label": "Apply Now - 078555671"},
     "3881": {"url": "https://t.me/+85595473808", "label": "Apple Now - 095473808"},
     "3882": {"url": "https://t.me/+855962080434", "label": "Apply Now - 0962080434"},
+    "3883": {"url": "https://t.me/recruitment_SSR", "label": "Apply Now - Sokha Hotels"},
+    "3884": {"url": "https://t.me/+855975406969", "label": "Apply Now - 0975406969"},
+    "3885": {"url": "https://t.me/+85581808237", "label": "Apply Now - 081808237"},
 }
 
 
@@ -172,11 +175,6 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
             if link_type in ("bot", "tips"):
                 label = "Career Tips, CV & Cover Letter"
                 target_url = "https://t.me/USEACCASTbot"
-            elif post_id in PAST_POST_CONTACTS and (link_type in ("employer", "apply") or post_id != "3866"):
-                # For past single-button posts (3868-3882), token was _admin but represented Apply Now
-                info = PAST_POST_CONTACTS[post_id]
-                label = info.get("label", "Apply Now")
-                target_url = info.get("url", "https://t.me/USEACCAD")
             elif link_type == "admin":
                 label = "📞 Contact Admin"
                 target_url = "https://t.me/USEACCAD"
@@ -185,20 +183,30 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
                     admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
                     target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
             elif link_type in ("employer", "apply"):
-                label = "Apply Now - 0962669708"
-                target_url = "https://t.me/+855962669708"
-                try:
-                    cfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
-                    if os.path.exists(cfile):
-                        with open(cfile, "r", encoding="utf-8") as f:
-                            cdata = json.load(f)
-                            emp = cdata.get("apply_contacts", {}).get("employer", {})
-                            if emp.get("url"):
-                                target_url = emp.get("url")
-                            if emp.get("label"):
-                                label = emp.get("label")
-                except Exception:
-                    pass
+                if post_id in PAST_POST_CONTACTS:
+                    info = PAST_POST_CONTACTS[post_id]
+                    label = info.get("label", "Apply Now")
+                    target_url = info.get("url", "https://t.me/USEACCAD")
+                else:
+                    label = "Apply Now"
+                    target_url = "https://t.me/USEACCAD"
+                    try:
+                        cfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
+                        if os.path.exists(cfile):
+                            with open(cfile, "r", encoding="utf-8") as f:
+                                cdata = json.load(f)
+                                emp = cdata.get("apply_contacts", {}).get("employer", {})
+                                if emp.get("url"):
+                                    target_url = emp.get("url")
+                                if emp.get("label"):
+                                    label = emp.get("label")
+                    except Exception:
+                        pass
+                    if target_url == "https://t.me/USEACCAD" and post_id:
+                        import urllib.parse
+                        admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
+                        target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
+
             post_url = f"https://t.me/useacareercenter/{post_id}"
         except Exception:
             pass
