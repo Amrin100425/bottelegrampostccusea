@@ -48,6 +48,10 @@ PAST_POST_CONTACTS = {
     "3883": {"url": "https://t.me/recruitment_SSR", "label": "Apply Now - Sokha Hotels"},
     "3884": {"url": "https://t.me/+855975406969", "label": "Apply Now - 0975406969"},
     "3885": {"url": "https://t.me/+85581808237", "label": "Apply Now - 081808237"},
+    "3886": {"url": "https://t.me/USEACCAD", "label": "Apply Now"},
+    "3887": {"url": "https://t.me/+85586703338", "label": "Apply Now - 086703338"},
+    "3888": {"url": "https://t.me/+85577967755", "label": "Apply Now - 077967755"},
+    "3889": {"url": "https://t.me/+85516499099", "label": "Apply Now - 016499099"},
 }
 
 
@@ -182,7 +186,7 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
                     import urllib.parse
                     admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
                     target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
-            elif link_type in ("employer", "apply"):
+            elif link_type in ("employer", "apply") or link_type.startswith("apply") or link_type.startswith("employer"):
                 if post_id in PAST_POST_CONTACTS:
                     info = PAST_POST_CONTACTS[post_id]
                     label = info.get("label", "Apply Now")
