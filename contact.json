@@ -14,7 +14,8 @@
     "admin": {
       "label": "Contact Admin",
       "url": "https://t.me/USEACCAD",
-      "btn_style": "success"
+      "btn_style": "success",
+      "icon_custom_emoji_id": "5850292279503228917"
     }
   },
   "fixed_buttons": [

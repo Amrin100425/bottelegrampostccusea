@@ -462,13 +462,11 @@ def get_contact_keyboard(
         or os.getenv("CUSTOM_EMOJI_ID")
         or os.getenv("EMOJI_ID")
     )
-    admin_label = admin_data.get("label") or STATIC_ADMIN_BUTTON_LABEL
-    if admin_label in ("👤 ទំនាក់ទំនង Admin USEA Career Center", "Contact Admin"):
-        admin_label = STATIC_ADMIN_BUTTON_LABEL
-
     if enable_custom_emoji and admin_emoji_id:
         admin_kwargs["icon_custom_emoji_id"] = str(admin_emoji_id).strip()
-        admin_label = re.sub(r"^[\W_]+", "", admin_label).strip() or "Contact Admin"
+        admin_label = "Contact Admin"
+    else:
+        admin_label = STATIC_ADMIN_BUTTON_LABEL
 
     admin_btn = InlineKeyboardButton(
         admin_label,
