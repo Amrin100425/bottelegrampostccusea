@@ -206,19 +206,25 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
                         import urllib.parse
                         admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
                         target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
-            elif link_type == "email":
-                label = "✉️ Apply via Email"
+            elif link_type == "email" or link_type.startswith("email"):
+                label = "Apply Now"
                 target_url = "https://t.me/USEACCAD"
                 try:
                     cfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contact.json")
                     if os.path.exists(cfile):
                         with open(cfile, "r", encoding="utf-8") as f:
                             cdata = json.load(f)
-                            em_data = cdata.get("apply_contacts", {}).get("email", {})
-                            if em_data.get("url"):
-                                target_url = em_data.get("url")
-                            if em_data.get("label"):
-                                label = em_data.get("label")
+                            for b in cdata.get("apply_contacts", {}).get("buttons", []):
+                                if (b.get("url") or "").startswith("mailto:"):
+                                    target_url = b.get("url")
+                                    label = b.get("label", label)
+                                    break
+                            if target_url == "https://t.me/USEACCAD":
+                                em_data = cdata.get("apply_contacts", {}).get("email", {})
+                                if em_data.get("url"):
+                                    target_url = em_data.get("url")
+                                if em_data.get("label"):
+                                    label = em_data.get("label")
                 except Exception:
                     pass
                 if target_url == "https://t.me/USEACCAD" and post_id:
@@ -678,26 +684,140 @@ class RedirectTrackerHandler(tornado.web.RequestHandler):
             email_addr = target_url.replace("mailto:", "").split("?")[0]
             self.set_header("Content-Type", "text/html; charset=utf-8")
             self.write(f'''<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="refresh" content="0; url={target_url}">
-    <title>Redirecting to Email...</title>
-    <script>window.location.href = "{target_url}";</script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply via Email — USEA Career Center</title>
     <style>
-        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 60px 20px; background: #0f172a; color: #f8fafc; }}
-        .box {{ max-width: 480px; margin: 0 auto; background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 32px 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }}
-        h2 {{ font-size: 1.4rem; margin-top: 0; color: #38bdf8; }}
-        p {{ color: #94a3b8; font-size: 0.95rem; line-height: 1.5; }}
-        a.btn {{ display: inline-block; margin-top: 24px; padding: 14px 28px; background: #ef4444; color: white; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 1rem; }}
+        * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }}
+        .card {{
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 36px 28px;
+            max-width: 460px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }}
+        .icon {{
+            font-size: 52px;
+            margin-bottom: 16px;
+        }}
+        h1 {{
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 8px;
+        }}
+        p.sub {{
+            color: #94a3b8;
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }}
+        .email-display {{
+            background-color: #0f172a;
+            border: 1px dashed #475569;
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #f1f5f9;
+            font-weight: 600;
+            font-size: 1.05rem;
+            word-break: break-all;
+            margin-bottom: 24px;
+            user-select: all;
+        }}
+        .btn {{
+            display: block;
+            width: 100%;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }}
+        .btn-gmail {{
+            background-color: #ea4335;
+            color: #ffffff;
+        }}
+        .btn-gmail:hover {{
+            background-color: #d93025;
+        }}
+        .btn-mail {{
+            background-color: #2563eb;
+            color: #ffffff;
+        }}
+        .btn-mail:hover {{
+            background-color: #1d4ed8;
+        }}
+        .btn-copy {{
+            background-color: #334155;
+            color: #e2e8f0;
+        }}
+        .btn-copy:hover {{
+            background-color: #475569;
+        }}
+        .hint {{
+            margin-top: 16px;
+            color: #64748b;
+            font-size: 0.8rem;
+        }}
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>Opening Email Client...</h2>
-        <p>If your email app does not open automatically, please tap the button below:</p>
-        <a class="btn" href="{target_url}">✉️ Send Email to {email_addr}</a>
+    <div class="card">
+        <div class="icon">✉️</div>
+        <h1>Apply via Email</h1>
+        <p class="sub">Please choose how you want to send your application:</p>
+        
+        <div class="email-display" id="email-text">{email_addr}</div>
+
+        <a class="btn btn-gmail" href="https://mail.google.com/mail/?view=cm&fs=1&to={email_addr}" target="_blank" rel="noopener">
+            🚀 Open with Gmail (Web)
+        </a>
+        <a class="btn btn-mail" href="{target_url}" id="mail-link">
+            ✉️ Open Email App (Default)
+        </a>
+        <button class="btn btn-copy" onclick="copyEmail()">
+            📋 Copy Email Address
+        </button>
+
+        <p class="hint">USEA Career Center Job Portal</p>
     </div>
+
+    <script>
+        function copyEmail() {{
+            navigator.clipboard.writeText("{email_addr}").then(() => {{
+                const btn = document.querySelector('.btn-copy');
+                const orig = btn.innerText;
+                btn.innerText = "✅ Copied to Clipboard!";
+                setTimeout(() => btn.innerText = orig, 2500);
+            }});
+        }}
+        window.addEventListener('load', function() {{
+            setTimeout(function() {{
+                try {{
+                    window.location.href = "{target_url}";
+                }} catch(e) {{}}
+            }}, 300);
+        }});
+    </script>
 </body>
 </html>''')
             return

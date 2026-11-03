@@ -223,6 +223,7 @@ STATIC_BOT_BUTTON_LABEL = "Career Tips, CV & Cover Letter"
 STATIC_BOT_BUTTON_URL = "https://t.me/USEACCASTbot"
 
 DEFAULT_APPLY_CONTACTS = {
+    "buttons": [],
     "employer": {},
     "email": {},
     "admin": {
@@ -245,6 +246,13 @@ def load_contact_data() -> dict:
                         apply_contacts = data.get("apply_contacts")
                         if not isinstance(apply_contacts, dict):
                             apply_contacts = {}
+                        if "buttons" not in apply_contacts:
+                            btns = []
+                            if apply_contacts.get("employer", {}).get("url"):
+                                btns.append(apply_contacts["employer"])
+                            if apply_contacts.get("email", {}).get("url"):
+                                btns.append(apply_contacts["email"])
+                            apply_contacts["buttons"] = btns
                         return {
                             "apply_contacts": apply_contacts,
                             "fixed_buttons": data.get("fixed_buttons", DEFAULT_FIXED_BUTTONS),
@@ -256,6 +264,7 @@ def load_contact_data() -> dict:
                         adm = flat[0] if flat else DEFAULT_APPLY_CONTACTS["admin"]
                         return {
                             "apply_contacts": {
+                                "buttons": [emp] if emp.get("url") else [],
                                 "employer": emp,
                                 "admin": adm,
                             },
@@ -265,6 +274,7 @@ def load_contact_data() -> dict:
             logger.warning("មិនអាចអាន contact.json បាន: %s", e)
     return {
         "apply_contacts": {
+            "buttons": [],
             "employer": {},
             "email": {},
             "admin": DEFAULT_APPLY_CONTACTS.get("admin", {}),
@@ -351,13 +361,14 @@ def get_contact_keyboard(
     data = load_contact_data()
     apply_contacts = data.get("apply_contacts") or {}
 
-    employer = apply_contacts.get("employer") or {}
-    emp_url = (employer.get("url") or "").strip()
-    emp_label = (employer.get("label") or "").strip() or "Apply Now"
-
-    email_c = apply_contacts.get("email") or {}
-    email_url = (email_c.get("url") or "").strip()
-    email_label = (email_c.get("label") or "").strip() or "✉️ Apply via Email"
+    # Extract all dynamic buttons (supports 1, 2, 3, or more buttons!)
+    raw_buttons = apply_contacts.get("buttons")
+    if raw_buttons is None:
+        raw_buttons = []
+        if apply_contacts.get("employer", {}).get("url"):
+            raw_buttons.append(apply_contacts["employer"])
+        if apply_contacts.get("email", {}).get("url"):
+            raw_buttons.append(apply_contacts["email"])
 
     # If post_url is provided but post_id is not, extract post_id from post_url
     if post_url and not post_id:
@@ -393,87 +404,76 @@ def get_contact_keyboard(
             post_id=post_id,
             post_url=post_url,
         )
-        final_emp_url = (
-            register_tracking_link(
-                base_url=WEBHOOK_URL,
-                target_url=emp_url,
-                label=emp_label,
-                link_type="employer",
-                post_id=post_id,
-                post_url=post_url,
-            )
-            if emp_url
-            else ""
-        )
-        final_email_url = (
-            register_tracking_link(
-                base_url=WEBHOOK_URL,
-                target_url=email_url,
-                label=email_label,
-                link_type="email",
-                post_id=post_id,
-                post_url=post_url,
-            )
-            if email_url
-            else ""
-        )
     else:
         final_admin_url = admin_contact_url
         final_bot_url = STATIC_BOT_BUTTON_URL
-        final_emp_url = emp_url
-        final_email_url = email_url
 
-    # Telegram Bot API strictly prohibits mailto: in InlineKeyboardButton.url (raises BUTTON_URL_INVALID).
-    # All mailto: links must be routed through the HTTP/HTTPS web redirect URL.
-    if email_url and (final_email_url.startswith("mailto:") or not final_email_url.startswith(("http://", "https://", "tg://"))):
-        final_email_url = register_tracking_link(
-            base_url=WEBHOOK_URL,
-            target_url=email_url,
-            label=email_label,
-            link_type="email",
-            post_id=post_id or "preview",
-            post_url=post_url or "",
+    # Process all dynamic buttons (ALL styled in RED / danger)
+    dynamic_btns = []
+    for idx, b in enumerate(raw_buttons, start=1):
+        b_url = (b.get("url") or "").strip()
+        b_label = (b.get("label") or "").strip() or "Apply Now"
+        b_style = b.get("btn_style") or "danger"
+        if not b_url:
+            continue
+
+        is_email = b_url.startswith("mailto:")
+        link_type = f"email{idx}" if is_email else f"apply{idx}"
+
+        # Telegram Bot API strictly prohibits mailto: in InlineKeyboardButton.url.
+        # It must ALWAYS be routed through web redirect URL:
+        if is_email or not b_url.startswith(("http://", "https://", "tg://")):
+            final_b_url = register_tracking_link(
+                base_url=WEBHOOK_URL,
+                target_url=b_url,
+                label=b_label,
+                link_type=link_type,
+                post_id=post_id or "preview",
+                post_url=post_url or "",
+            )
+        elif should_track:
+            final_b_url = register_tracking_link(
+                base_url=WEBHOOK_URL,
+                target_url=b_url,
+                label=b_label,
+                link_type=link_type,
+                post_id=post_id,
+                post_url=post_url,
+            )
+        else:
+            final_b_url = b_url
+
+        dynamic_btns.append(
+            InlineKeyboardButton(
+                b_label,
+                url=final_b_url,
+                api_kwargs={"style": b_style},
+            )
         )
 
     kb_rows = []
-
     admin_btn = InlineKeyboardButton(
         STATIC_ADMIN_BUTTON_LABEL,
         url=final_admin_url,
         api_kwargs={"style": "success"},
     )
 
-    # Dynamic apply buttons (both RED / danger style — only shown when set)
-    dynamic_apply_btns = []
-    if final_emp_url:
-        dynamic_apply_btns.append(
-            InlineKeyboardButton(
-                emp_label,
-                url=final_emp_url,
-                api_kwargs={"style": "danger"},
-            )
-        )
-    if final_email_url:
-        dynamic_apply_btns.append(
-            InlineKeyboardButton(
-                email_label,
-                url=final_email_url,
-                api_kwargs={"style": "danger"},
-            )
-        )
-
-    if len(dynamic_apply_btns) == 0:
-        # No dynamic button set -> Row 1 has only Contact Admin
+    if len(dynamic_btns) == 0:
+        # 0 dynamic buttons -> Row 1 has only Contact Admin
         kb_rows.append([admin_btn])
-    elif len(dynamic_apply_btns) == 1:
-        # Only one dynamic button set (employer or email) -> Row 1 has Contact Admin + that button
-        kb_rows.append([admin_btn, dynamic_apply_btns[0]])
+    elif len(dynamic_btns) == 1:
+        # 1 dynamic button -> Row 1 has Contact Admin + Button 1
+        kb_rows.append([admin_btn, dynamic_btns[0]])
+    elif len(dynamic_btns) == 2:
+        # 2 dynamic buttons -> Row 1 has Contact Admin + Button 1; Row 2 has Button 2
+        kb_rows.append([admin_btn, dynamic_btns[0]])
+        kb_rows.append([dynamic_btns[1]])
     else:
-        # Both Apply Now (Telegram/Phone) and Email are set:
-        # Row 1: Contact Admin (Green) + Apply Now (Red)
-        # Row 2: Apply via Email (Red)
-        kb_rows.append([admin_btn, dynamic_apply_btns[0]])
-        kb_rows.append([dynamic_apply_btns[1]])
+        # 3 or more dynamic buttons -> Row 1: Contact Admin + Button 1; remaining buttons 2 per row
+        kb_rows.append([admin_btn, dynamic_btns[0]])
+        rem = dynamic_btns[1:]
+        for i in range(0, len(rem), 2):
+            kb_rows.append(rem[i : i + 2])
 
     # Bottom Row: Static bot redirect button directly to career tips bot (BLUE)
     kb_rows.append([
@@ -569,31 +569,46 @@ def parse_contact_text(raw_text: str):
 def parse_apply_contacts_input(raw_text: str):
     """
     Parse input for dynamic Apply Now & Email contact buttons.
-    Supports single-line or multi-line (to set Telegram/Phone, Email, or both).
+    Supports any number of buttons (1, 2, 3, 4, etc.).
     """
     lines = [ln.strip() for ln in raw_text.splitlines() if ln.strip()]
     if not lines:
         return None
 
-    current_data = load_contact_data()
-    apply_contacts = dict(current_data.get("apply_contacts") or {})
-    apply_contacts.setdefault("employer", {})
-    apply_contacts.setdefault("email", {})
-    apply_contacts.setdefault("admin", DEFAULT_APPLY_CONTACTS.get("admin", {}))
-
     raw_lower = raw_text.strip().lower()
 
     # Clear options
-    if raw_lower in ("clear", "none", "off", "0", "del", "delete", "remove", "គ្មាន", "លុប", "បិទ", "clear all"):
-        apply_contacts["employer"] = {}
-        apply_contacts["email"] = {}
-        return apply_contacts
+    if raw_lower in ("clear", "none", "off", "0", "del", "delete", "remove", "គ្មាន", "លុប", "បិទ", "clear all", "clear contact", "clearcontact"):
+        return {
+            "buttons": [],
+            "employer": {},
+            "email": {},
+            "admin": DEFAULT_APPLY_CONTACTS.get("admin", {}),
+        }
     elif raw_lower in ("clear email", "clear mail", "clearemail", "លុប email", "លុបអ៊ីមែល"):
-        apply_contacts["email"] = {}
-        return apply_contacts
+        current = load_contact_data()
+        apply_c = current.get("apply_contacts") or {}
+        new_btns = [b for b in apply_c.get("buttons", []) if not (b.get("url") or "").startswith("mailto:")]
+        return {
+            "buttons": new_btns,
+            "employer": apply_c.get("employer", {}),
+            "email": {},
+            "admin": apply_c.get("admin", DEFAULT_APPLY_CONTACTS.get("admin", {})),
+        }
     elif raw_lower in ("clear employer", "clear telegram", "clear phone", "clear tg", "លុប telegram"):
-        apply_contacts["employer"] = {}
-        return apply_contacts
+        current = load_contact_data()
+        apply_c = current.get("apply_contacts") or {}
+        new_btns = [b for b in apply_c.get("buttons", []) if (b.get("url") or "").startswith("mailto:")]
+        return {
+            "buttons": new_btns,
+            "employer": {},
+            "email": apply_c.get("email", {}),
+            "admin": apply_c.get("admin", DEFAULT_APPLY_CONTACTS.get("admin", {})),
+        }
+
+    buttons = []
+    first_employer = {}
+    first_email = {}
 
     for line in lines:
         label = ""
@@ -609,26 +624,33 @@ def parse_apply_contacts_input(raw_text: str):
             continue
 
         clean_label = label.strip()
-
-        # Check if email contact
-        if url.startswith("mailto:") or clean_target.lower().startswith(("email:", "mail:", "mailto:")):
-            if not clean_label:
+        if not clean_label:
+            if url.startswith("mailto:"):
                 clean_label = "✉️ Apply via Email"
-            apply_contacts["email"] = {
-                "label": clean_label,
-                "url": url,
-                "btn_style": "danger",
-            }
-        else:
-            if not clean_label:
+            else:
                 clean_label = "Apply Now"
-            apply_contacts["employer"] = {
-                "label": clean_label,
-                "url": url,
-                "btn_style": "danger",
-            }
 
-    return apply_contacts
+        btn_dict = {
+            "label": clean_label,
+            "url": url,
+            "btn_style": "danger",
+        }
+        buttons.append(btn_dict)
+
+        if url.startswith("mailto:") and not first_email:
+            first_email = btn_dict
+        elif not url.startswith("mailto:") and not first_employer:
+            first_employer = btn_dict
+
+    if not buttons:
+        return None
+
+    return {
+        "buttons": buttons,
+        "employer": first_employer,
+        "email": first_email,
+        "admin": DEFAULT_APPLY_CONTACTS.get("admin", {}),
+    }
 
 
 SETCONTACT_HELP = (
@@ -662,7 +684,7 @@ def is_contact_setting_text(text: str) -> bool:
     if not text:
         return False
     lines = [ln.strip() for ln in text.strip().splitlines() if ln.strip()]
-    if not lines or len(lines) > 4:
+    if not lines or len(lines) > 10:
         return False
 
     first_line = lines[0].lower()
@@ -735,19 +757,16 @@ async def apply_contacts_and_reply(update: Update, raw_text: str) -> bool:
     save_contact_data(contacts)
     keyboard = get_contact_keyboard()
 
-    emp = contacts.get("employer") or {}
-    emp_url = (emp.get("url") or "").strip()
-    em = contacts.get("email") or {}
-    em_url = (em.get("url") or "").strip()
-
+    buttons = contacts.get("buttons") or []
     lines = ["✅ បានកំណត់ Contact រួចរាល់!"]
-    if emp_url:
-        lines.append(f"• Apply Now: {emp.get('label', 'Apply Now')} → {emp_url}")
-    if em_url:
-        lines.append(f"• Email: {em.get('label', '✉️ Apply via Email')} → {em_url}")
-    if not emp_url and not em_url:
+    if buttons:
+        for idx, b in enumerate(buttons, start=1):
+            lbl = b.get("label", "Apply Now")
+            u = b.get("url", "")
+            lines.append(f"• ប៊ូតុងទី {idx}: {lbl} → {u}")
+    else:
         lines = [
-            "✅ បានលុប Contact សម្រាប់ប៊ូតុង Apply Now និង Email រួចរាល់!",
+            "✅ បានលុប Contact សម្រាប់ប៊ូតុង Dynamic រួចរាល់!",
             "👉 ប៊ូតុងទាំងនេះនឹងមិនបង្ហាញក្នុង Post ទេ (លុះត្រាតែកំណត់ Contact ម្តងទៀត)។",
         ]
     lines.append("\nឧទាហរណ៍ប៊ូតុង (នឹងបង្ហាញក្នុង Post)៖")
@@ -923,23 +942,12 @@ async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     data = load_contact_data()
     apply_contacts = data.get("apply_contacts") or {}
 
-    emp = apply_contacts.get("employer") or {}
-    emp_url = (emp.get("url") or "").strip()
-    emp_label = (emp.get("label") or "").strip() or "Apply Now"
-
-    if emp_url:
-        emp_status = f"✅ {emp_label} → {emp_url} (បង្ហាញក្នុង Post - ពណ៌ក្រហម)"
-    else:
-        emp_status = "❌ មិនទាន់កំណត់ (ប៊ូតុង Apply Now នឹងមិនបង្ហាញក្នុង Post ទេ)"
-
-    em = apply_contacts.get("email") or {}
-    em_url = (em.get("url") or "").strip()
-    em_label = (em.get("label") or "").strip() or "✉️ Apply via Email"
-
-    if em_url:
-        em_status = f"✅ {em_label} → {em_url} (បង្ហាញក្នុង Post - ពណ៌ក្រហម)"
-    else:
-        em_status = "❌ មិនទាន់កំណត់ (ប៊ូតុង Email នឹងមិនបង្ហាញក្នុង Post ទេ)"
+    buttons = apply_contacts.get("buttons") or []
+    if not buttons:
+        if apply_contacts.get("employer", {}).get("url"):
+            buttons.append(apply_contacts["employer"])
+        if apply_contacts.get("email", {}).get("url"):
+            buttons.append(apply_contacts["email"])
 
     lines = [
         "ℹ️ <b>ទម្រង់ប៊ូតុងបច្ចុប្បន្ន (Current Button Layout)</b>\n",
@@ -947,10 +955,17 @@ async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         f"• {html.escape(STATIC_ADMIN_BUTTON_LABEL)} → {html.escape(STATIC_ADMIN_BUTTON_URL)} (ពណ៌បៃតង)",
         f"• {html.escape(STATIC_BOT_BUTTON_LABEL)} → {html.escape(STATIC_BOT_BUTTON_URL)} (ពណ៌ខៀវ)\n",
         "🔄 <b>ប៊ូតុង Dynamic (ពណ៌ក្រហម — បង្ហាញតែពេលកំណត់):</b>",
-        f"• Apply Now: {html.escape(emp_status)}",
-        f"• Email: {html.escape(em_status)}\n",
-        "💡 ប្រើ /setcontact ឬ /setemail ដើម្បីកំណត់ | /clearcontact ឬ /clearemail ដើម្បីលុប",
     ]
+
+    if buttons:
+        for idx, b in enumerate(buttons, start=1):
+            lbl = b.get("label", "Apply Now")
+            u = b.get("url", "")
+            lines.append(f"• ប៊ូតុងទី {idx}: ✅ {html.escape(lbl)} → {html.escape(u)}")
+    else:
+        lines.append("• ❌ មិនទាន់កំណត់ (គ្មានប៊ូតុង Dynamic ក្នុង Post ទេ)")
+
+    lines.append("\n💡 ផ្ញើ Contact (លេខទូរស័ព្ទ ឬ Email) ដើម្បីកំណត់ | ផ្ញើ clear ឬ /clearcontact ដើម្បីលុប")
 
     keyboard = get_contact_keyboard()
     try:
