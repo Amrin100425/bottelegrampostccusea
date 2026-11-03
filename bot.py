@@ -214,8 +214,13 @@ def build_contact_url(raw: str) -> str:
 # ------------------------------------------------------------------
 BOT_USERNAME = os.getenv("BOT_USERNAME", "USEACCBot")
 
+# Default Telegram Premium Custom Animated Emoji IDs
+DEFAULT_ADMIN_CONTACT_EMOJI = "5850292279503228917"
+DEFAULT_ADMIN_APPLY_NOW_EMOJI = "5472239203590888751"
+DEFAULT_ADMIN_CV_EMOJI = "5431420628978641216"
+
 # Static button 1: Admin contact — never changes
-STATIC_ADMIN_BUTTON_LABEL = "📲 Contact Admin"
+STATIC_ADMIN_BUTTON_LABEL = "Contact Admin"
 STATIC_ADMIN_BUTTON_URL = "https://t.me/USEACCAD"
 
 # Static button 3: Bot redirect — never changes
@@ -224,12 +229,21 @@ STATIC_BOT_BUTTON_URL = "https://t.me/USEACCASTbot"
 
 DEFAULT_APPLY_CONTACTS = {
     "buttons": [],
-    "employer": {},
-    "email": {},
+    "employer": {
+        "label": "Apply Now",
+        "btn_style": "danger",
+        "icon_custom_emoji_id": DEFAULT_ADMIN_APPLY_NOW_EMOJI,
+    },
+    "email": {
+        "label": "Apply via Email",
+        "btn_style": "danger",
+        "icon_custom_emoji_id": DEFAULT_ADMIN_APPLY_NOW_EMOJI,
+    },
     "admin": {
         "label": STATIC_ADMIN_BUTTON_LABEL,
         "url": STATIC_ADMIN_BUTTON_URL,
         "btn_style": "success",
+        "icon_custom_emoji_id": DEFAULT_ADMIN_CONTACT_EMOJI,
     },
 }
 
@@ -449,6 +463,7 @@ def get_contact_keyboard(
             b.get("icon_custom_emoji_id")
             or os.getenv("ADMIN_APPLY_NOW")
             or os.getenv("APPLY_NOW_EMOJI_ID")
+            or DEFAULT_ADMIN_APPLY_NOW_EMOJI
         )
         if enable_custom_emoji and apply_emoji_id:
             dynamic_kwargs["icon_custom_emoji_id"] = str(apply_emoji_id).strip()
@@ -471,6 +486,7 @@ def get_contact_keyboard(
         or os.getenv("ADMIN_ICON_EMOJI_ID")
         or os.getenv("CUSTOM_EMOJI_ID")
         or os.getenv("EMOJI_ID")
+        or DEFAULT_ADMIN_CONTACT_EMOJI
     )
     if enable_custom_emoji and admin_emoji_id:
         admin_kwargs["icon_custom_emoji_id"] = str(admin_emoji_id).strip()
@@ -507,6 +523,7 @@ def get_contact_keyboard(
         os.getenv("ADMIN_CV")
         or os.getenv("ADMIN_CV_EMOJI_ID")
         or os.getenv("CV_EMOJI_ID")
+        or DEFAULT_ADMIN_CV_EMOJI
     )
     if enable_custom_emoji and cv_emoji_id:
         bot_kwargs["icon_custom_emoji_id"] = str(cv_emoji_id).strip()
@@ -684,10 +701,16 @@ def parse_apply_contacts_input(raw_text: str):
             else:
                 clean_label = "Apply Now"
 
+        apply_emoji_id = (
+            os.getenv("ADMIN_APPLY_NOW")
+            or os.getenv("APPLY_NOW_EMOJI_ID")
+            or DEFAULT_ADMIN_APPLY_NOW_EMOJI
+        )
         btn_dict = {
             "label": clean_label,
             "url": url,
             "btn_style": "danger",
+            "icon_custom_emoji_id": apply_emoji_id,
         }
         buttons.append(btn_dict)
 
@@ -1004,11 +1027,22 @@ async def set_email_command(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     data = load_contact_data()
     apply_contacts = data.get("apply_contacts") or {}
-    apply_contacts["email"] = {
+    apply_emoji_id = (
+        os.getenv("ADMIN_APPLY_NOW")
+        or os.getenv("APPLY_NOW_EMOJI_ID")
+        or DEFAULT_ADMIN_APPLY_NOW_EMOJI
+    )
+    email_btn = {
         "label": clean_label,
         "url": url,
         "btn_style": "danger",
+        "icon_custom_emoji_id": apply_emoji_id,
     }
+    apply_contacts["email"] = email_btn
+    btns = apply_contacts.get("buttons") or []
+    btns = [b for b in btns if not (b.get("url") or "").startswith("mailto:")]
+    btns.append(email_btn)
+    apply_contacts["buttons"] = btns
     save_contact_data(apply_contacts, fixed_buttons=data.get("fixed_buttons", DEFAULT_FIXED_BUTTONS))
 
     keyboard = get_contact_keyboard()
