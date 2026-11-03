@@ -357,6 +357,7 @@ def get_contact_keyboard(
     post_text: str = None,
     post_id: str = None,
     enable_tracking: bool = True,
+    enable_custom_emoji: bool = True,
 ) -> InlineKeyboardMarkup:
     data = load_contact_data()
     apply_contacts = data.get("apply_contacts") or {}
@@ -454,12 +455,21 @@ def get_contact_keyboard(
     kb_rows = []
     admin_data = apply_contacts.get("admin") or {}
     admin_kwargs = {"style": admin_data.get("btn_style") or "success"}
-    admin_emoji_id = admin_data.get("icon_custom_emoji_id") or os.getenv("ADMIN_ICON_EMOJI_ID")
-    if admin_emoji_id:
+    admin_emoji_id = (
+        admin_data.get("icon_custom_emoji_id")
+        or os.getenv("ADMIN_CUSTOM_EMOJI_ID")
+        or os.getenv("ADMIN_ICON_EMOJI_ID")
+        or os.getenv("CUSTOM_EMOJI_ID")
+        or os.getenv("EMOJI_ID")
+    )
+    admin_label = admin_data.get("label") or STATIC_ADMIN_BUTTON_LABEL
+    if enable_custom_emoji and admin_emoji_id:
         admin_kwargs["icon_custom_emoji_id"] = str(admin_emoji_id).strip()
+        if admin_label.startswith(("📲 ", "📞 ", "✨ 📞 ")):
+            admin_label = "Contact Admin"
 
     admin_btn = InlineKeyboardButton(
-        STATIC_ADMIN_BUTTON_LABEL,
+        admin_label,
         url=final_admin_url,
         api_kwargs=admin_kwargs,
     )
@@ -1835,6 +1845,39 @@ async def report_callback_handler(update: Update, context: ContextTypes.DEFAULT_
         await send_csv_report_file(update, context, month)
 
 
+async def get_emoji_id_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Helper command for admins to extract custom_emoji_id from any Telegram Premium animated emoji."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⚠️ បញ្ជានេះសម្រាប់តែ Admin ប៉ុណ្ណោះ (Admins only)។")
+        return
+
+    msg = update.message
+    target_msg = msg.reply_to_message or msg
+    entities = target_msg.entities or target_msg.caption_entities or []
+
+    found_ids = []
+    for ent in entities:
+        if ent.type == "custom_emoji" and ent.custom_emoji_id:
+            found_ids.append(ent.custom_emoji_id)
+
+    if found_ids:
+        ids_text = "\n".join([f"• <code>{eid}</code>" for eid in found_ids])
+        await update.message.reply_text(
+            f"🎉 <b>រកឃើញ Custom Animated Emoji ID:</b>\n\n{ids_text}\n\n"
+            f"💡 <b>របៀបប្រើប្រាស់ក្នុង <code>.env</code>:</b>\n"
+            f"<code>ADMIN_CUSTOM_EMOJI_ID={found_ids[0]}</code>",
+            parse_mode="HTML",
+        )
+    else:
+        await update.message.reply_text(
+            "ℹ️ <b>របៀបស្វែងរក Animated Emoji ID:</b>\n\n"
+            "1. ផ្ញើ Animated Emoji ពី Telegram Premium របស់អ្នកមកកាន់ Bot នេះ (ឬ Reply លើសារនោះជាមួយ <code>/getemoji</code>)\n"
+            "2. Bot នឹងបង្ហាញលេខ ID សម្រាប់អ្នកយកទៅដាក់ក្នុង <code>.env</code> (ADMIN_CUSTOM_EMOJI_ID=...) ភ្លាមៗ!",
+            parse_mode="HTML",
+        )
+
+
 def setup_webhook_health_routes() -> None:
     """
     Patch python-telegram-bot's internal Tornado webhook server to provide
@@ -2067,6 +2110,8 @@ def main() -> None:
     app.add_handler(CommandHandler("cancel", cancel_all_command))
     app.add_handler(CommandHandler("showcontact", show_contact))
     app.add_handler(CommandHandler("clearcontact", clear_contact_command))
+    app.add_handler(CommandHandler("getemoji", get_emoji_id_command))
+    app.add_handler(CommandHandler("emoji", get_emoji_id_command))
     app.add_handler(CommandHandler("setemail", set_email_command))
     app.add_handler(CommandHandler("clearemail", clear_email_command))
     app.add_handler(CommandHandler("report", report_command))
