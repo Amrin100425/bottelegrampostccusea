@@ -1205,6 +1205,20 @@ async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     return CONFIRM
 
 
+def clear_dynamic_contacts_after_post() -> None:
+    """Auto-clear dynamic apply contacts from storage after post is published."""
+    try:
+        data = load_contact_data()
+        apply_contacts = data.get("apply_contacts") or {}
+        apply_contacts["buttons"] = []
+        apply_contacts["employer"] = {}
+        apply_contacts["email"] = {}
+        save_contact_data(apply_contacts, fixed_buttons=data.get("fixed_buttons", DEFAULT_FIXED_BUTTONS))
+        logger.info("Automatically cleared dynamic apply contacts after post published to channel.")
+    except Exception as e:
+        logger.warning("Failed to auto-clear dynamic contacts after post: %s", e)
+
+
 async def _publish_data_to_channel(bot, data: dict) -> None:
     """Core function to dispatch prepared post data to the channel."""
     info = data.get("info") or ""
@@ -1332,6 +1346,10 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
             except Exception as e:
                 logger.warning("Failed to edit reply markup to add post URL: %s", e)
 
+    # Immediately after post is published, clear dynamic apply contacts from storage
+    # so they are not reused for future posts, waiting for admin to set new contacts.
+    clear_dynamic_contacts_after_post()
+
 
 async def confirm_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
@@ -1347,7 +1365,10 @@ async def confirm_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 
     try:
         await _publish_data_to_channel(context.bot, context.user_data)
-        await query.edit_message_text("🎉 បានបញ្ជូនព័ត៌មានទៅកាន់ Channel/Group ដោយជោគជ័យ!")
+        await query.edit_message_text(
+            "🎉 បានបញ្ជូនព័ត៌មានទៅកាន់ Channel ដោយជោគជ័យ!\n\n"
+            "💡 Contact សម្រាប់ Post នេះត្រូវបានសម្អាតរួចរាល់ (Bot នឹងរង់ចាំការកំណត់ Contact ថ្មីសម្រាប់ Post បន្ទាប់)។"
+        )
         logger.info("Successfully published post to Channel/Group ID %s", CHANNEL_ID)
     except Exception as e:
         logger.error("Failed to send to channel/group: %s", e, exc_info=True)
@@ -1426,7 +1447,10 @@ async def standalone_confirm_callback(update: Update, context: ContextTypes.DEFA
 
     try:
         await _publish_data_to_channel(context.bot, context.user_data)
-        await query.edit_message_text("🎉 បានបញ្ជូនព័ត៌មានទៅកាន់ Channel/Group ដោយជោគជ័យ!")
+        await query.edit_message_text(
+            "🎉 បានបញ្ជូនព័ត៌មានទៅកាន់ Channel ដោយជោគជ័យ!\n\n"
+            "💡 Contact សម្រាប់ Post នេះត្រូវបានសម្អាតរួចរាល់ (Bot នឹងរង់ចាំការកំណត់ Contact ថ្មីសម្រាប់ Post បន្ទាប់)។"
+        )
         logger.info("Successfully published post to Channel/Group ID %s", CHANNEL_ID)
     except Exception as e:
         logger.error("Failed to send standalone to channel/group: %s", e, exc_info=True)

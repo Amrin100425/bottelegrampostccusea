@@ -1,22 +1,6 @@
 {
   "apply_contacts": {
-    "buttons": [
-      {
-        "label": "Apply Now",
-        "url": "https://t.me/+85577893954",
-        "btn_style": "danger"
-      },
-      {
-        "label": "Apply Now",
-        "url": "https://t.me/+855975406969",
-        "btn_style": "danger"
-      },
-      {
-        "label": "Apply Now",
-        "url": "mailto:sorcheatamrin954@gmail.com",
-        "btn_style": "danger"
-      }
-    ],
+    "buttons": [],
     "employer": {
       "label": "Apply Now",
       "url": "https://t.me/+85577893954",
