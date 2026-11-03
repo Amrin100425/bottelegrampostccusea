@@ -215,7 +215,7 @@ def build_contact_url(raw: str) -> str:
 BOT_USERNAME = os.getenv("BOT_USERNAME", "USEACCBot")
 
 # Static button 1: Admin contact — never changes
-STATIC_ADMIN_BUTTON_LABEL = "📞 Contact Admin"
+STATIC_ADMIN_BUTTON_LABEL = "📲 Contact Admin"
 STATIC_ADMIN_BUTTON_URL = "https://t.me/USEACCAD"
 
 # Static button 3: Bot redirect — never changes
@@ -452,10 +452,16 @@ def get_contact_keyboard(
         )
 
     kb_rows = []
+    admin_data = apply_contacts.get("admin") or {}
+    admin_kwargs = {"style": admin_data.get("btn_style") or "success"}
+    admin_emoji_id = admin_data.get("icon_custom_emoji_id") or os.getenv("ADMIN_ICON_EMOJI_ID")
+    if admin_emoji_id:
+        admin_kwargs["icon_custom_emoji_id"] = str(admin_emoji_id).strip()
+
     admin_btn = InlineKeyboardButton(
         STATIC_ADMIN_BUTTON_LABEL,
         url=final_admin_url,
-        api_kwargs={"style": "success"},
+        api_kwargs=admin_kwargs,
     )
 
     if len(dynamic_btns) == 0:

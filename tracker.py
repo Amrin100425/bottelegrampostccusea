@@ -176,7 +176,7 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
                 label = "Career Tips, CV & Cover Letter"
                 target_url = "https://t.me/USEACCASTbot"
             elif link_type == "admin":
-                label = "📞 Contact Admin"
+                label = "📲 Contact Admin"
                 target_url = "https://t.me/USEACCAD"
                 if post_id:
                     import urllib.parse
@@ -348,7 +348,7 @@ def record_telegram_button_click(
     uid_str = str(user_id)
 
     default_labels = {
-        "admin": "📞 Contact Admin",
+        "admin": "📲 Contact Admin",
         "employer": "💼 Apply Now",
         "bot": "🤖 Career Tips Bot",
     }
