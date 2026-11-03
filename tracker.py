@@ -674,6 +674,34 @@ class RedirectTrackerHandler(tornado.web.RequestHandler):
         user_agent = self.request.headers.get("User-Agent", "")
 
         target_url = record_click(token=token, client_ip=client_ip, user_agent=user_agent)
+        if target_url.startswith("mailto:"):
+            email_addr = target_url.replace("mailto:", "").split("?")[0]
+            self.set_header("Content-Type", "text/html; charset=utf-8")
+            self.write(f'''<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="refresh" content="0; url={target_url}">
+    <title>Redirecting to Email...</title>
+    <script>window.location.href = "{target_url}";</script>
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; text-align: center; padding: 60px 20px; background: #0f172a; color: #f8fafc; }}
+        .box {{ max-width: 480px; margin: 0 auto; background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 32px 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }}
+        h2 {{ font-size: 1.4rem; margin-top: 0; color: #38bdf8; }}
+        p {{ color: #94a3b8; font-size: 0.95rem; line-height: 1.5; }}
+        a.btn {{ display: inline-block; margin-top: 24px; padding: 14px 28px; background: #ef4444; color: white; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 1rem; }}
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Opening Email Client...</h2>
+        <p>If your email app does not open automatically, please tap the button below:</p>
+        <a class="btn" href="{target_url}">✉️ Send Email to {email_addr}</a>
+    </div>
+</body>
+</html>''')
+            return
+
         self.redirect(target_url, status=302)
 
     def head(self, token: str):

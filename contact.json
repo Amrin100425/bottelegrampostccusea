@@ -1,7 +1,15 @@
 {
   "apply_contacts": {
-    "employer": {},
-    "email": {},
+    "employer": {
+      "label": "Apply Now",
+      "url": "https://t.me/+85577893954",
+      "btn_style": "danger"
+    },
+    "email": {
+      "label": "✉️ Apply via Email",
+      "url": "mailto:sorcheatamrin954@gmail.com",
+      "btn_style": "danger"
+    },
     "admin": {
       "label": "👤 ទំនាក់ទំនង Admin USEA Career Center",
       "url": "https://t.me/USEACCAD",

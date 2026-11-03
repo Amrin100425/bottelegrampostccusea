@@ -599,7 +599,7 @@ def parse_apply_contacts_input(raw_text: str):
 
         # Check if email contact
         if url.startswith("mailto:") or clean_target.lower().startswith(("email:", "mail:", "mailto:")):
-            if not clean_label:
+            if not clean_label or clean_label.lower() in ("apply now", "apply", "ដាក់ពាក្យ"):
                 clean_label = "✉️ Apply via Email"
             apply_contacts["email"] = {
                 "label": clean_label,
@@ -640,65 +640,84 @@ SETCONTACT_HELP = (
 )
 
 
-async def set_contact_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    user = update.effective_user
-    if not is_admin(user.id):
-        await update.message.reply_text("❌ អ្នកមិនមានសិទ្ធិប្រើ command នេះទេ។")
-        return ConversationHandler.END
 
-    raw_text = update.message.text.partition(" ")[2].strip()
-    if not raw_text and "\n" in update.message.text:
-        raw_text = update.message.text.split("\n", 1)[1].strip()
+def is_contact_setting_text(text: str) -> bool:
+    """
+    Returns True if the text looks like a contact setting command/input
+    rather than a channel job post.
+    """
+    if not text:
+        return False
+    lines = [ln.strip() for ln in text.strip().splitlines() if ln.strip()]
+    if not lines or len(lines) > 4:
+        return False
 
-    if raw_text:
-        contacts = parse_apply_contacts_input(raw_text)
-        if contacts is None:
-            await update.message.reply_text(
-                "⚠️ មិនអាចអាន Contact បានទេ។\n\n" + SETCONTACT_HELP, parse_mode="Markdown"
+    first_line = lines[0].lower()
+    if first_line.startswith(("/setcontact", "/setemail", "/clearcontact", "/clearemail")):
+        return True
+
+    matched = 0
+    for line in lines:
+        lower = line.lower()
+        if lower in (
+            "clear",
+            "clear all",
+            "clear contact",
+            "clearcontact",
+            "clearemail",
+            "clear email",
+            "clear employer",
+            "លុប",
+            "គ្មាន",
+            "off",
+            "none",
+            "0",
+        ):
+            matched += 1
+            continue
+
+        if any(
+            lower.startswith(p)
+            for p in (
+                "apply now",
+                "apply",
+                "email",
+                "mail",
+                "apply via email",
+                "telegram",
+                "phone",
+                "tel",
+                "wa:",
+                "tg:",
+                "contact",
             )
-            return ConversationHandler.END
+        ) and ("-" in line or ":" in line):
+            matched += 1
+            continue
 
-        save_contact_data(contacts)
-        keyboard = get_contact_keyboard()
+        digits = "".join(c for c in line if c.isdigit())
+        if len(digits) >= 8 and len(line) <= 20 and not any(c in line for c in ("$", "%", "USD", "usd", "៛")):
+            matched += 1
+            continue
 
-        emp = contacts.get("employer") or {}
-        emp_url = (emp.get("url") or "").strip()
-        em = contacts.get("email") or {}
-        em_url = (em.get("url") or "").strip()
+        if "@" in line and "." in line and " " not in line and not line.startswith("@"):
+            matched += 1
+            continue
 
-        lines = ["✅ បានកំណត់ Contact រួចរាល់!"]
-        if emp_url:
-            lines.append(f"• Apply Now: {emp.get('label', 'Apply Now')} → {emp_url}")
-        if em_url:
-            lines.append(f"• Email: {em.get('label', '✉️ Apply via Email')} → {em_url}")
-        if not emp_url and not em_url:
-            lines = [
-                "✅ បានលុប Contact សម្រាប់ប៊ូតុង Apply Now និង Email រួចរាល់!",
-                "👉 ប៊ូតុងទាំងនេះនឹងមិនបង្ហាញក្នុង Post ទេ (លុះត្រាតែកំណត់ Contact ម្តងទៀត)។",
-            ]
-        lines.append("\nឧទាហរណ៍ប៊ូតុង (នឹងបង្ហាញក្នុង Post)៖")
-        await update.message.reply_text("\n".join(lines), reply_markup=keyboard)
-        return ConversationHandler.END
+        if line.startswith("@") and len(line) <= 35 and " " not in line:
+            matched += 1
+            continue
+        if (line.startswith("https://t.me/") or line.startswith("t.me/")) and " " not in line:
+            matched += 1
+            continue
 
-    await update.message.reply_text(
-        SETCONTACT_HELP + "\n\n━━━━━━━━━━━━━━━━━━━━\n"
-        "📝 *សូមផ្ញើ Contact របស់អ្នកឥឡូវនេះ (ឬផ្ញើ `clear` ដើម្បីលុប / `/cancel` ដើម្បីបោះបង់)៖*",
-        parse_mode="Markdown",
-    )
-    return SETTING_CONTACT
+    return matched == len(lines)
 
 
-async def set_contact_process(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    raw_text = update.message.text.strip()
+async def apply_contacts_and_reply(update: Update, raw_text: str) -> bool:
     contacts = parse_apply_contacts_input(raw_text)
-
     if contacts is None:
-        await update.message.reply_text(
-            "⚠️ មិនអាចអាន Contact បានទេ។ សូមពិនិត្យទម្រង់រួចផ្ញើម្តងទៀត ឬសរសេរ /cancel ដើម្បីបោះបង់៖\n\n"
-            + SETCONTACT_HELP,
-            parse_mode="Markdown",
-        )
-        return SETTING_CONTACT
+        return False
 
     save_contact_data(contacts)
     keyboard = get_contact_keyboard()
@@ -720,6 +739,44 @@ async def set_contact_process(update: Update, context: ContextTypes.DEFAULT_TYPE
         ]
     lines.append("\nឧទាហរណ៍ប៊ូតុង (នឹងបង្ហាញក្នុង Post)៖")
     await update.message.reply_text("\n".join(lines), reply_markup=keyboard)
+    return True
+
+async def set_contact_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("❌ អ្នកមិនមានសិទ្ធិប្រើ command នេះទេ។")
+        return ConversationHandler.END
+
+    raw_text = update.message.text.partition(" ")[2].strip()
+    if not raw_text and "\n" in update.message.text:
+        raw_text = update.message.text.split("\n", 1)[1].strip()
+
+    if raw_text:
+        ok = await apply_contacts_and_reply(update, raw_text)
+        if not ok:
+            await update.message.reply_text(
+                "⚠️ មិនអាចអាន Contact បានទេ។\n\n" + SETCONTACT_HELP, parse_mode="Markdown"
+            )
+        return ConversationHandler.END
+
+    await update.message.reply_text(
+        SETCONTACT_HELP + "\n\n━━━━━━━━━━━━━━━━━━━━\n"
+        "📝 *សូមផ្ញើ Contact របស់អ្នកឥឡូវនេះ (ឬផ្ញើ `clear` ដើម្បីលុប / `/cancel` ដើម្បីបោះបង់)៖*",
+        parse_mode="Markdown",
+    )
+    return SETTING_CONTACT
+
+
+async def set_contact_process(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    raw_text = update.message.text.strip()
+    ok = await apply_contacts_and_reply(update, raw_text)
+    if not ok:
+        await update.message.reply_text(
+            "⚠️ មិនអាចអាន Contact បានទេ។ សូមពិនិត្យទម្រង់រួចផ្ញើម្តងទៀត ឬសរសេរ /cancel ដើម្បីបោះបង់៖\n\n"
+            + SETCONTACT_HELP,
+            parse_mode="Markdown",
+        )
+        return SETTING_CONTACT
     return ConversationHandler.END
 
 
@@ -1223,6 +1280,13 @@ async def handle_standalone_message(update: Update, context: ContextTypes.DEFAUL
         return
 
     msg = update.message
+
+    # Check if this plain text message is intended to set or clear contact buttons
+    if msg.text and not msg.photo and is_contact_setting_text(msg.text):
+        ok = await apply_contacts_and_reply(update, msg.text)
+        if ok:
+            return
+
     await _save_and_preview_post(update, context, msg)
 
     confirm_keyboard = InlineKeyboardMarkup([
