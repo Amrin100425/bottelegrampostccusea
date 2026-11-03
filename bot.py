@@ -16,6 +16,7 @@ Bot សម្រាប់ជួយ Admin ទម្លាក់ព័ត៌មា
       សុទ្ធតែមាន Confirmation (✅ YES / ❌ NO) សិន មុននឹងបញ្ជូនទៅកាន់ Channel។
 """
 
+import html
 import io
 import json
 import logging
@@ -422,6 +423,18 @@ def get_contact_keyboard(
         final_emp_url = emp_url
         final_email_url = email_url
 
+    # Telegram Bot API strictly prohibits mailto: in InlineKeyboardButton.url (raises BUTTON_URL_INVALID).
+    # All mailto: links must be routed through the HTTP/HTTPS web redirect URL.
+    if email_url and (final_email_url.startswith("mailto:") or not final_email_url.startswith(("http://", "https://", "tg://"))):
+        final_email_url = register_tracking_link(
+            base_url=WEBHOOK_URL,
+            target_url=email_url,
+            label=email_label,
+            link_type="email",
+            post_id=post_id or "preview",
+            post_url=post_url or "",
+        )
+
     kb_rows = []
 
     admin_btn = InlineKeyboardButton(
@@ -599,7 +612,7 @@ def parse_apply_contacts_input(raw_text: str):
 
         # Check if email contact
         if url.startswith("mailto:") or clean_target.lower().startswith(("email:", "mail:", "mailto:")):
-            if not clean_label or clean_label.lower() in ("apply now", "apply", "ដាក់ពាក្យ"):
+            if not clean_label:
                 clean_label = "✉️ Apply via Email"
             apply_contacts["email"] = {
                 "label": clean_label,
@@ -738,7 +751,11 @@ async def apply_contacts_and_reply(update: Update, raw_text: str) -> bool:
             "👉 ប៊ូតុងទាំងនេះនឹងមិនបង្ហាញក្នុង Post ទេ (លុះត្រាតែកំណត់ Contact ម្តងទៀត)។",
         ]
     lines.append("\nឧទាហរណ៍ប៊ូតុង (នឹងបង្ហាញក្នុង Post)៖")
-    await update.message.reply_text("\n".join(lines), reply_markup=keyboard)
+    try:
+        await update.message.reply_text("\n".join(lines), reply_markup=keyboard)
+    except Exception as err:
+        logger.error("apply_contacts_and_reply error with keyboard: %s", err)
+        await update.message.reply_text("\n".join(lines))
     return True
 
 async def set_contact_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -759,11 +776,18 @@ async def set_contact_start(update: Update, context: ContextTypes.DEFAULT_TYPE) 
             )
         return ConversationHandler.END
 
-    await update.message.reply_text(
-        SETCONTACT_HELP + "\n\n━━━━━━━━━━━━━━━━━━━━\n"
-        "📝 *សូមផ្ញើ Contact របស់អ្នកឥឡូវនេះ (ឬផ្ញើ `clear` ដើម្បីលុប / `/cancel` ដើម្បីបោះបង់)៖*",
-        parse_mode="Markdown",
-    )
+    try:
+        await update.message.reply_text(
+            SETCONTACT_HELP + "\n\n━━━━━━━━━━━━━━━━━━━━\n"
+            "📝 *សូមផ្ញើ Contact របស់អ្នកឥឡូវនេះ (ឬផ្ញើ `clear` ដើម្បីលុប / `/cancel` ដើម្បីបោះបង់)៖*",
+            parse_mode="Markdown",
+        )
+    except Exception as err:
+        logger.error("set_contact_start markdown error: %s", err)
+        await update.message.reply_text(
+            SETCONTACT_HELP.replace("*", "").replace("`", "") + "\n\n━━━━━━━━━━━━━━━━━━━━\n"
+            "📝 សូមផ្ញើ Contact របស់អ្នកឥឡូវនេះ (ឬផ្ញើ clear ដើម្បីលុប / /cancel ដើម្បីបោះបង់)៖"
+        )
     return SETTING_CONTACT
 
 
@@ -920,20 +944,28 @@ async def show_contact(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     lines = [
         "ℹ️ <b>ទម្រង់ប៊ូតុងបច្ចុប្បន្ន (Current Button Layout)</b>\n",
         "🔒 <b>ប៊ូតុងថេរ (Static):</b>",
-        f"• {STATIC_ADMIN_BUTTON_LABEL} → {STATIC_ADMIN_BUTTON_URL} (ពណ៌បៃតង)",
-        f"• {STATIC_BOT_BUTTON_LABEL} → {STATIC_BOT_BUTTON_URL} (ពណ៌ខៀវ)\n",
+        f"• {html.escape(STATIC_ADMIN_BUTTON_LABEL)} → {html.escape(STATIC_ADMIN_BUTTON_URL)} (ពណ៌បៃតង)",
+        f"• {html.escape(STATIC_BOT_BUTTON_LABEL)} → {html.escape(STATIC_BOT_BUTTON_URL)} (ពណ៌ខៀវ)\n",
         "🔄 <b>ប៊ូតុង Dynamic (ពណ៌ក្រហម — បង្ហាញតែពេលកំណត់):</b>",
-        f"• Apply Now: {emp_status}",
-        f"• Email: {em_status}\n",
+        f"• Apply Now: {html.escape(emp_status)}",
+        f"• Email: {html.escape(em_status)}\n",
         "💡 ប្រើ /setcontact ឬ /setemail ដើម្បីកំណត់ | /clearcontact ឬ /clearemail ដើម្បីលុប",
     ]
 
     keyboard = get_contact_keyboard()
-    await update.message.reply_text(
-        "\n".join(lines),
-        reply_markup=keyboard,
-        parse_mode="HTML",
-    )
+    try:
+        await update.message.reply_text(
+            "\n".join(lines),
+            reply_markup=keyboard,
+            parse_mode="HTML",
+        )
+    except Exception as err:
+        logger.error("show_contact HTML error: %s, falling back to plain text", err)
+        plain = "\n".join(lines).replace("<b>", "").replace("</b>", "")
+        try:
+            await update.message.reply_text(plain, reply_markup=keyboard)
+        except Exception:
+            await update.message.reply_text(plain)
 
 
 # ------------------------------------------------------------------
