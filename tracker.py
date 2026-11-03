@@ -26,7 +26,7 @@ _data_lock = threading.Lock()
 
 # Mapping for past posts (3866-3882) where each post has its own employer contact
 PAST_POST_CONTACTS = {
-    "3866": {"url": "https://t.me/+855962669708", "label": "Apply Now - 0962669708"},
+    "3866": {"url": "https://t.me/USEACCAD", "label": "Apply Now"},
     "3867": {
         "url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3867",
         "label": "More information",
@@ -158,7 +158,7 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
     link_type = "general"
     label = "Button"
     post_url = ""
-    target_url = "https://t.me/useacareercenter"
+    target_url = "https://t.me/USEACCAD"
 
     if link_info:
         target_url = link_info.get("target_url") or target_url

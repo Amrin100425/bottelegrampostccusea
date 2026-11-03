@@ -20,8 +20,8 @@
     },
     "p3866_employer": {
       "token": "p3866_employer",
-      "target_url": "https://t.me/+855962669708",
-      "label": "Apply Now - 0962669708",
+      "target_url": "https://t.me/USEACCAD",
+      "label": "Apply Now",
       "link_type": "employer",
       "post_id": "3866",
       "post_url": "https://t.me/useacareercenter/3866",
@@ -516,7 +516,7 @@
   },
   "months": {
     "2026-11": {
-      "total_clicks": 33,
+      "total_clicks": 38,
       "unique_users": [
         "6f749e0b9493",
         "816207a460cc"
@@ -524,15 +524,15 @@
       "by_type": {
         "admin": {
           "label": "📞 Contact Admin",
-          "clicks": 7,
+          "clicks": 9,
           "users": [
             "6f749e0b9493",
             "816207a460cc"
           ]
         },
         "employer": {
-          "label": "Apply Now - 081808237",
-          "clicks": 18,
+          "label": "Apply Now",
+          "clicks": 20,
           "users": [
             "6f749e0b9493",
             "816207a460cc"
@@ -545,6 +545,13 @@
             "6f749e0b9493",
             "816207a460cc"
           ]
+        },
+        "general": {
+          "label": "Button",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
         }
       },
       "by_link": {
@@ -555,9 +562,10 @@
           "post_id": "3866",
           "post_url": "https://t.me/useacareercenter/3866",
           "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3866",
-          "clicks": 2,
+          "clicks": 3,
           "users": [
-            "6f749e0b9493"
+            "6f749e0b9493",
+            "816207a460cc"
           ]
         },
         "p3866_employer": {
@@ -566,10 +574,11 @@
           "link_type": "employer",
           "post_id": "3866",
           "post_url": "https://t.me/useacareercenter/3866",
-          "target_url": "https://t.me/+855962669708",
-          "clicks": 2,
+          "target_url": "https://t.me/USEACCAD",
+          "clicks": 3,
           "users": [
-            "6f749e0b9493"
+            "6f749e0b9493",
+            "816207a460cc"
           ]
         },
         "p3866_bot": {
@@ -885,15 +894,52 @@
           "users": [
             "816207a460cc"
           ]
+        },
+        "p9999_employer": {
+          "token": "p9999_employer",
+          "label": "Apply Now",
+          "link_type": "employer",
+          "post_id": "9999",
+          "post_url": "https://t.me/useacareercenter/9999",
+          "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/9999",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "p9999_admin": {
+          "token": "p9999_admin",
+          "label": "📞 Contact Admin",
+          "link_type": "admin",
+          "post_id": "9999",
+          "post_url": "https://t.me/useacareercenter/9999",
+          "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/9999",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
+        },
+        "random_token": {
+          "token": "random_token",
+          "label": "Button",
+          "link_type": "general",
+          "post_id": "",
+          "post_url": "",
+          "target_url": "https://t.me/USEACCAD",
+          "clicks": 1,
+          "users": [
+            "816207a460cc"
+          ]
         }
       },
       "by_post": {
         "3866": {
           "post_id": "3866",
           "post_url": "https://t.me/useacareercenter/3866",
-          "clicks": 5,
+          "clicks": 7,
           "users": [
-            "6f749e0b9493"
+            "6f749e0b9493",
+            "816207a460cc"
           ]
         },
         "3871": {
@@ -989,9 +1035,10 @@
         "9999": {
           "post_id": "9999",
           "post_url": "https://t.me/useacareercenter/9999",
-          "clicks": 1,
+          "clicks": 3,
           "users": [
-            "6f749e0b9493"
+            "6f749e0b9493",
+            "816207a460cc"
           ]
         },
         "3883": {
@@ -1383,6 +1430,61 @@
       "post_id": "3885",
       "post_url": "https://t.me/useacareercenter/3885",
       "target_url": "https://t.me/USEACCASTbot",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T16:01:01.911097",
+      "month": "2026-11",
+      "token": "p3866_employer",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "target_url": "https://t.me/USEACCAD",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T16:01:01.946534",
+      "month": "2026-11",
+      "token": "p3866_admin",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/3866",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T16:01:01.982368",
+      "month": "2026-11",
+      "token": "p9999_employer",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "9999",
+      "post_url": "https://t.me/useacareercenter/9999",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/9999",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T16:01:02.015575",
+      "month": "2026-11",
+      "token": "p9999_admin",
+      "label": "📞 Contact Admin",
+      "link_type": "admin",
+      "post_id": "9999",
+      "post_url": "https://t.me/useacareercenter/9999",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/9999",
+      "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-03T16:01:02.049099",
+      "month": "2026-11",
+      "token": "random_token",
+      "label": "Button",
+      "link_type": "general",
+      "post_id": "",
+      "post_url": "",
+      "target_url": "https://t.me/USEACCAD",
       "user_hash": "816207a460cc"
     }
   ]
