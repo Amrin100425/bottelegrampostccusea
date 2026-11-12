@@ -39,9 +39,11 @@ from tracker import (
     register_tracking_link,
     record_click,
     record_telegram_button_click,
+    record_published_post,
     get_available_months,
     get_monthly_report_data,
     format_telegram_report,
+    format_telegram_posts_report,
     generate_csv_report,
     RedirectTrackerHandler,
     WebReportHandler,
@@ -1158,6 +1160,12 @@ async def _save_and_preview_post(update: Update, context: ContextTypes.DEFAULT_T
     raw_length = telegram_length(msg.caption or msg.text or "")
     context.user_data["raw_length"] = raw_length
 
+    # Capture admin author information for post tracking
+    user = update.effective_user
+    context.user_data["author_id"] = user.id if user else None
+    context.user_data["author_name"] = (user.full_name or user.username or "Admin") if user else "Admin"
+    context.user_data["raw_text"] = (msg.caption or msg.text or "")
+
     keyboard = get_contact_keyboard(post_text=info)
 
     # Send preview: Prioritize copy_message to perfectly preserve Telegram Premium custom/animated emojis!
@@ -1379,6 +1387,23 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
                 )
             except Exception as e:
                 logger.warning("Failed to edit reply markup to add post URL: %s", e)
+
+        # Record post publication in tracker
+        try:
+            author_id = data.get("author_id")
+            author_name = data.get("author_name") or "Admin"
+            raw_text = data.get("raw_text") or (data.get("info") or "")
+            snippet = raw_text[:150].strip()
+            record_published_post(
+                post_id=str(sent_msg_id),
+                post_url=post_url,
+                admin_id=author_id,
+                admin_name=author_name,
+                caption_snippet=snippet,
+            )
+            logger.info("Recorded post #%s published to channel by %s (%s)", sent_msg_id, author_name, author_id)
+        except Exception as e_pub:
+            logger.warning("Failed to record published post to tracker: %s", e_pub)
 
     # Immediately after post is published, clear dynamic apply contacts from storage
     # so they are not reused for future posts, waiting for admin to set new contacts.
@@ -1706,10 +1731,13 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "👋 សួស្តី Admin! ខ្ញុំជា Bot សម្រាប់ទម្លាក់ព័ត៌មានការងារ។\n\n"
         "Admin អាចប្រើ:\n"
         "• /post — បង្ហោះការងារថ្មី (ផ្ញើព័ត៌មាន/រូបភាព ក្នុងសារតែមួយ)\n"
+        "• /posts — មើលស្ថិតិចំនួន Post ដែលបានបង្ហោះចូល Channel\n"
+        "• /report — មើលរបាយការណ៍សកម្មភាព និងស្ថិតិចុចលើប៊ូតុងនីមួយៗប្រចាំខែ (Clicks Report)\n"
+        "• /backup — ទាញយកឯកសារ Backup ទិន្នន័យ Clicks & Posts (clicks.json)\n"
+        "• /restore — ដាក់បញ្ចូល (Restore) ទិន្នន័យពីឯកសារ Backup មកវិញ\n"
         "• /setcontact — កំណត់ Contact សម្រាប់ប៊ូតុង Apply Now (បើមិនកំណត់ ឬលុប ប៊ូតុងនឹងបាត់)\n"
         "• /clearcontact — លុប Contact (ធ្វើឱ្យប៊ូតុង Apply Now បាត់)\n"
         "• /showcontact — មើលទម្រង់ប៊ូតុងបច្ចុប្បន្ន\n"
-        "• /report — មើលរបាយការណ៍ចំនួនអ្នកចុចលើប៊ូតុងនីមួយៗប្រចាំខែ (Button Clicks Report)\n"
         "• ឬ forward សារណាមួយមក bot ដោយផ្ទាល់ (bot នឹងសួរ confirm មុន post)"
     )
 
@@ -1745,7 +1773,8 @@ def build_report_month_keyboard(current_selected_month: str = None) -> InlineKey
 
     target = current_selected_month or now_month
     keyboard_rows.append([
-        InlineKeyboardButton(f"📥 ទាញយក CSV ({target})", callback_data=f"rep_csv:{target}")
+        InlineKeyboardButton(f"📥 ទាញយក CSV ({target})", callback_data=f"rep_csv:{target}"),
+        InlineKeyboardButton("📢 មើលចំនួន Posts", callback_data=f"rep_posts_month:{target}"),
     ])
 
     return InlineKeyboardMarkup(keyboard_rows)
@@ -1759,7 +1788,8 @@ def build_report_view_keyboard(month: str) -> InlineKeyboardMarkup:
             InlineKeyboardButton("🔄 Refresh", callback_data=f"rep_month:{month}"),
         ],
         [
-            InlineKeyboardButton("🔙 ជ្រើសរើសខែផ្សេង (Choose Another Month)", callback_data="rep_home"),
+            InlineKeyboardButton("📢 មើលចំនួន Posts", callback_data=f"rep_posts_month:{month}"),
+            InlineKeyboardButton("🔙 ជ្រើសរើសខែផ្សេង", callback_data="rep_home"),
         ],
     ])
 
@@ -1819,6 +1849,37 @@ async def report_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     )
 
 
+async def posts_count_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Show how many posts admins have sent to the channel (all time or by month)."""
+    user = update.effective_user
+    if not is_admin(user.id):
+        await update.message.reply_text("⚠️ បញ្ជានេះសម្រាប់តែ Admin ប៉ុណ្ណោះ (Admins only)។")
+        return
+
+    args = context.args or []
+    target_month = args[0] if args else datetime.now().strftime("%Y-%m")
+    rep_data = get_monthly_report_data(target_month)
+    text = format_telegram_posts_report(rep_data, webhook_url=WEBHOOK_URL)
+
+    now_m = datetime.now().strftime("%Y-%m")
+    keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("📅 ខែនេះ (Current Month)", callback_data=f"rep_posts_month:{now_m}"),
+            InlineKeyboardButton("🌐 គ្រប់ខែ (All-Time)", callback_data="rep_posts_month:all"),
+        ],
+        [
+            InlineKeyboardButton("📊 របាយការណ៍ប៊ូតុង (/report)", callback_data="rep_home"),
+        ]
+    ])
+
+    await update.message.reply_text(
+        text,
+        reply_markup=keyboard,
+        parse_mode="HTML",
+        disable_web_page_preview=True,
+    )
+
+
 async def report_callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     user = update.effective_user
@@ -1849,6 +1910,35 @@ async def report_callback_handler(update: Update, context: ContextTypes.DEFAULT_
         rep_data = get_monthly_report_data(month)
         text = format_telegram_report(rep_data, webhook_url=WEBHOOK_URL)
         kb = build_report_view_keyboard(month)
+        try:
+            await query.edit_message_text(
+                text,
+                reply_markup=kb,
+                parse_mode="HTML",
+                disable_web_page_preview=True,
+            )
+        except Exception:
+            pass
+    elif data.startswith("rep_posts_month:"):
+        month = data.split(":", 1)[1]
+        rep_data = get_monthly_report_data(month)
+        text = format_telegram_posts_report(rep_data, webhook_url=WEBHOOK_URL)
+        now_m = datetime.now().strftime("%Y-%m")
+        kb = InlineKeyboardMarkup([
+            [
+                InlineKeyboardButton(
+                    f"{'✅ ' if month == now_m else ''}📅 ខែនេះ",
+                    callback_data=f"rep_posts_month:{now_m}"
+                ),
+                InlineKeyboardButton(
+                    f"{'✅ ' if month == 'all' else ''}🌐 គ្រប់ខែ",
+                    callback_data="rep_posts_month:all"
+                ),
+            ],
+            [
+                InlineKeyboardButton("📊 របាយការណ៍ប៊ូតុង (/report)", callback_data=f"rep_month:{month}"),
+            ]
+        ])
         try:
             await query.edit_message_text(
                 text,
@@ -2245,6 +2335,7 @@ def main() -> None:
     app.add_handler(CommandHandler("report", report_command))
     app.add_handler(CommandHandler("reports", report_command))
     app.add_handler(CommandHandler("stats", report_command))
+    app.add_handler(CommandHandler(["posts", "postcount", "channelposts"], posts_count_command))
     app.add_handler(CommandHandler(["backup", "backupclicks", "exportclicks"], backup_clicks_command))
     app.add_handler(CommandHandler(["restore", "restoreclicks", "importclicks"], restore_clicks_command))
     app.add_handler(
@@ -2255,7 +2346,7 @@ def main() -> None:
     )
     app.add_handler(
         CallbackQueryHandler(
-            report_callback_handler, pattern="^rep_(home|month|csv):?.*$"
+            report_callback_handler, pattern="^rep_(home|month|posts_month|csv):?.*$"
         )
     )
     app.add_handler(contact_conv_handler)

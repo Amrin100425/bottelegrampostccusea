@@ -52,7 +52,14 @@ def merge_click_data(base: dict, incoming: dict) -> dict:
         if token not in base_links or (info.get("updated_at", "") > base_links[token].get("updated_at", "")):
             base_links[token] = info
 
-    # 2. Merge months
+    # 2. Merge published_posts
+    base_pub = base.setdefault("published_posts", {})
+    incoming_pub = incoming.get("published_posts", {})
+    for pid, pinfo in incoming_pub.items():
+        if pid not in base_pub or (pinfo.get("timestamp", "") > base_pub[pid].get("timestamp", "")):
+            base_pub[pid] = pinfo
+
+    # 3. Merge months
     base_months = base.setdefault("months", {})
     incoming_months = incoming.get("months", {})
     for m_key, in_m in incoming_months.items():
@@ -65,6 +72,24 @@ def merge_click_data(base: dict, incoming: dict) -> dict:
         bm_users = set(bm.get("unique_users", []))
         bm_users.update(in_m.get("unique_users", []))
         bm["unique_users"] = list(bm_users)
+
+        # Merge posts_published
+        bm_posts = set(bm.get("posts_published", []))
+        bm_posts.update(in_m.get("posts_published", []))
+        bm["posts_published"] = list(bm_posts)
+
+        # Merge posts_by_admin
+        bm_admin = bm.setdefault("posts_by_admin", {})
+        for adm_k, in_adm in in_m.get("posts_by_admin", {}).items():
+            if adm_k not in bm_admin:
+                bm_admin[adm_k] = in_adm
+            else:
+                a_posts = set(bm_admin[adm_k].get("posts", []))
+                a_posts.update(in_adm.get("posts", []))
+                bm_admin[adm_k]["posts"] = list(a_posts)
+                bm_admin[adm_k]["count"] = len(bm_admin[adm_k]["posts"])
+                if in_adm.get("admin_name"):
+                    bm_admin[adm_k]["admin_name"] = in_adm["admin_name"]
 
         # Merge by_type
         b_type = bm.setdefault("by_type", {})
@@ -108,7 +133,7 @@ def merge_click_data(base: dict, incoming: dict) -> dict:
         link_clicks_sum = sum(v.get("clicks", 0) for v in b_link.values())
         bm["total_clicks"] = max(bm.get("total_clicks", 0), in_m.get("total_clicks", 0), link_clicks_sum)
 
-    # 3. Merge recent_clicks (keep deduplicated, newest first, max 500)
+    # 4. Merge recent_clicks (keep deduplicated, newest first, max 500)
     seen_clicks = set()
     merged_recent = []
     combined_recent = base.get("recent_clicks", []) + incoming.get("recent_clicks", [])
@@ -161,26 +186,89 @@ def _get_default_data() -> dict:
         "links": {},
         "months": {},
         "recent_clicks": [],
+        "published_posts": {},
     }
+
+
+def _seed_published_posts(data: dict) -> bool:
+    """Pre-seed historical posts (3866-3890) so stats accurately reflect published posts."""
+    pub = data.setdefault("published_posts", {})
+    m_data = data.setdefault("months", {}).setdefault(
+        "2026-11",
+        {
+            "total_clicks": 0,
+            "unique_users": [],
+            "by_type": {},
+            "by_link": {},
+            "by_post": {},
+            "posts_published": [],
+            "posts_by_admin": {},
+        },
+    )
+    posts_pub = m_data.setdefault("posts_published", [])
+    changed = False
+
+    historical_ids = [
+        "3866", "3867", "3868", "3869", "3870", "3871", "3872", "3873", "3874",
+        "3875", "3876", "3877", "3878", "3879", "3880", "3881", "3882",
+        "3883", "3884", "3885", "3886", "3887", "3888", "3889", "3890"
+    ]
+    for pid in historical_ids:
+        if pid not in pub:
+            contact_label = PAST_POST_CONTACTS.get(pid, {}).get("label", "Job Announcement")
+            pub[pid] = {
+                "post_id": pid,
+                "post_url": f"https://t.me/useacareercenter/{pid}",
+                "timestamp": f"2026-11-01T{int(pid) % 24:02d}:00:00",
+                "month": "2026-11",
+                "admin_id": None,
+                "admin_name": "Admin",
+                "caption_snippet": f"Job Post #{pid} ({contact_label})",
+            }
+            changed = True
+        if pid not in posts_pub:
+            posts_pub.append(pid)
+            changed = True
+
+    by_admin = m_data.setdefault("posts_by_admin", {})
+    if "Admin" not in by_admin and posts_pub:
+        by_admin["Admin"] = {
+            "admin_id": None,
+            "admin_name": "Admin",
+            "posts": list(posts_pub),
+            "count": len(posts_pub),
+        }
+        changed = True
+
+    return changed
 
 
 def load_click_data() -> dict:
     """Load persistent click data from JSON store."""
     if not os.path.exists(CLICK_STORE_FILE):
-        return _get_default_data()
+        data = _get_default_data()
+        _seed_published_posts(data)
+        save_click_data(data)
+        return data
 
     try:
         with open(CLICK_STORE_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
             if not isinstance(data, dict):
-                return _get_default_data()
+                data = _get_default_data()
             data.setdefault("links", {})
             data.setdefault("months", {})
             data.setdefault("recent_clicks", [])
+            data.setdefault("published_posts", {})
+            if _seed_published_posts(data):
+                save_click_data(data)
             return data
     except Exception as exc:
         logger.warning("Error loading %s: %s. Re-initializing default.", CLICK_STORE_FILE, exc)
-        return _get_default_data()
+        data = _get_default_data()
+        _seed_published_posts(data)
+        save_click_data(data)
+        return data
 
 
 def save_click_data(data: dict) -> None:
@@ -499,6 +587,79 @@ def record_telegram_button_click(
     logger.info("Recorded Telegram button click: type=%s, user=%s (%s), post=%s, month=%s", link_type, uid_str, user_display, post_id, month_key)
 
 
+def record_published_post(
+    post_id: str,
+    post_url: str = "",
+    admin_id: Optional[int] = None,
+    admin_name: str = "Admin",
+    caption_snippet: str = "",
+) -> None:
+    """
+    Record a post published to the channel by an admin.
+    Tracks total count, monthly count, and breakdown by admin.
+    """
+    if not post_id:
+        return
+    post_id = str(post_id).strip()
+    data = load_click_data()
+    now = datetime.now()
+    month_key = now.strftime("%Y-%m")
+    now_iso = now.isoformat()
+
+    full_url = post_url or f"https://t.me/useacareercenter/{post_id}"
+
+    # 1. Global registry
+    pub = data.setdefault("published_posts", {})
+    pub[post_id] = {
+        "post_id": post_id,
+        "post_url": full_url,
+        "timestamp": now_iso,
+        "month": month_key,
+        "admin_id": admin_id,
+        "admin_name": admin_name or "Admin",
+        "caption_snippet": (caption_snippet or "")[:150].strip(),
+    }
+
+    # 2. Month-specific stats
+    months = data.setdefault("months", {})
+    m_data = months.setdefault(
+        month_key,
+        {
+            "total_clicks": 0,
+            "unique_users": [],
+            "by_type": {},
+            "by_link": {},
+            "by_post": {},
+            "posts_published": [],
+            "posts_by_admin": {},
+        },
+    )
+    posts_pub = m_data.setdefault("posts_published", [])
+    if post_id not in posts_pub:
+        posts_pub.append(post_id)
+
+    # 3. Admin-specific stats
+    admin_key = str(admin_id) if admin_id else (admin_name or "Admin")
+    by_admin = m_data.setdefault("posts_by_admin", {})
+    adm_entry = by_admin.setdefault(
+        admin_key,
+        {
+            "admin_id": admin_id,
+            "admin_name": admin_name or "Admin",
+            "posts": [],
+            "count": 0,
+        },
+    )
+    adm_posts = adm_entry.setdefault("posts", [])
+    if post_id not in adm_posts:
+        adm_posts.append(post_id)
+    adm_entry["count"] = len(adm_posts)
+    adm_entry["admin_name"] = admin_name or adm_entry.get("admin_name", "Admin")
+
+    save_click_data(data)
+    logger.info("Recorded published post: id=%s, admin=%s (%s), month=%s", post_id, admin_name, admin_id, month_key)
+
+
 def get_available_months() -> List[str]:
     """Return sorted list of month strings (YYYY-MM), newest first."""
     data = load_click_data()
@@ -510,7 +671,7 @@ def get_available_months() -> List[str]:
 
 def get_monthly_report_data(month: Optional[str] = None) -> dict:
     """
-    Retrieve aggregated statistics for each button for a specific month or all time ('all').
+    Retrieve aggregated statistics for each button and published posts for a specific month or all time ('all').
     """
     data = load_click_data()
     current_month = datetime.now().strftime("%Y-%m")
@@ -558,6 +719,41 @@ def get_monthly_report_data(month: Optional[str] = None) -> dict:
             for k, v in by_post_merged.items()
         }
 
+        # Published posts all-time
+        pub_posts = data.get("published_posts", {})
+        all_posts = list(pub_posts.values())
+        all_posts.sort(
+            key=lambda x: (x.get("timestamp", ""), int(x.get("post_id", 0)) if str(x.get("post_id", "")).isdigit() else 0),
+            reverse=True,
+        )
+
+        # Merge posts_by_admin across all months
+        all_admin_merged = {}
+        for m_key, m_val in data.get("months", {}).items():
+            for a_key, a_val in m_val.get("posts_by_admin", {}).items():
+                dest = all_admin_merged.setdefault(
+                    a_key,
+                    {
+                        "admin_id": a_val.get("admin_id"),
+                        "admin_name": a_val.get("admin_name", "Admin"),
+                        "posts": set(),
+                        "count": 0,
+                    },
+                )
+                dest["posts"].update(a_val.get("posts", []))
+                if a_val.get("admin_name"):
+                    dest["admin_name"] = a_val["admin_name"]
+
+        all_admin_formatted = {
+            k: {
+                "admin_id": v["admin_id"],
+                "admin_name": v["admin_name"],
+                "posts": list(v["posts"]),
+                "count": len(v["posts"]),
+            }
+            for k, v in all_admin_merged.items()
+        }
+
         return {
             "month": "all",
             "month_display": "គ្រប់ខែទាំងអស់ (All-Time)",
@@ -565,6 +761,9 @@ def get_monthly_report_data(month: Optional[str] = None) -> dict:
             "unique_users_count": len(all_users),
             "by_type": by_type_formatted,
             "by_post": by_post_formatted,
+            "posts_count": len(all_posts),
+            "published_posts": all_posts,
+            "posts_by_admin": all_admin_formatted,
         }
 
     # Specific month
@@ -574,6 +773,8 @@ def get_monthly_report_data(month: Optional[str] = None) -> dict:
         "by_type": {},
         "by_link": {},
         "by_post": {},
+        "posts_published": [],
+        "posts_by_admin": {},
     }
 
     by_type_formatted = {}
@@ -593,6 +794,32 @@ def get_monthly_report_data(month: Optional[str] = None) -> dict:
             "unique_users": len(v.get("users", [])),
         }
 
+    # Gather posts for this month
+    pub_posts = data.get("published_posts", {})
+    month_post_ids = set(m_data.get("posts_published", []))
+    month_posts = [
+        p for p in pub_posts.values()
+        if p.get("post_id") in month_post_ids or p.get("month") == target_month
+    ]
+    for pid in month_post_ids:
+        if not any(p.get("post_id") == pid for p in month_posts):
+            month_posts.append({
+                "post_id": pid,
+                "post_url": f"https://t.me/useacareercenter/{pid}",
+                "timestamp": f"{target_month}-01T00:00:00",
+                "month": target_month,
+                "admin_id": None,
+                "admin_name": "Admin",
+                "caption_snippet": f"Post #{pid}",
+            })
+
+    month_posts.sort(
+        key=lambda x: (x.get("timestamp", ""), int(x.get("post_id", 0)) if str(x.get("post_id", "")).isdigit() else 0),
+        reverse=True,
+    )
+
+    posts_by_admin = m_data.get("posts_by_admin", {})
+
     return {
         "month": target_month,
         "month_display": f"ខែ {target_month}",
@@ -600,24 +827,41 @@ def get_monthly_report_data(month: Optional[str] = None) -> dict:
         "unique_users_count": len(m_data.get("unique_users", [])),
         "by_type": by_type_formatted,
         "by_post": by_post_formatted,
+        "posts_count": len(month_posts),
+        "published_posts": month_posts,
+        "posts_by_admin": posts_by_admin,
     }
 
 
 def format_telegram_report(report_data: dict, webhook_url: str = "") -> str:
     """
     Format report into a clean HTML Telegram message clearly showing
-    how many users clicked EACH BUTTON for the month.
+    how many posts were published and how many users clicked EACH BUTTON for the month.
     """
     month_display = report_data.get("month_display") or report_data.get("month")
     total_clicks = report_data.get("total_clicks", 0)
     unique_users = report_data.get("unique_users_count", 0)
+    posts_count = report_data.get("posts_count", 0)
+    posts_by_admin = report_data.get("posts_by_admin") or {}
 
     lines = [
-        f"📊 <b>របាយការណ៍ចំនួនអ្នកចុចលើប៊ូតុងនីមួយៗ</b>",
+        f"📊 <b>របាយការណ៍សកម្មភាព និងស្ថិតិចុចលើប៊ូតុង</b>",
         f"📅 <b>ប្រចាំ:</b> <code>{month_display}</code>",
         "━━━━━━━━━━━━━━━━━━━━",
-        "🔘 <b>ស្ថិតិតាមប៊ូតុងនីមួយៗ (Stats for Each Button):</b>\n",
+        f"📢 <b>ចំនួន Post បានបង្ហោះចូល Channel:</b> <b>{posts_count}</b> Posts",
     ]
+
+    if posts_by_admin:
+        lines.append("✍️ <b>Admin អ្នកបង្ហោះ (Posted by):</b>")
+        for adm_k, adm_info in posts_by_admin.items():
+            adm_name = adm_info.get("admin_name", "Admin")
+            cnt = adm_info.get("count", len(adm_info.get("posts", [])))
+            lines.append(f"   • <b>{adm_name}:</b> {cnt} Posts")
+
+    lines.extend([
+        "━━━━━━━━━━━━━━━━━━━━",
+        "🔘 <b>ស្ថិតិតាមប៊ូតុងនីមួយៗ (Stats for Each Button):</b>\n",
+    ])
 
     by_type = report_data.get("by_type") or {}
 
@@ -656,6 +900,7 @@ def format_telegram_report(report_data: dict, webhook_url: str = "") -> str:
     lines.append("━━━━━━━━━━━━━━━━━━━━")
     lines.append(f"👥 <b>អ្នកចុចសរុបទាំងអស់ (Total Unique Users):</b> <b>{unique_users}</b> នាក់")
     lines.append(f"👆 <b>ចំនួនចុចសរុបគ្រប់ប៊ូតុង (Total Button Clicks):</b> <b>{total_clicks}</b> ដង")
+    lines.append(f"📢 <b>ចំនួន Post សរុប (Total Posts Published):</b> <b>{posts_count}</b> Posts")
 
     by_post = report_data.get("by_post") or {}
     if by_post:
@@ -675,9 +920,53 @@ def format_telegram_report(report_data: dict, webhook_url: str = "") -> str:
     return "\n".join(lines)
 
 
+def format_telegram_posts_report(report_data: dict, webhook_url: str = "") -> str:
+    """
+    Format dedicated post count & published channel posts report for Telegram.
+    """
+    month_display = report_data.get("month_display") or report_data.get("month")
+    posts_count = report_data.get("posts_count", 0)
+    published_posts = report_data.get("published_posts") or []
+    posts_by_admin = report_data.get("posts_by_admin") or {}
+
+    lines = [
+        "📢 <b>របាយការណ៍ចំនួន Post ដែលបង្ហោះចូល Channel</b>",
+        f"📅 <b>ប្រចាំ:</b> <code>{month_display}</code>",
+        "━━━━━━━━━━━━━━━━━━━━",
+        f"📊 <b>ចំនួន Post បានបង្ហោះសរុប:</b> <b>{posts_count}</b> Posts\n",
+    ]
+
+    if posts_by_admin:
+        lines.append("✍️ <b>ស្ថិតិតាម Admin (Posts by Admin):</b>")
+        for adm_k, adm_info in posts_by_admin.items():
+            adm_name = adm_info.get("admin_name", "Admin")
+            cnt = adm_info.get("count", len(adm_info.get("posts", [])))
+            lines.append(f"   • <b>{adm_name}:</b> <b>{cnt}</b> Posts")
+        lines.append("")
+
+    if published_posts:
+        lines.append("📝 <b>បញ្ជី Post ថ្មីៗ (Recent Channel Posts):</b>")
+        for p in published_posts[:12]:
+            pid = p.get("post_id")
+            p_url = p.get("post_url") or f"https://t.me/useacareercenter/{pid}"
+            adm = p.get("admin_name", "Admin")
+            snip = p.get("caption_snippet", "")
+            if len(snip) > 35:
+                snip = snip[:32] + "..."
+            snip_text = f" — <i>{snip}</i>" if snip else ""
+            lines.append(f"• <b>Post #{pid}</b> ({adm}): <a href=\"{p_url}\">មើល Post</a>{snip_text}")
+
+    clean_webhook = (webhook_url or "").rstrip("/")
+    if clean_webhook:
+        lines.append(f"\n🌐 <b>Web Dashboard:</b> <a href=\"{clean_webhook}/report\">បើកមើលតារាងពេញលេញលើ Web</a>")
+
+    return "\n".join(lines)
+
+
 def generate_csv_report(month: Optional[str] = None) -> bytes:
     """
     Generate CSV file bytes with UTF-8 BOM encoding for Microsoft Excel compatibility.
+    Includes both Button Clicks and Published Channel Posts.
     """
     data = load_click_data()
     recent = data.get("recent_clicks", [])
@@ -685,7 +974,7 @@ def generate_csv_report(month: Optional[str] = None) -> bytes:
     output = io.StringIO()
     writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
 
-    # Header
+    # 1. Header for Button Clicks
     writer.writerow([
         "Timestamp (UTC/Local)",
         "Month (YYYY-MM)",
@@ -736,6 +1025,22 @@ def generate_csv_report(month: Optional[str] = None) -> bytes:
                 f"Post #{p_key}",
                 p_info.get("clicks", 0),
                 p_info.get("unique_users", 0),
+            ])
+
+    # 2. Append Published Channel Posts Section
+    rep = get_monthly_report_data(month)
+    published_posts = rep.get("published_posts", [])
+    if published_posts:
+        writer.writerow([])
+        writer.writerow(["--- Channel Published Posts Summary ---"])
+        writer.writerow(["Post ID", "Post URL", "Admin / Author", "Publish Timestamp", "Caption Snippet"])
+        for p in published_posts:
+            writer.writerow([
+                p.get("post_id", ""),
+                p.get("post_url", ""),
+                p.get("admin_name", "Admin"),
+                p.get("timestamp", ""),
+                p.get("caption_snippet", ""),
             ])
 
     # UTF-8 BOM (\xef\xbb\xbf) ensures Khmer script opens correctly in Excel
@@ -920,6 +1225,8 @@ class WebReportHandler(tornado.web.RequestHandler):
         rep = get_monthly_report_data(month)
         total_clicks = rep.get("total_clicks", 0)
         unique_users = rep.get("unique_users_count", 0)
+        posts_count = rep.get("posts_count", 0)
+        published_posts = rep.get("published_posts", [])
         by_type = rep.get("by_type", {})
         by_post = rep.get("by_post", {})
 
@@ -958,6 +1265,28 @@ class WebReportHandler(tornado.web.RequestHandler):
                 <td><a href="{p['post_url']}" target="_blank" class="link">{p['post_url']}</a></td>
                 <td><strong>{p['unique_users']}</strong> នាក់</td>
                 <td><strong>{p['clicks']}</strong> ដង</td>
+            </tr>
+            """)
+
+        published_rows = []
+        for p in published_posts:
+            pid = p.get("post_id", "")
+            p_url = p.get("post_url", f"https://t.me/useacareercenter/{pid}")
+            adm = p.get("admin_name", "Admin")
+            ts = p.get("timestamp", "")
+            if "T" in ts:
+                ts = ts.replace("T", " ")[:19]
+            snip = p.get("caption_snippet", "")
+            p_clicks = by_post.get(pid, {}).get("clicks", 0)
+            p_users = by_post.get(pid, {}).get("unique_users", 0)
+            published_rows.append(f"""
+            <tr>
+                <td><strong>#{pid}</strong></td>
+                <td><a href="{p_url}" target="_blank" class="link">View Post #{pid} ↗</a></td>
+                <td><span class="badge">{adm}</span></td>
+                <td><small style="color:var(--text-muted);">{ts}</small></td>
+                <td style="max-width:280px; word-break:break-word;">{snip or '<em>(No description)</em>'}</td>
+                <td><strong>{p_users}</strong> នាក់ ({p_clicks} clicks)</td>
             </tr>
             """)
 
@@ -1119,17 +1448,40 @@ class WebReportHandler(tornado.web.RequestHandler):
 
         <div class="grid">
             <div class="stat-card">
+                <div class="stat-label">📢 ចំនួន Post បានបង្ហោះ (Posts)</div>
+                <div class="stat-val">{posts_count}</div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-label">👥 អ្នកចុចសរុប (Unique Users)</div>
                 <div class="stat-val">{unique_users}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">👆 ចំនួនចុចសរុប (Total Button Clicks)</div>
+                <div class="stat-label">👆 ចំនួនចុចសរុប (Button Clicks)</div>
                 <div class="stat-val">{total_clicks}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">📌 ចំនួន Post ដែលត្រូវបានចុច</div>
                 <div class="stat-val">{len(by_post)}</div>
             </div>
+        </div>
+
+        <div class="card">
+            <h2>📢 បញ្ជី Post ដែលបានបង្ហោះចូល Channel ({posts_count} Posts)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Post ID</th>
+                        <th>តំណភ្ជាប់ (Link)</th>
+                        <th>Admin អ្នកបង្ហោះ</th>
+                        <th>កាលបរិច្ឆេទ (Date/Time)</th>
+                        <th>ខ្លឹមសារសង្ខេប (Snippet)</th>
+                        <th>ការចុចប៊ូតុង (Clicks)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {''.join(published_rows) if published_rows else '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">មិនទាន់មានទិន្នន័យ (No published posts)</td></tr>'}
+                </tbody>
+            </table>
         </div>
 
         <div class="card">

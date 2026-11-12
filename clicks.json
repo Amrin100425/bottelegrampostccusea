@@ -1198,6 +1198,67 @@
             "816207a460cc"
           ]
         }
+      },
+      "posts_published": [
+        "3866",
+        "3867",
+        "3868",
+        "3869",
+        "3870",
+        "3871",
+        "3872",
+        "3873",
+        "3874",
+        "3875",
+        "3876",
+        "3877",
+        "3878",
+        "3879",
+        "3880",
+        "3881",
+        "3882",
+        "3883",
+        "3884",
+        "3885",
+        "3886",
+        "3887",
+        "3888",
+        "3889",
+        "3890"
+      ],
+      "posts_by_admin": {
+        "Admin": {
+          "admin_id": null,
+          "admin_name": "Admin",
+          "posts": [
+            "3866",
+            "3867",
+            "3868",
+            "3869",
+            "3870",
+            "3871",
+            "3872",
+            "3873",
+            "3874",
+            "3875",
+            "3876",
+            "3877",
+            "3878",
+            "3879",
+            "3880",
+            "3881",
+            "3882",
+            "3883",
+            "3884",
+            "3885",
+            "3886",
+            "3887",
+            "3888",
+            "3889",
+            "3890"
+          ],
+          "count": 25
+        }
       }
     }
   },
@@ -1620,5 +1681,232 @@
       "target_url": "https://t.me/USEACCAD",
       "user_hash": "816207a460cc"
     }
-  ]
+  ],
+  "published_posts": {
+    "3866": {
+      "post_id": "3866",
+      "post_url": "https://t.me/useacareercenter/3866",
+      "timestamp": "2026-11-01T02:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3866 (Apply Now)"
+    },
+    "3867": {
+      "post_id": "3867",
+      "post_url": "https://t.me/useacareercenter/3867",
+      "timestamp": "2026-11-01T03:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3867 (More information)"
+    },
+    "3868": {
+      "post_id": "3868",
+      "post_url": "https://t.me/useacareercenter/3868",
+      "timestamp": "2026-11-01T04:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3868 (Apply Now)"
+    },
+    "3869": {
+      "post_id": "3869",
+      "post_url": "https://t.me/useacareercenter/3869",
+      "timestamp": "2026-11-01T05:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3869 (Apply Now)"
+    },
+    "3870": {
+      "post_id": "3870",
+      "post_url": "https://t.me/useacareercenter/3870",
+      "timestamp": "2026-11-01T06:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3870 (USEA Career Center Announcement)"
+    },
+    "3871": {
+      "post_id": "3871",
+      "post_url": "https://t.me/useacareercenter/3871",
+      "timestamp": "2026-11-01T07:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3871 (Apply Now - Be Like Khmer)"
+    },
+    "3872": {
+      "post_id": "3872",
+      "post_url": "https://t.me/useacareercenter/3872",
+      "timestamp": "2026-11-01T08:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3872 (Apply Now - 015344663)"
+    },
+    "3873": {
+      "post_id": "3873",
+      "post_url": "https://t.me/useacareercenter/3873",
+      "timestamp": "2026-11-01T09:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3873 (Apply Now - @RAIS_SCHOOL)"
+    },
+    "3874": {
+      "post_id": "3874",
+      "post_url": "https://t.me/useacareercenter/3874",
+      "timestamp": "2026-11-01T10:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3874 (Apply Now - 070588000)"
+    },
+    "3875": {
+      "post_id": "3875",
+      "post_url": "https://t.me/useacareercenter/3875",
+      "timestamp": "2026-11-01T11:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3875 (Apply Now - CJFTEC)"
+    },
+    "3876": {
+      "post_id": "3876",
+      "post_url": "https://t.me/useacareercenter/3876",
+      "timestamp": "2026-11-01T12:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3876 (Apply Now - 081787985)"
+    },
+    "3877": {
+      "post_id": "3877",
+      "post_url": "https://t.me/useacareercenter/3877",
+      "timestamp": "2026-11-01T13:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3877 (Apply Now - CJFTEC)"
+    },
+    "3878": {
+      "post_id": "3878",
+      "post_url": "https://t.me/useacareercenter/3878",
+      "timestamp": "2026-11-01T14:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3878 (Apply Now - 016757174)"
+    },
+    "3879": {
+      "post_id": "3879",
+      "post_url": "https://t.me/useacareercenter/3879",
+      "timestamp": "2026-11-01T15:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3879 (Apply Now)"
+    },
+    "3880": {
+      "post_id": "3880",
+      "post_url": "https://t.me/useacareercenter/3880",
+      "timestamp": "2026-11-01T16:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3880 (Apply Now - 078555671)"
+    },
+    "3881": {
+      "post_id": "3881",
+      "post_url": "https://t.me/useacareercenter/3881",
+      "timestamp": "2026-11-01T17:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3881 (Apple Now - 095473808)"
+    },
+    "3882": {
+      "post_id": "3882",
+      "post_url": "https://t.me/useacareercenter/3882",
+      "timestamp": "2026-11-01T18:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3882 (Apply Now - 0962080434)"
+    },
+    "3883": {
+      "post_id": "3883",
+      "post_url": "https://t.me/useacareercenter/3883",
+      "timestamp": "2026-11-01T19:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3883 (Apply Now - Sokha Hotels)"
+    },
+    "3884": {
+      "post_id": "3884",
+      "post_url": "https://t.me/useacareercenter/3884",
+      "timestamp": "2026-11-01T20:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3884 (Apply Now - 0975406969)"
+    },
+    "3885": {
+      "post_id": "3885",
+      "post_url": "https://t.me/useacareercenter/3885",
+      "timestamp": "2026-11-01T21:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3885 (Apply Now - 081808237)"
+    },
+    "3886": {
+      "post_id": "3886",
+      "post_url": "https://t.me/useacareercenter/3886",
+      "timestamp": "2026-11-01T22:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3886 (Apply Now)"
+    },
+    "3887": {
+      "post_id": "3887",
+      "post_url": "https://t.me/useacareercenter/3887",
+      "timestamp": "2026-11-01T23:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3887 (Apply Now - 086703338)"
+    },
+    "3888": {
+      "post_id": "3888",
+      "post_url": "https://t.me/useacareercenter/3888",
+      "timestamp": "2026-11-01T00:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3888 (Apply Now - 077967755)"
+    },
+    "3889": {
+      "post_id": "3889",
+      "post_url": "https://t.me/useacareercenter/3889",
+      "timestamp": "2026-11-01T01:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3889 (Apply Now - 016499099)"
+    },
+    "3890": {
+      "post_id": "3890",
+      "post_url": "https://t.me/useacareercenter/3890",
+      "timestamp": "2026-11-01T02:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Post #3890 (Homewood Hotel - Join Our Team (095 465 668))"
+    }
+  }
 }
