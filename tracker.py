@@ -19,6 +19,14 @@ from typing import Dict, List, Optional, Tuple
 
 import tornado.web
 
+try:
+    import openpyxl
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+    from openpyxl.utils import get_column_letter
+    HAS_OPENPYXL = True
+except ImportError:
+    HAS_OPENPYXL = False
+
 logger = logging.getLogger(__name__)
 
 DATA_DIR = os.getenv("DATA_DIR", "").strip()
@@ -1163,6 +1171,540 @@ def generate_csv_report(month: Optional[str] = None) -> bytes:
     return "\ufeff".encode("utf-8") + output.getvalue().encode("utf-8")
 
 
+def generate_excel_report(month: Optional[str] = None) -> bytes:
+    """
+    Generate professional, beautifully styled multi-sheet Excel workbook (.xlsx).
+    Divided into dedicated sheets:
+      1. Overview & Buttons: Executive KPI summary & styled button performance table.
+      2. All Channel Posts: Every channel post in one sheet with URLs, authors, clicks, and users.
+      3. Post Authors: Every admin/user who posted in one sheet with post counts, clicks, and averages.
+      4. Detailed Click Logs: Granular individual click audit logs with clickable destination links.
+    """
+    if not HAS_OPENPYXL:
+        raise RuntimeError("openpyxl is not installed. Please install openpyxl to export Excel reports.")
+
+    rep = get_monthly_report_data(month)
+    data = load_click_data()
+    recent = data.get("recent_clicks", [])
+
+    wb = openpyxl.Workbook()
+
+    # Premium Color Palette
+    navy_fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
+    teal_fill = PatternFill(start_color="0F766E", end_color="0F766E", fill_type="solid")
+    indigo_fill = PatternFill(start_color="4338CA", end_color="4338CA", fill_type="solid")
+    slate_fill = PatternFill(start_color="334155", end_color="334155", fill_type="solid")
+    zebra_fill = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+    total_fill = PatternFill(start_color="E2E8F0", end_color="E2E8F0", fill_type="solid")
+    card_hdr_fill = PatternFill(start_color="F1F5F9", end_color="F1F5F9", fill_type="solid")
+
+    font_banner = Font(name="Segoe UI", size=14, bold=True, color="FFFFFF")
+    font_sub = Font(name="Segoe UI", size=9, italic=True, color="E0E7FF")
+    font_sec_hdr = Font(name="Segoe UI", size=11, bold=True, color="1E3A8A")
+    font_col_hdr = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+    font_bold = Font(name="Segoe UI", size=9, bold=True, color="0F172A")
+    font_regular = Font(name="Segoe UI", size=9, color="0F172A")
+    font_link = Font(name="Segoe UI", size=9, color="2563EB", underline="single")
+
+    thin_side = Side(border_style="thin", color="CBD5E1")
+    border_all = Border(left=thin_side, right=thin_side, top=thin_side, bottom=thin_side)
+    border_total = Border(left=thin_side, right=thin_side, top=thin_side, bottom=Side(border_style="double", color="0F172A"))
+
+    align_center = Alignment(horizontal="center", vertical="center")
+    align_left = Alignment(horizontal="left", vertical="center")
+    align_right = Alignment(horizontal="right", vertical="center")
+    align_wrap = Alignment(horizontal="left", vertical="center", wrap_text=True)
+
+    m_disp = rep.get("month_display") or rep.get("month") or ""
+
+    def auto_fit_columns(ws, min_widths=None, max_width=50):
+        min_widths = min_widths or {}
+        for col in ws.columns:
+            max_len = 0
+            col_letter = get_column_letter(col[0].column)
+            for cell in col:
+                if cell.coordinate in ["A1", "A2", "A3", "B1", "B2"]:
+                    continue
+                val = str(cell.value or "")
+                if cell.number_format and "%" in cell.number_format:
+                    val += "%"
+                for line in val.split("\n"):
+                    if len(line) > max_len:
+                        max_len = len(line)
+            chosen = max(max_len + 3, min_widths.get(col_letter, 12))
+            ws.column_dimensions[col_letter].width = min(chosen, max_width)
+
+    # ==========================================================
+    # SHEET 1: Overview & Buttons
+    # ==========================================================
+    ws1 = wb.active
+    ws1.title = "Overview & Buttons"
+    try:
+        ws1.views.sheetView[0].showGridLines = True
+    except Exception:
+        pass
+
+    ws1.merge_cells("A1:E2")
+    ws1["A1"] = "📊 USEA Career Center — Performance Analytics Report"
+    ws1["A1"].font = font_banner
+    ws1["A1"].fill = navy_fill
+    ws1["A1"].alignment = align_center
+
+    ws1.merge_cells("A3:E3")
+    ws1["A3"] = f"Report Period: {m_disp} | Exported for Administration"
+    ws1["A3"].font = font_sub
+    ws1["A3"].fill = navy_fill
+    ws1["A3"].alignment = align_center
+
+    ws1.merge_cells("A5:B5")
+    ws1["A5"] = "📋 KPI Summary (សេចក្តីសង្ខេបសំខាន់ៗ)"
+    ws1["A5"].font = font_sec_hdr
+
+    kpis = [
+        ("Report Period (កាលបរិច្ឆេទរបាយការណ៍)", m_disp),
+        ("Total Posts Published (ចំនួន Post បានបង្ហោះសរុប)", rep.get("posts_count", 0)),
+        ("Total Button Clicks (ចំនួនចុចប៊ូតុងសរុប)", rep.get("total_clicks", 0)),
+        ("Total Unique Users (ចំនួនអ្នកចុចសរុប)", rep.get("unique_users_count", 0)),
+        ("Post Tracking Started (កាលបរិច្ឆេទចាប់ផ្តើម)", rep.get("post_tracking_started_at") or "-"),
+    ]
+    cur_r = 6
+    for label, val in kpis:
+        c1 = ws1.cell(row=cur_r, column=1, value=label)
+        c2 = ws1.cell(row=cur_r, column=2, value=val)
+        c1.font = font_bold
+        c1.fill = card_hdr_fill
+        c1.border = border_all
+        c1.alignment = align_left
+        c2.font = font_bold if isinstance(val, int) else font_regular
+        c2.border = border_all
+        c2.alignment = align_center if isinstance(val, int) else align_left
+        if isinstance(val, int):
+            c2.number_format = "#,##0"
+        cur_r += 1
+
+    cur_r += 2
+    ws1.merge_cells(f"A{cur_r}:E{cur_r}")
+    ws1[f"A{cur_r}"] = "🔘 Button Performance Breakdown (ស្ថិតិតាមប៊ូតុងនីមួយៗ)"
+    ws1[f"A{cur_r}"].font = font_sec_hdr
+    cur_r += 1
+
+    btn_headers = [
+        "Button Name (ឈ្មោះប៊ូតុង)",
+        "Type (ប្រភេទ)",
+        "Unique Users (ចំនួនអ្នកចុច)",
+        "Total Clicks (ចំនួនចុចសរុប)",
+        "Share of Clicks (%)",
+    ]
+    for c_idx, h in enumerate(btn_headers, 1):
+        cell = ws1.cell(row=cur_r, column=c_idx, value=h)
+        cell.font = font_col_hdr
+        cell.fill = teal_fill
+        cell.border = border_all
+        cell.alignment = align_center
+
+    cur_r += 1
+    total_clks = rep.get("total_clicks", 0) or 1
+    by_type = rep.get("by_type") or {}
+    for idx, (t_key, t_info) in enumerate(by_type.items()):
+        clks = t_info.get("clicks", 0)
+        users = t_info.get("unique_users", 0)
+        pct = clks / total_clks
+
+        row_cells = [
+            (t_info.get("label", t_key), align_left, font_regular, None),
+            (t_key, align_center, font_regular, None),
+            (users, align_right, font_bold, "#,##0"),
+            (clks, align_right, font_bold, "#,##0"),
+            (pct, align_right, font_regular, "0.0%"),
+        ]
+        for c_idx, (val, aln, fnt, nfmt) in enumerate(row_cells, 1):
+            cell = ws1.cell(row=cur_r, column=c_idx, value=val)
+            cell.font = fnt
+            cell.alignment = aln
+            cell.border = border_all
+            if idx % 2 == 1:
+                cell.fill = zebra_fill
+            if nfmt:
+                cell.number_format = nfmt
+        cur_r += 1
+
+    sum_users = sum(v.get("unique_users", 0) for v in by_type.values())
+    sum_clks = sum(v.get("clicks", 0) for v in by_type.values())
+    total_cells = [
+        ("Total (សរុប)", align_left),
+        ("", align_center),
+        (sum_users, align_right),
+        (sum_clks, align_right),
+        (1.0, align_right),
+    ]
+    for c_idx, (val, aln) in enumerate(total_cells, 1):
+        cell = ws1.cell(row=cur_r, column=c_idx, value=val)
+        cell.font = font_bold
+        cell.alignment = aln
+        cell.fill = total_fill
+        cell.border = border_total
+        if isinstance(val, (int, float)):
+            cell.number_format = "0.0%" if isinstance(val, float) else "#,##0"
+
+    auto_fit_columns(ws1, min_widths={"A": 30, "B": 15, "C": 22, "D": 22, "E": 18})
+
+    # ==========================================================
+    # SHEET 2: Channel Posts ("all post into one sheet")
+    # ==========================================================
+    ws2 = wb.create_sheet(title="All Channel Posts")
+    try:
+        ws2.views.sheetView[0].showGridLines = True
+    except Exception:
+        pass
+
+    ws2.merge_cells("A1:G2")
+    ws2["A1"] = f"📢 All Channel Posts & Performance — {m_disp} ({rep.get('posts_count', 0)} Posts)"
+    ws2["A1"].font = font_banner
+    ws2["A1"].fill = navy_fill
+    ws2["A1"].alignment = align_center
+
+    ws2.merge_cells("A3:G3")
+    ws2["A3"] = "បញ្ជី Post ទាំងអស់ដែលបានបង្ហោះចូល Telegram Channel ព្រមទាំងចំនួន Clicks និងចំនួន Users ដែលបានចុច"
+    ws2["A3"].font = font_sub
+    ws2["A3"].fill = navy_fill
+    ws2["A3"].alignment = align_center
+
+    post_headers = [
+        "Post ID",
+        "Post Link (URL)",
+        "Author / Admin (អ្នកបង្ហោះ)",
+        "Publish Date/Time (ថ្ងៃខែបង្ហោះ)",
+        "Clicks on Post (ចំនួនចុច)",
+        "Unique Users (ចំនួនអ្នកចុច)",
+        "Caption / Snippet (ខ្លឹមសារសង្ខេប)",
+    ]
+    header_r = 5
+    for c_idx, h in enumerate(post_headers, 1):
+        cell = ws2.cell(row=header_r, column=c_idx, value=h)
+        cell.font = font_col_hdr
+        cell.fill = navy_fill
+        cell.border = border_all
+        cell.alignment = align_center
+
+    published_posts = list(rep.get("published_posts") or [])
+    by_post = rep.get("by_post") or {}
+
+    seen_pids = {str(p.get("post_id", "")).strip() for p in published_posts if p.get("post_id")}
+    for pid, p_stat in by_post.items():
+        pid_str = str(pid).strip()
+        if pid_str and pid_str not in seen_pids:
+            published_posts.append({
+                "post_id": pid_str,
+                "post_url": p_stat.get("post_url") or f"https://t.me/useacareercenter/{pid_str}",
+                "timestamp": "",
+                "admin_name": "Admin",
+                "caption_snippet": f"Post #{pid_str}",
+            })
+            seen_pids.add(pid_str)
+
+    def _sort_key(p):
+        ts = p.get("timestamp") or ""
+        pid_raw = str(p.get("post_id") or "")
+        pid_num = int(pid_raw) if pid_raw.isdigit() else 0
+        return (ts, pid_num)
+
+    published_posts.sort(key=_sort_key, reverse=True)
+
+    cur_r = 6
+    total_post_clicks = 0
+    total_post_users = 0
+    for idx, p in enumerate(published_posts):
+        pid = str(p.get("post_id", "")).strip()
+        p_stat = by_post.get(pid, {})
+        p_clicks = p_stat.get("clicks", 0)
+        p_users = p_stat.get("unique_users", 0)
+        total_post_clicks += p_clicks
+        total_post_users += p_users
+
+        p_url = p.get("post_url") or f"https://t.me/useacareercenter/{pid}"
+        adm = p.get("admin_name") or "Admin"
+        ts = p.get("timestamp", "")
+        if "T" in ts:
+            ts = ts.replace("T", " ")[:19]
+        snip = p.get("caption_snippet") or ""
+
+        # Post ID
+        c_id = ws2.cell(row=cur_r, column=1, value=f"#{pid}")
+        c_id.font = font_bold
+        c_id.alignment = align_center
+
+        # Post URL (hyperlink)
+        c_url = ws2.cell(row=cur_r, column=2, value=p_url)
+        c_url.font = font_link
+        c_url.alignment = align_left
+        c_url.hyperlink = p_url
+
+        # Admin
+        c_adm = ws2.cell(row=cur_r, column=3, value=adm)
+        c_adm.font = font_regular
+        c_adm.alignment = align_center
+
+        # Timestamp
+        c_ts = ws2.cell(row=cur_r, column=4, value=ts)
+        c_ts.font = font_regular
+        c_ts.alignment = align_center
+
+        # Clicks
+        c_clks = ws2.cell(row=cur_r, column=5, value=p_clicks)
+        c_clks.font = font_bold
+        c_clks.alignment = align_right
+        c_clks.number_format = "#,##0"
+
+        # Users
+        c_usrs = ws2.cell(row=cur_r, column=6, value=p_users)
+        c_usrs.font = font_bold
+        c_usrs.alignment = align_right
+        c_usrs.number_format = "#,##0"
+
+        # Snippet
+        c_snip = ws2.cell(row=cur_r, column=7, value=snip)
+        c_snip.font = font_regular
+        c_snip.alignment = align_wrap
+
+        for c_idx in range(1, 8):
+            cell = ws2.cell(row=cur_r, column=c_idx)
+            cell.border = border_all
+            if idx % 2 == 1:
+                cell.fill = zebra_fill
+
+        cur_r += 1
+
+    # Total row
+    tot_row = [
+        (f"Total ({len(published_posts)} Posts)", align_left),
+        ("", align_left),
+        ("", align_center),
+        ("", align_center),
+        (total_post_clicks, align_right),
+        (total_post_users, align_right),
+        ("", align_left),
+    ]
+    for c_idx, (val, aln) in enumerate(tot_row, 1):
+        cell = ws2.cell(row=cur_r, column=c_idx, value=val)
+        cell.font = font_bold
+        cell.alignment = aln
+        cell.fill = total_fill
+        cell.border = border_total
+        if isinstance(val, int):
+            cell.number_format = "#,##0"
+
+    ws2.auto_filter.ref = f"A{header_r}:G{cur_r-1}"
+    auto_fit_columns(ws2, min_widths={"A": 12, "B": 36, "C": 18, "D": 20, "E": 18, "F": 18, "G": 40}, max_width=45)
+
+    # ==========================================================
+    # SHEET 3: Post Authors ("user who post into one sheet")
+    # ==========================================================
+    ws3 = wb.create_sheet(title="Post Authors")
+    try:
+        ws3.views.sheetView[0].showGridLines = True
+    except Exception:
+        pass
+
+    ws3.merge_cells("A1:G2")
+    ws3["A1"] = f"✍️ Post Authors & Admin Contribution Summary — {m_disp}"
+    ws3["A1"].font = font_banner
+    ws3["A1"].fill = indigo_fill
+    ws3["A1"].alignment = align_center
+
+    ws3.merge_cells("A3:G3")
+    ws3["A3"] = "ស្ថិតិតាម Admin / User នីមួយៗដែលបានបង្ហោះ និងចំនួន Click/User ដែលទទួលបានលើ Posts របស់ពួកគាត់"
+    ws3["A3"].font = font_sub
+    ws3["A3"].fill = indigo_fill
+    ws3["A3"].alignment = align_center
+
+    author_headers = [
+        "Admin / Author Name",
+        "Admin Telegram ID",
+        "Total Posts (ចំនួន Post)",
+        "Total Clicks Generated",
+        "Unique Users Reached",
+        "Avg Clicks / Post",
+        "Published Post IDs (បញ្ជី Posts)",
+    ]
+    header_r = 5
+    for c_idx, h in enumerate(author_headers, 1):
+        cell = ws3.cell(row=header_r, column=c_idx, value=h)
+        cell.font = font_col_hdr
+        cell.fill = indigo_fill
+        cell.border = border_all
+        cell.alignment = align_center
+
+    # Compute author-level stats from published_posts
+    admin_stats = {}
+    for p in published_posts:
+        adm = p.get("admin_name") or "Admin"
+        aid = p.get("admin_id") or "-"
+        key = str(aid) if aid != "-" else adm
+        entry = admin_stats.setdefault(key, {
+            "name": adm,
+            "id": aid,
+            "posts": [],
+            "clicks": 0,
+            "users": 0,
+        })
+        pid = str(p.get("post_id", "")).strip()
+        if pid:
+            entry["posts"].append(pid)
+            p_stat = by_post.get(pid, {})
+            entry["clicks"] += p_stat.get("clicks", 0)
+            entry["users"] += p_stat.get("unique_users", 0)
+
+    cur_r = 6
+    tot_auth_posts = 0
+    tot_auth_clks = 0
+    tot_auth_usrs = 0
+    for idx, (k, a_info) in enumerate(sorted(admin_stats.items(), key=lambda x: len(x[1]["posts"]), reverse=True)):
+        p_cnt = len(a_info["posts"])
+        c_cnt = a_info["clicks"]
+        u_cnt = a_info["users"]
+        avg_c = round(c_cnt / p_cnt, 2) if p_cnt > 0 else 0.0
+
+        tot_auth_posts += p_cnt
+        tot_auth_clks += c_cnt
+        tot_auth_usrs += u_cnt
+
+        p_list_str = ", ".join(a_info["posts"][:30])
+        if len(a_info["posts"]) > 30:
+            p_list_str += f" (+{len(a_info['posts'])-30} more)"
+
+        row_data = [
+            (a_info["name"], align_left, font_bold, None),
+            (str(a_info["id"]), align_center, font_regular, None),
+            (p_cnt, align_right, font_bold, "#,##0"),
+            (c_cnt, align_right, font_bold, "#,##0"),
+            (u_cnt, align_right, font_bold, "#,##0"),
+            (avg_c, align_right, font_regular, "0.00"),
+            (p_list_str, align_left, font_regular, None),
+        ]
+        for c_idx, (val, aln, fnt, nfmt) in enumerate(row_data, 1):
+            cell = ws3.cell(row=cur_r, column=c_idx, value=val)
+            cell.font = fnt
+            cell.alignment = aln
+            cell.border = border_all
+            if idx % 2 == 1:
+                cell.fill = zebra_fill
+            if nfmt:
+                cell.number_format = nfmt
+
+        cur_r += 1
+
+    # Total row
+    tot_avg = round(tot_auth_clks / tot_auth_posts, 2) if tot_auth_posts > 0 else 0.0
+    tot_auth_row = [
+        (f"Total ({len(admin_stats)} Admins)", align_left),
+        ("", align_center),
+        (tot_auth_posts, align_right),
+        (tot_auth_clks, align_right),
+        (tot_auth_usrs, align_right),
+        (tot_avg, align_right),
+        ("", align_left),
+    ]
+    for c_idx, (val, aln) in enumerate(tot_auth_row, 1):
+        cell = ws3.cell(row=cur_r, column=c_idx, value=val)
+        cell.font = font_bold
+        cell.alignment = aln
+        cell.fill = total_fill
+        cell.border = border_total
+        if isinstance(val, int):
+            cell.number_format = "#,##0"
+        elif isinstance(val, float):
+            cell.number_format = "0.00"
+
+    ws3.auto_filter.ref = f"A{header_r}:G{cur_r-1}"
+    auto_fit_columns(ws3, min_widths={"A": 22, "B": 18, "C": 18, "D": 22, "E": 20, "F": 18, "G": 40}, max_width=45)
+
+    # ==========================================================
+    # SHEET 4: Detailed Click Logs
+    # ==========================================================
+    ws4 = wb.create_sheet(title="Detailed Click Logs")
+    try:
+        ws4.views.sheetView[0].showGridLines = True
+    except Exception:
+        pass
+
+    ws4.merge_cells("A1:I2")
+    ws4["A1"] = f"📋 Detailed Individual Click Logs — {m_disp}"
+    ws4["A1"].font = font_banner
+    ws4["A1"].fill = slate_fill
+    ws4["A1"].alignment = align_center
+
+    ws4.merge_cells("A3:I3")
+    ws4["A3"] = "កំណត់ត្រាចុចលើប៊ូតុងនីមួយៗលម្អិតតាមកាលបរិច្ឆេទ និងអ្នកចុច (Visitor Audit Logs)"
+    ws4["A3"].font = font_sub
+    ws4["A3"].fill = slate_fill
+    ws4["A3"].alignment = align_center
+
+    log_headers = [
+        "Timestamp (UTC/Local)",
+        "Month (YYYY-MM)",
+        "Button Name",
+        "Button Type",
+        "Post ID",
+        "Post URL",
+        "Destination Target URL",
+        "Visitor Telegram ID",
+        "Visitor Name / Username",
+    ]
+    header_r = 5
+    for c_idx, h in enumerate(log_headers, 1):
+        cell = ws4.cell(row=header_r, column=c_idx, value=h)
+        cell.font = font_col_hdr
+        cell.fill = slate_fill
+        cell.border = border_all
+        cell.alignment = align_center
+
+    cur_r = 6
+    target_month = month if month and month != "all" else None
+    rows_logged = 0
+    for idx, c in enumerate(recent):
+        if target_month and c.get("month") != target_month:
+            continue
+        rows_logged += 1
+        row_vals = [
+            (c.get("timestamp", ""), align_center),
+            (c.get("month", ""), align_center),
+            (c.get("label", ""), align_left),
+            (c.get("link_type", ""), align_center),
+            (f"#{c.get('post_id', '')}" if c.get("post_id") else "-", align_center),
+            (c.get("post_url", ""), align_left),
+            (c.get("target_url", ""), align_left),
+            (c.get("user_hash", ""), align_center),
+            (c.get("user_display", ""), align_left),
+        ]
+        for c_idx, (val, aln) in enumerate(row_vals, 1):
+            cell = ws4.cell(row=cur_r, column=c_idx, value=val)
+            cell.font = font_regular
+            cell.alignment = aln
+            cell.border = border_all
+            if rows_logged % 2 == 0:
+                cell.fill = zebra_fill
+            if c_idx in (6, 7) and val.startswith("http"):
+                cell.font = font_link
+                cell.hyperlink = val
+
+        cur_r += 1
+
+    if rows_logged == 0:
+        ws4.merge_cells(f"A{cur_r}:I{cur_r}")
+        empty_c = ws4[f"A{cur_r}"]
+        empty_c.value = "(No individual click events logged for this period)"
+        empty_c.font = font_sub
+        empty_c.alignment = align_center
+        cur_r += 1
+
+    ws4.auto_filter.ref = f"A{header_r}:I{cur_r-1}"
+    auto_fit_columns(ws4, min_widths={"A": 22, "B": 14, "C": 25, "D": 14, "E": 12, "F": 30, "G": 30, "H": 18, "I": 22}, max_width=40)
+
+    buf = io.BytesIO()
+    wb.save(buf)
+    return buf.getvalue()
+
+
 # ------------------------------------------------------------------
 # Tornado Web Handlers
 # ------------------------------------------------------------------
@@ -1407,6 +1949,47 @@ class WebReportHandler(tornado.web.RequestHandler):
             </tr>
             """)
 
+        # Compute author statistics ("user who post into one sheet")
+        author_stats = {}
+        for p in published_posts:
+            adm = p.get("admin_name") or "Admin"
+            aid = p.get("admin_id") or "-"
+            key = str(aid) if aid != "-" else adm
+            entry = author_stats.setdefault(key, {
+                "name": adm,
+                "id": aid,
+                "posts": [],
+                "clicks": 0,
+                "users": 0,
+            })
+            pid = str(p.get("post_id", "")).strip()
+            if pid:
+                entry["posts"].append(pid)
+                p_stat = by_post.get(pid, {})
+                entry["clicks"] += p_stat.get("clicks", 0)
+                entry["users"] += p_stat.get("unique_users", 0)
+
+        author_rows = []
+        for _, a_info in sorted(author_stats.items(), key=lambda x: len(x[1]["posts"]), reverse=True):
+            p_cnt = len(a_info["posts"])
+            c_cnt = a_info["clicks"]
+            u_cnt = a_info["users"]
+            avg_c = round(c_cnt / p_cnt, 2) if p_cnt > 0 else 0.0
+            p_list_preview = ", ".join(f"#{x}" for x in a_info["posts"][:10])
+            if len(a_info["posts"]) > 10:
+                p_list_preview += f" (+{len(a_info['posts'])-10} more)"
+            author_rows.append(f"""
+            <tr>
+                <td><strong>{a_info['name']}</strong></td>
+                <td><span class="badge">{a_info['id']}</span></td>
+                <td><strong style="color:var(--primary);">{p_cnt}</strong> Posts</td>
+                <td><strong>{c_cnt}</strong> clicks</td>
+                <td><strong>{u_cnt}</strong> នាក់</td>
+                <td><span style="color:#10b981; font-weight:600;">{avg_c}</span></td>
+                <td><small style="color:var(--text-muted);">{p_list_preview or '-'}</small></td>
+            </tr>
+            """)
+
         html = f"""<!DOCTYPE html>
 <html lang="km">
 <head>
@@ -1470,6 +2053,15 @@ class WebReportHandler(tornado.web.RequestHandler):
         }}
         .btn-primary:hover {{
             background: #0369a1;
+        }}
+        .btn-excel {{
+            background: #0d9488;
+            color: #fff;
+            border: none;
+            font-weight: 600;
+        }}
+        .btn-excel:hover {{
+            background: #0f766e;
         }}
         .grid {{
             display: grid;
@@ -1559,6 +2151,7 @@ class WebReportHandler(tornado.web.RequestHandler):
                 <select onchange="window.location.href='/report?month=' + this.value">
                     {''.join(options_html)}
                 </select>
+                <a href="/report/excel?month={month}" class="btn btn-excel">📊 Download Excel (.xlsx)</a>
                 <a href="/report/csv?month={month}" class="btn btn-primary">📥 Download CSV</a>
             </div>
         </div>
@@ -1581,6 +2174,26 @@ class WebReportHandler(tornado.web.RequestHandler):
                 <div class="stat-label">📌 ចំនួន Post ដែលត្រូវបានចុច</div>
                 <div class="stat-val">{len(by_post)}</div>
             </div>
+        </div>
+
+        <div class="card">
+            <h2>✍️ ស្ថិតិតាម Admin អ្នកបង្ហោះ (Post Authors & Engagement)</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Admin / Author</th>
+                        <th>Telegram ID</th>
+                        <th>ចំនួន Post បានបង្ហោះ</th>
+                        <th>ចំនួនចុច (Clicks)</th>
+                        <th>ចំនួនអ្នកចុច (Users)</th>
+                        <th>Avg Clicks/Post</th>
+                        <th>បញ្ជី Posts</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {''.join(author_rows) if author_rows else '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">មិនទាន់មានទិន្នន័យ (No author data)</td></tr>'}
+                </tbody>
+            </table>
         </div>
 
         <div class="card">
@@ -1659,6 +2272,24 @@ class WebCsvExportHandler(tornado.web.RequestHandler):
         self.set_header("Content-Type", "text/csv; charset=utf-8")
         self.set_header("Content-Disposition", f'attachment; filename="{filename}"')
         self.write(csv_bytes)
+
+
+class WebExcelExportHandler(tornado.web.RequestHandler):
+    """
+    Handle GET /report/excel?month=YYYY-MM: Direct styled multi-sheet Excel (.xlsx) file download.
+    """
+
+    def get(self):
+        month = self.get_argument("month", None)
+        avail_months = get_available_months()
+        if not month:
+            month = avail_months[0] if avail_months else datetime.now().strftime("%Y-%m")
+
+        excel_bytes = generate_excel_report(month=month)
+        filename = f"USEA_Career_Report_{month}.xlsx"
+        self.set_header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        self.set_header("Content-Disposition", f'attachment; filename="{filename}"')
+        self.write(excel_bytes)
 
 
 class WebClicksJsonHandler(tornado.web.RequestHandler):

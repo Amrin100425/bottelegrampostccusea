@@ -47,9 +47,11 @@ from tracker import (
     format_telegram_report,
     format_telegram_posts_report,
     generate_csv_report,
+    generate_excel_report,
     RedirectTrackerHandler,
     WebReportHandler,
     WebCsvExportHandler,
+    WebExcelExportHandler,
     WebClicksJsonHandler,
     load_click_data,
     save_click_data,
@@ -1775,7 +1777,10 @@ def build_report_month_keyboard(current_selected_month: str = None) -> InlineKey
 
     target = current_selected_month or now_month
     keyboard_rows.append([
-        InlineKeyboardButton(f"📥 ទាញយក CSV ({target})", callback_data=f"rep_csv:{target}"),
+        InlineKeyboardButton(f"📊 ទាញយក Excel ({target})", callback_data=f"rep_xlsx:{target}"),
+        InlineKeyboardButton(f"📄 ទាញយក CSV ({target})", callback_data=f"rep_csv:{target}"),
+    ])
+    keyboard_rows.append([
         InlineKeyboardButton("📢 មើលចំនួន Posts", callback_data=f"rep_posts_month:{target}"),
     ])
 
@@ -1786,14 +1791,50 @@ def build_report_view_keyboard(month: str) -> InlineKeyboardMarkup:
     """Build action buttons when viewing a specific month report."""
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("📥 ទាញយកជា CSV", callback_data=f"rep_csv:{month}"),
-            InlineKeyboardButton("🔄 Refresh", callback_data=f"rep_month:{month}"),
+            InlineKeyboardButton("📊 ទាញយក Excel (.xlsx)", callback_data=f"rep_xlsx:{month}"),
+            InlineKeyboardButton("📄 ទាញយក CSV", callback_data=f"rep_csv:{month}"),
         ],
         [
             InlineKeyboardButton("📢 មើលចំនួន Posts", callback_data=f"rep_posts_month:{month}"),
+            InlineKeyboardButton("🔄 Refresh", callback_data=f"rep_month:{month}"),
+        ],
+        [
             InlineKeyboardButton("🔙 ជ្រើសរើសខែផ្សេង", callback_data="rep_home"),
         ],
     ])
+
+
+async def send_excel_report_file(update: Update, context: ContextTypes.DEFAULT_TYPE, month: str) -> None:
+    """Generate and send beautifully styled multi-sheet Excel report directly to admin chat."""
+    excel_bytes = generate_excel_report(month=month)
+    filename = f"USEA_Career_Report_{month}.xlsx"
+    chat_id = update.effective_chat.id
+
+    rep = get_monthly_report_data(month)
+    posts_count = rep.get("posts_count", 0)
+    total_clicks = rep.get("total_clicks", 0)
+    unique_users = rep.get("unique_users_count", 0)
+
+    caption = (
+        f"📊 <b>របាយការណ៍ Excel (Multi-Sheet Styled Report)</b>\n"
+        f"📅 ប្រចាំ: <code>{month}</code>\n"
+        f"📢 ចំនួន Post បានបង្ហោះ: <b>{posts_count}</b> Posts\n"
+        f"👥 អ្នកចុចសរុប: <b>{unique_users}</b> នាក់ | 👆 ចុចសរុប: <b>{total_clicks}</b> ដង\n\n"
+        f"✨ <b>សន្លឹកកិច្ចការទាំង ៤ (Worksheets):</b>\n"
+        f"1️⃣ <b>Overview & Buttons:</b> KPI និងស្ថិតិចុចតាមប៊ូតុងនីមួយៗ\n"
+        f"2️⃣ <b>All Channel Posts:</b> បញ្ជី Post ទាំងអស់ (Post ID, Link, Clicks, Snippet)\n"
+        f"3️⃣ <b>Post Authors:</b> ស្ថិតិតាម Admin អ្នកបង្ហោះ (Posts, Clicks, Avg)\n"
+        f"4️⃣ <b>Detailed Click Logs:</b> កំណត់ត្រាចុចលម្អិតតាមកាលបរិច្ឆេទ"
+    )
+    await context.bot.send_document(
+        chat_id=chat_id,
+        document=io.BytesIO(excel_bytes),
+        filename=filename,
+        caption=caption,
+        parse_mode="HTML",
+        read_timeout=60,
+        write_timeout=60,
+    )
 
 
 async def send_csv_report_file(update: Update, context: ContextTypes.DEFAULT_TYPE, month: str) -> None:
@@ -1832,7 +1873,11 @@ async def report_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     args = context.args or []
     now_month = datetime.now().strftime("%Y-%m")
 
-    # If admin types /report csv or /report csv 2026-10
+    # If admin types /report xlsx, /report excel or /report csv
+    if args and args[0].lower() in ("xlsx", "excel"):
+        target_month = args[1] if len(args) > 1 else now_month
+        await send_excel_report_file(update, context, target_month)
+        return
     if args and args[0].lower() == "csv":
         target_month = args[1] if len(args) > 1 else now_month
         await send_csv_report_file(update, context, target_month)
@@ -1957,6 +2002,9 @@ async def report_callback_handler(update: Update, context: ContextTypes.DEFAULT_
             )
         except Exception:
             pass
+    elif data.startswith("rep_xlsx:"):
+        month = data.split(":", 1)[1]
+        await send_excel_report_file(update, context, month)
     elif data.startswith("rep_csv:"):
         month = data.split(":", 1)[1]
         await send_csv_report_file(update, context, month)
@@ -2271,6 +2319,7 @@ def setup_webhook_health_routes() -> None:
                     (r"/r/(?P<token>[^/]+)/?", RedirectTrackerHandler),
                     (r"/report/?", WebReportHandler),
                     (r"/report/csv/?", WebCsvExportHandler),
+                    (r"/report/excel/?", WebExcelExportHandler),
                     (r"/report/clicks\.json/?", WebClicksJsonHandler),
                 ],
             )
@@ -2287,7 +2336,7 @@ def setup_webhook_health_routes() -> None:
         ptb_webhook.TelegramHandler.get = _telegram_get
         ptb_webhook.TelegramHandler.head = lambda self: self.set_status(200)
 
-        logger.info("Configured web routes: /, /health, /ping, /r/, /report, /report/csv")
+        logger.info("Configured web routes: /, /health, /ping, /r/, /report, /report/csv, /report/excel")
     except Exception as exc:
         logger.warning("Could not setup webhook health routes: %s", exc)
 
@@ -2306,6 +2355,7 @@ def start_local_tracking_server_if_needed(port: int = 10000) -> None:
         (r"/r/(?P<token>[^/]+)/?", RedirectTrackerHandler),
         (r"/report/?", WebReportHandler),
         (r"/report/csv/?", WebCsvExportHandler),
+        (r"/report/excel/?", WebExcelExportHandler),
         (r"/report/clicks\.json/?", WebClicksJsonHandler),
     ])
 
@@ -2397,7 +2447,7 @@ def main() -> None:
     )
     app.add_handler(
         CallbackQueryHandler(
-            report_callback_handler, pattern="^rep_(home|month|posts_month|csv):?.*$"
+            report_callback_handler, pattern="^rep_(home|month|posts_month|csv|xlsx):?.*$"
         )
     )
     app.add_handler(contact_conv_handler)
