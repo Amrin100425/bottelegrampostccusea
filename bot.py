@@ -16,6 +16,7 @@ Bot សម្រាប់ជួយ Admin ទម្លាក់ព័ត៌មា
       សុទ្ធតែមាន Confirmation (✅ YES / ❌ NO) សិន មុននឹងបញ្ជូនទៅកាន់ Channel។
 """
 
+import asyncio
 import html
 import io
 import json
@@ -26,6 +27,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.request import HTTPXRequest
 from telegram.ext import (
     ApplicationBuilder,
     CallbackQueryHandler,
@@ -2026,11 +2028,14 @@ async def backup_clicks_command(update: Update, context: ContextTypes.DEFAULT_TY
         filename=filename,
         caption=caption,
         parse_mode="HTML",
+        read_timeout=120.0,
+        write_timeout=120.0,
+        connect_timeout=30.0,
     )
 
 
 async def restore_clicks_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Restore and merge clicks.json from an uploaded file."""
+    """Restore and merge clicks.json from an uploaded file with retry and generous timeouts."""
     user = update.effective_user
     if not is_admin(user.id):
         await update.message.reply_text("⚠️ បញ្ជានេះសម្រាប់តែ Admin ប៉ុណ្ណោះ (Admins only)។")
@@ -2050,13 +2055,43 @@ async def restore_clicks_command(update: Update, context: ContextTypes.DEFAULT_T
         )
         return
 
+    status_msg = await msg.reply_text(
+        "⏳ <b>កំពុងទាញយក និង Restore ទិន្នន័យ...</b>\nសូមរង់ចាំបន្តិច ប្រព័ន្ធកំពុង Download & Merge ឯកសារ។",
+        parse_mode="HTML",
+    )
+
     try:
-        file_obj = await context.bot.get_file(doc.file_id)
-        content_bytes = await file_obj.download_as_bytearray()
+        content_bytes = None
+        last_err = None
+        for attempt in range(3):
+            try:
+                file_obj = await context.bot.get_file(
+                    doc.file_id,
+                    read_timeout=120.0,
+                    write_timeout=120.0,
+                    connect_timeout=30.0,
+                    pool_timeout=30.0,
+                )
+                content_bytes = await file_obj.download_as_bytearray(
+                    read_timeout=180.0,
+                    write_timeout=180.0,
+                    connect_timeout=30.0,
+                    pool_timeout=30.0,
+                )
+                break
+            except Exception as e_dl:
+                last_err = e_dl
+                logger.warning("Download attempt %s failed for restore: %s", attempt + 1, e_dl)
+                if attempt < 2:
+                    await asyncio.sleep(2.0)
+
+        if content_bytes is None:
+            raise last_err or Exception("Download timed out after 3 attempts")
+
         incoming = json.loads(content_bytes.decode("utf-8"))
 
-        if not isinstance(incoming, dict) or ("links" not in incoming and "months" not in incoming):
-            await msg.reply_text("❌ File នេះមិនមែនជាទម្រង់ clicks.json ត្រឹមត្រូវទេ។")
+        if not isinstance(incoming, dict) or ("links" not in incoming and "months" not in incoming and "published_posts" not in incoming):
+            await status_msg.edit_text("❌ File នេះមិនមែនជាទម្រង់ clicks.json ត្រឹមត្រូវទេ។")
             return
 
         current = load_click_data()
@@ -2066,17 +2101,19 @@ async def restore_clicks_command(update: Update, context: ContextTypes.DEFAULT_T
         total_links = len(merged.get("links", {}))
         curr_m = datetime.now().strftime("%Y-%m")
         m_clicks = merged.get("months", {}).get(curr_m, {}).get("total_clicks", 0)
+        posts_cnt = len(merged.get("published_posts", {}))
 
-        await msg.reply_text(
+        await status_msg.edit_text(
             f"🎉 <b>បាន Restore & Merge ទិន្នន័យ Clicks ដោយជោគជ័យ!</b>\n\n"
             f"🔗 Links សរុបក្នុងប្រព័ន្ធ: <b>{total_links}</b>\n"
+            f"📢 Posts សរុបបានរក្សាទុក: <b>{posts_cnt}</b> Posts\n"
             f"📊 Clicks ខែនេះ ({curr_m}): <b>{m_clicks}</b>\n"
-            f"💾 រាល់ click counts ទាំងអស់ត្រូវបានបញ្ចូលរួមគ្នា ដោយមិនបាត់បង់ទិន្នន័យចាស់ឡើយ!",
+            f"💾 រាល់ click counts និង post tracking ទាំងអស់ត្រូវបានបញ្ចូលរួមគ្នា ដោយមិនបាត់បង់ទិន្នន័យចាស់ឡើយ!",
             parse_mode="HTML",
         )
     except Exception as err:
         logger.error("Restore clicks failed: %s", err, exc_info=True)
-        await msg.reply_text(f"❌ បរាជ័យក្នុងការ Restore: {err}")
+        await status_msg.edit_text(f"❌ បរាជ័យក្នុងការ Restore: {err}\n\n💡 ប្រសិនបើ network យឺត សូមសាកល្បងម្ដងទៀត។")
 
 
 async def auto_backup_clicks_job(context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -2287,7 +2324,14 @@ def start_local_tracking_server_if_needed(port: int = 10000) -> None:
 
 
 def main() -> None:
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    request = HTTPXRequest(
+        connection_pool_size=16,
+        connect_timeout=30.0,
+        read_timeout=60.0,
+        write_timeout=60.0,
+        pool_timeout=30.0,
+    )
+    app = ApplicationBuilder().token(BOT_TOKEN).request(request).build()
 
     if app.job_queue:
         app.job_queue.run_repeating(auto_backup_clicks_job, interval=86400, first=3600)
