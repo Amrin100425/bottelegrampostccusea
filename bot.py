@@ -1800,10 +1800,17 @@ async def send_csv_report_file(update: Update, context: ContextTypes.DEFAULT_TYP
     filename = f"button_clicks_{month}.csv"
     chat_id = update.effective_chat.id
 
+    rep = get_monthly_report_data(month)
+    posts_count = rep.get("posts_count", 0)
+    total_clicks = rep.get("total_clicks", 0)
+    unique_users = rep.get("unique_users_count", 0)
+
     caption = (
-        f"📥 <b>របាយការណ៍ស្ថិតិចុចលើប៊ូតុងនីមួយៗ (Button Click Report)</b>\n"
+        f"📥 <b>របាយការណ៍ស្ថិតិ Clicks & ចំនួន Posts (CSV Report)</b>\n"
         f"📅 ប្រចាំ: <code>{month}</code>\n"
-        f"💡 ឯកសារនេះអាចបើកមើលក្នុង Microsoft Excel បានយ៉ាងស្រួល។"
+        f"📢 ចំនួន Post បានបង្ហោះ: <b>{posts_count}</b> Posts\n"
+        f"👥 អ្នកចុចសរុប: <b>{unique_users}</b> នាក់ | 👆 ចុចសរុប: <b>{total_clicks}</b> ដង\n"
+        f"💡 ឯកសារនេះរួមបញ្ចូលទាំងស្ថិតិ Post នីមួយៗ (Clicks & Users) អាចបើកក្នុង Excel បានយ៉ាងស្រួល។"
     )
     await context.bot.send_document(
         chat_id=chat_id,

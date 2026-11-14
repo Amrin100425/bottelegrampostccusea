@@ -59,6 +59,18 @@ def merge_click_data(base: dict, incoming: dict) -> dict:
         if pid not in base_pub or (pinfo.get("timestamp", "") > base_pub[pid].get("timestamp", "")):
             base_pub[pid] = pinfo
 
+    # Preserve earliest post tracking start date across base, incoming, and posts
+    start_candidates = [
+        str(base.get("post_tracking_started_at") or "").strip(),
+        str(incoming.get("post_tracking_started_at") or "").strip(),
+    ]
+    resolved_base_start = _resolve_post_tracking_start(base)
+    if resolved_base_start:
+        start_candidates.append(resolved_base_start)
+    valid_starts = [s for s in start_candidates if s]
+    if valid_starts:
+        base["post_tracking_started_at"] = min(valid_starts)
+
     # 3. Merge months
     base_months = base.setdefault("months", {})
     incoming_months = incoming.get("months", {})
@@ -181,12 +193,37 @@ PAST_POST_CONTACTS = {
 }
 
 
+def _resolve_post_tracking_start(data: dict) -> str:
+    """Return earliest ISO timestamp when post tracking started across stored metadata and published posts."""
+    candidates = []
+    stored = str(data.get("post_tracking_started_at") or "").strip()
+    if stored:
+        candidates.append(stored)
+    for p in (data.get("published_posts") or {}).values():
+        if isinstance(p, dict):
+            ts = str(p.get("timestamp") or "").strip()
+            if ts:
+                candidates.append(ts)
+    return min(candidates) if candidates else ""
+
+
+def _format_tracking_date(iso_ts: str) -> str:
+    """Format an ISO timestamp (e.g. 2026-11-01T00:00:00) into YYYY-MM-DD for display."""
+    raw = str(iso_ts or "").strip()
+    if not raw:
+        return ""
+    if "T" in raw:
+        return raw.split("T", 1)[0]
+    return raw[:10]
+
+
 def _get_default_data() -> dict:
     return {
         "links": {},
         "months": {},
         "recent_clicks": [],
         "published_posts": {},
+        "post_tracking_started_at": "",
     }
 
 
@@ -240,6 +277,11 @@ def _seed_published_posts(data: dict) -> bool:
         }
         changed = True
 
+    earliest_start = _resolve_post_tracking_start(data)
+    if earliest_start and data.get("post_tracking_started_at") != earliest_start:
+        data["post_tracking_started_at"] = earliest_start
+        changed = True
+
     return changed
 
 
@@ -260,6 +302,7 @@ def load_click_data() -> dict:
             data.setdefault("months", {})
             data.setdefault("recent_clicks", [])
             data.setdefault("published_posts", {})
+            data.setdefault("post_tracking_started_at", "")
             if _seed_published_posts(data):
                 save_click_data(data)
             return data
@@ -272,18 +315,24 @@ def load_click_data() -> dict:
 
 
 def save_click_data(data: dict) -> None:
-    """Atomically save click data to avoid corruption."""
+    """Atomically save click data to avoid corruption, with Windows lock fallback."""
     with _data_lock:
         temp_file = f"{CLICK_STORE_FILE}.tmp"
         try:
             with open(temp_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
-            if os.path.exists(CLICK_STORE_FILE):
-                os.replace(temp_file, CLICK_STORE_FILE)
-            else:
-                os.rename(temp_file, CLICK_STORE_FILE)
+            try:
+                if os.path.exists(CLICK_STORE_FILE):
+                    os.replace(temp_file, CLICK_STORE_FILE)
+                else:
+                    os.rename(temp_file, CLICK_STORE_FILE)
+            except PermissionError:
+                # Windows file watchers/editors can block atomic replace; write in-place as fallback.
+                with open(CLICK_STORE_FILE, "w", encoding="utf-8") as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
         except Exception as exc:
             logger.error("Failed to save click data to %s: %s", CLICK_STORE_FILE, exc)
+        finally:
             if os.path.exists(temp_file):
                 try:
                     os.remove(temp_file)
@@ -619,6 +668,8 @@ def record_published_post(
         "admin_name": admin_name or "Admin",
         "caption_snippet": (caption_snippet or "")[:150].strip(),
     }
+    earliest_start = _resolve_post_tracking_start(data) or now_iso
+    data["post_tracking_started_at"] = earliest_start
 
     # 2. Month-specific stats
     months = data.setdefault("months", {})
@@ -764,6 +815,7 @@ def get_monthly_report_data(month: Optional[str] = None) -> dict:
             "posts_count": len(all_posts),
             "published_posts": all_posts,
             "posts_by_admin": all_admin_formatted,
+            "post_tracking_started_at": _format_tracking_date(_resolve_post_tracking_start(data)),
         }
 
     # Specific month
@@ -830,6 +882,7 @@ def get_monthly_report_data(month: Optional[str] = None) -> dict:
         "posts_count": len(month_posts),
         "published_posts": month_posts,
         "posts_by_admin": posts_by_admin,
+        "post_tracking_started_at": _format_tracking_date(_resolve_post_tracking_start(data)),
     }
 
 
@@ -843,6 +896,7 @@ def format_telegram_report(report_data: dict, webhook_url: str = "") -> str:
     unique_users = report_data.get("unique_users_count", 0)
     posts_count = report_data.get("posts_count", 0)
     posts_by_admin = report_data.get("posts_by_admin") or {}
+    started_date = report_data.get("post_tracking_started_at") or ""
 
     lines = [
         f"📊 <b>របាយការណ៍សកម្មភាព និងស្ថិតិចុចលើប៊ូតុង</b>",
@@ -850,6 +904,8 @@ def format_telegram_report(report_data: dict, webhook_url: str = "") -> str:
         "━━━━━━━━━━━━━━━━━━━━",
         f"📢 <b>ចំនួន Post បានបង្ហោះចូល Channel:</b> <b>{posts_count}</b> Posts",
     ]
+    if started_date:
+        lines.append(f"🗓️ <b>ចាប់ផ្តើមតាមដានពីថ្ងៃទី (Tracking Started):</b> <code>{started_date}</code>")
 
     if posts_by_admin:
         lines.append("✍️ <b>Admin អ្នកបង្ហោះ (Posted by):</b>")
@@ -900,7 +956,8 @@ def format_telegram_report(report_data: dict, webhook_url: str = "") -> str:
     lines.append("━━━━━━━━━━━━━━━━━━━━")
     lines.append(f"👥 <b>អ្នកចុចសរុបទាំងអស់ (Total Unique Users):</b> <b>{unique_users}</b> នាក់")
     lines.append(f"👆 <b>ចំនួនចុចសរុបគ្រប់ប៊ូតុង (Total Button Clicks):</b> <b>{total_clicks}</b> ដង")
-    lines.append(f"📢 <b>ចំនួន Post សរុប (Total Posts Published):</b> <b>{posts_count}</b> Posts")
+    since_suffix = f" (ចាប់ពីថ្ងៃទី <code>{started_date}</code>)" if started_date else ""
+    lines.append(f"📢 <b>ចំនួន Post សរុប (Total Posts Published):</b> <b>{posts_count}</b> Posts{since_suffix}")
 
     by_post = report_data.get("by_post") or {}
     if by_post:
@@ -928,13 +985,18 @@ def format_telegram_posts_report(report_data: dict, webhook_url: str = "") -> st
     posts_count = report_data.get("posts_count", 0)
     published_posts = report_data.get("published_posts") or []
     posts_by_admin = report_data.get("posts_by_admin") or {}
+    started_date = report_data.get("post_tracking_started_at") or ""
 
     lines = [
         "📢 <b>របាយការណ៍ចំនួន Post ដែលបង្ហោះចូល Channel</b>",
         f"📅 <b>ប្រចាំ:</b> <code>{month_display}</code>",
+    ]
+    if started_date:
+        lines.append(f"🗓️ <b>ចាប់ផ្តើមតាមដានពីថ្ងៃទី (Tracking Started):</b> <code>{started_date}</code>")
+    lines.extend([
         "━━━━━━━━━━━━━━━━━━━━",
         f"📊 <b>ចំនួន Post បានបង្ហោះសរុប:</b> <b>{posts_count}</b> Posts\n",
-    ]
+    ])
 
     if posts_by_admin:
         lines.append("✍️ <b>ស្ថិតិតាម Admin (Posts by Admin):</b>")
@@ -966,15 +1028,103 @@ def format_telegram_posts_report(report_data: dict, webhook_url: str = "") -> st
 def generate_csv_report(month: Optional[str] = None) -> bytes:
     """
     Generate CSV file bytes with UTF-8 BOM encoding for Microsoft Excel compatibility.
-    Includes both Button Clicks and Published Channel Posts.
+    Includes Executive Summary, Channel Published Posts & Click Performance,
+    Button Performance Breakdown, and Detailed Individual Click Logs.
     """
     data = load_click_data()
+    rep = get_monthly_report_data(month)
     recent = data.get("recent_clicks", [])
 
     output = io.StringIO()
     writer = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
 
-    # 1. Header for Button Clicks
+    # 1. Executive Summary (សេចក្តីសង្ខេបរបាយការណ៍)
+    writer.writerow(["--- Executive Summary (សេចក្តីសង្ខេបរបាយការណ៍) ---"])
+    writer.writerow(["Report Period (កាលបរិច្ឆេទរបាយការណ៍)", rep.get("month_display") or rep.get("month", "")])
+    writer.writerow(["Total Posts Published (ចំនួន Post បានបង្ហោះសរុប)", rep.get("posts_count", 0)])
+    writer.writerow(["Total Button Clicks (ចំនួនចុចប៊ូតុងសរុប)", rep.get("total_clicks", 0)])
+    writer.writerow(["Total Unique Users (ចំនួនអ្នកចុចសរុប)", rep.get("unique_users_count", 0)])
+    started_date = rep.get("post_tracking_started_at") or ""
+    if started_date:
+        writer.writerow(["Post Tracking Started Date (កាលបរិច្ឆេទចាប់ផ្តើមតាមដាន)", started_date])
+    posts_by_admin = rep.get("posts_by_admin") or {}
+    for adm_k, adm_info in posts_by_admin.items():
+        adm_name = adm_info.get("admin_name", "Admin")
+        cnt = adm_info.get("count", len(adm_info.get("posts", [])))
+        writer.writerow([f"Posts Published by {adm_name} (បង្ហោះដោយ {adm_name})", cnt])
+    writer.writerow([])
+
+    # 2. Channel Published Posts & Click Performance (ស្ថិតិ Post នីមួយៗ)
+    writer.writerow(["--- Channel Published Posts & Click Performance (ស្ថិតិ Post នីមួយៗ) ---"])
+    writer.writerow([
+        "Post ID",
+        "Post URL",
+        "Admin / Author",
+        "Publish Date/Time",
+        "Clicks on Post (ចំនួនចុច)",
+        "Unique Users on Post (ចំនួនអ្នកចុច)",
+        "Caption Snippet",
+    ])
+
+    published_posts = list(rep.get("published_posts") or [])
+    by_post = rep.get("by_post") or {}
+
+    # Merge any post from by_post that had clicks but wasn't in published_posts
+    seen_pids = {str(p.get("post_id", "")).strip() for p in published_posts if p.get("post_id")}
+    for pid, p_stat in by_post.items():
+        pid_str = str(pid).strip()
+        if pid_str and pid_str not in seen_pids:
+            published_posts.append({
+                "post_id": pid_str,
+                "post_url": p_stat.get("post_url") or f"https://t.me/useacareercenter/{pid_str}",
+                "timestamp": "",
+                "admin_name": "Admin",
+                "caption_snippet": f"Post #{pid_str}",
+            })
+            seen_pids.add(pid_str)
+
+    def _sort_key(p):
+        ts = p.get("timestamp") or ""
+        pid_raw = str(p.get("post_id") or "")
+        pid_num = int(pid_raw) if pid_raw.isdigit() else 0
+        return (ts, pid_num)
+
+    published_posts.sort(key=_sort_key, reverse=True)
+
+    for p in published_posts:
+        pid = str(p.get("post_id", "")).strip()
+        p_stat = by_post.get(pid, {})
+        p_clicks = p_stat.get("clicks", 0)
+        p_users = p_stat.get("unique_users", 0)
+        ts = p.get("timestamp", "")
+        if "T" in ts:
+            ts = ts.replace("T", " ")[:19]
+        writer.writerow([
+            pid,
+            p.get("post_url", f"https://t.me/useacareercenter/{pid}"),
+            p.get("admin_name", "Admin"),
+            ts,
+            p_clicks,
+            p_users,
+            p.get("caption_snippet", ""),
+        ])
+    writer.writerow([])
+
+    # 3. Button Performance Breakdown (ស្ថិតិតាមប៊ូតុងនីមួយៗ)
+    writer.writerow(["--- Button Performance Breakdown (ស្ថិតិតាមប៊ូតុងនីមួយៗ) ---"])
+    writer.writerow(["Button Name", "Button Type", "Unique Users (ចំនួនអ្នកចុច)", "Total Clicks (ចំនួនចុចសរុប)"])
+    by_type = rep.get("by_type") or {}
+    for t_key, t_info in by_type.items():
+        writer.writerow([
+            t_info.get("label", t_key),
+            t_key,
+            t_info.get("unique_users", 0),
+            t_info.get("clicks", 0),
+        ])
+    writer.writerow([])
+
+    # 4. Detailed Individual Button Click Logs (កំណត់ត្រាចុចលម្អិត)
+    writer.writerow(["--- Detailed Individual Button Click Logs (កំណត់ត្រាចុចលម្អិត) ---"])
     writer.writerow([
         "Timestamp (UTC/Local)",
         "Month (YYYY-MM)",
@@ -1006,42 +1156,8 @@ def generate_csv_report(month: Optional[str] = None) -> bytes:
         ])
         rows_written += 1
 
-    # If no individual logs found (e.g. older months), export aggregated summary rows
     if rows_written == 0:
-        writer.writerow([])
-        writer.writerow(["--- Monthly Button Summary Breakdown ---"])
-        writer.writerow(["Month", "Button Name / Post", "Clicks", "Unique Users"])
-        rep = get_monthly_report_data(month)
-        for t_key, t_info in rep.get("by_type", {}).items():
-            writer.writerow([
-                rep.get("month", ""),
-                f"Button: {t_info.get('label')}",
-                t_info.get("clicks", 0),
-                t_info.get("unique_users", 0),
-            ])
-        for p_key, p_info in rep.get("by_post", {}).items():
-            writer.writerow([
-                rep.get("month", ""),
-                f"Post #{p_key}",
-                p_info.get("clicks", 0),
-                p_info.get("unique_users", 0),
-            ])
-
-    # 2. Append Published Channel Posts Section
-    rep = get_monthly_report_data(month)
-    published_posts = rep.get("published_posts", [])
-    if published_posts:
-        writer.writerow([])
-        writer.writerow(["--- Channel Published Posts Summary ---"])
-        writer.writerow(["Post ID", "Post URL", "Admin / Author", "Publish Timestamp", "Caption Snippet"])
-        for p in published_posts:
-            writer.writerow([
-                p.get("post_id", ""),
-                p.get("post_url", ""),
-                p.get("admin_name", "Admin"),
-                p.get("timestamp", ""),
-                p.get("caption_snippet", ""),
-            ])
+        writer.writerow(["(No individual click events logged for this period)", "", "", "", "", "", "", "", ""])
 
     # UTF-8 BOM (\xef\xbb\xbf) ensures Khmer script opens correctly in Excel
     return "\ufeff".encode("utf-8") + output.getvalue().encode("utf-8")
@@ -1227,6 +1343,7 @@ class WebReportHandler(tornado.web.RequestHandler):
         unique_users = rep.get("unique_users_count", 0)
         posts_count = rep.get("posts_count", 0)
         published_posts = rep.get("published_posts", [])
+        started_date = rep.get("post_tracking_started_at") or ""
         by_type = rep.get("by_type", {})
         by_post = rep.get("by_post", {})
 
@@ -1450,6 +1567,7 @@ class WebReportHandler(tornado.web.RequestHandler):
             <div class="stat-card">
                 <div class="stat-label">📢 ចំនួន Post បានបង្ហោះ (Posts)</div>
                 <div class="stat-val">{posts_count}</div>
+                {f'<div style="color: var(--text-muted); font-size: 0.78rem; margin-top: 6px;">🗓️ ចាប់ផ្តើមតាមដានពីថ្ងៃទី: {started_date}</div>' if started_date else ''}
             </div>
             <div class="stat-card">
                 <div class="stat-label">👥 អ្នកចុចសរុប (Unique Users)</div>
@@ -1466,7 +1584,7 @@ class WebReportHandler(tornado.web.RequestHandler):
         </div>
 
         <div class="card">
-            <h2>📢 បញ្ជី Post ដែលបានបង្ហោះចូល Channel ({posts_count} Posts)</h2>
+            <h2>📢 បញ្ជី Post ដែលបានបង្ហោះចូល Channel ({posts_count} Posts{f' • ចាប់ពី {started_date}' if started_date else ''})</h2>
             <table>
                 <thead>
                     <tr>
