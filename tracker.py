@@ -255,11 +255,10 @@ PAST_POST_CONTACTS = {
         },
     },
     "4050": {
-        "url": "mailto:hr.recruitment@gaea.com.kh",
+        "url": "https://t.me/+85569780618",
         "label": "Apply Now",
-        "email": "mailto:hr.recruitment@gaea.com.kh",
         "tokens": {
-            "p4050_apply1": {"url": "mailto:hr.recruitment@gaea.com.kh", "label": "Apply Now", "link_type": "email"},
+            "p4050_apply1": {"url": "https://t.me/+85569780618", "label": "Apply Now", "link_type": "employer"},
         },
     },
 }

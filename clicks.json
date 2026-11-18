@@ -850,10 +850,10 @@
     "p4050_apply1": {
       "token": "p4050_apply1",
       "label": "Apply Now",
-      "link_type": "email",
+      "link_type": "employer",
       "post_id": "4050",
       "post_url": "https://t.me/useacareercenter/4050",
-      "target_url": "mailto:hr.recruitment@gaea.com.kh"
+      "target_url": "https://t.me/+85569780618"
     },
     "p4050_bot": {
       "token": "p4050_bot",
@@ -866,15 +866,15 @@
   },
   "months": {
     "2026-11": {
-      "total_clicks": 39,
+      "total_clicks": 54,
       "unique_users": [
         "6f749e0b9493",
         "816207a460cc"
       ],
       "by_type": {
         "admin": {
-          "label": "📞 Contact Admin",
-          "clicks": 9,
+          "label": "📲 Contact Admin",
+          "clicks": 10,
           "users": [
             "6f749e0b9493",
             "816207a460cc"
@@ -882,7 +882,7 @@
         },
         "employer": {
           "label": "Apply Now",
-          "clicks": 20,
+          "clicks": 29,
           "users": [
             "6f749e0b9493",
             "816207a460cc"
@@ -890,7 +890,7 @@
         },
         "bot": {
           "label": "Career Tips, CV & Cover Letter",
-          "clicks": 8,
+          "clicks": 9,
           "users": [
             "6f749e0b9493",
             "816207a460cc"
@@ -904,10 +904,11 @@
           ]
         },
         "email": {
-          "label": "Apply via Email",
-          "clicks": 1,
+          "label": "Apply Now",
+          "clicks": 5,
           "users": [
-            "816207a460cc"
+            "816207a460cc",
+            "6f749e0b9493"
           ]
         }
       },
@@ -1287,6 +1288,174 @@
           "users": [
             "816207a460cc"
           ]
+        },
+        "p4043_admin": {
+          "token": "p4043_admin",
+          "label": "📲 Contact Admin",
+          "link_type": "admin",
+          "post_id": "4043",
+          "post_url": "https://t.me/useacareercenter/4043",
+          "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/4043",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4043_email1": {
+          "token": "p4043_email1",
+          "label": "Apply via Email 📩",
+          "link_type": "email",
+          "post_id": "4043",
+          "post_url": "https://t.me/useacareercenter/4043",
+          "target_url": "mailto:careers@artisansangkor.com",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4043_apply2": {
+          "token": "p4043_apply2",
+          "label": "Apply via Telegram ☎️",
+          "link_type": "employer",
+          "post_id": "4043",
+          "post_url": "https://t.me/useacareercenter/4043",
+          "target_url": "https://t.me/+85515959355",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4043_bot": {
+          "token": "p4043_bot",
+          "label": "Career Tips, CV & Cover Letter",
+          "link_type": "bot",
+          "post_id": "4043",
+          "post_url": "https://t.me/useacareercenter/4043",
+          "target_url": "https://t.me/USEACCASTbot",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4044_apply1": {
+          "token": "p4044_apply1",
+          "label": "More Information ☎️",
+          "link_type": "employer",
+          "post_id": "4044",
+          "post_url": "https://t.me/useacareercenter/4044",
+          "target_url": "https://t.me/vanhong_siemreap_careers",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4044_apply2": {
+          "token": "p4044_apply2",
+          "label": "Location 🗺",
+          "link_type": "employer",
+          "post_id": "4044",
+          "post_url": "https://t.me/useacareercenter/4044",
+          "target_url": "https://maps.app.goo.gl/SVYMNV7ysh3Hb4978",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4045_email1": {
+          "token": "p4045_email1",
+          "label": "Apply via Email",
+          "link_type": "email",
+          "post_id": "4045",
+          "post_url": "https://t.me/useacareercenter/4045",
+          "target_url": "mailto:hr@api-school.com",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4046_apply1": {
+          "token": "p4046_apply1",
+          "label": "Apply Now ✉",
+          "link_type": "employer",
+          "post_id": "4046",
+          "post_url": "https://t.me/useacareercenter/4046",
+          "target_url": "https://t.me/umgcambodia",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4047_apply1": {
+          "token": "p4047_apply1",
+          "label": "Apply via Telegram ☎️",
+          "link_type": "employer",
+          "post_id": "4047",
+          "post_url": "https://t.me/useacareercenter/4047",
+          "target_url": "https://t.me/+85599919112",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4047_email2": {
+          "token": "p4047_email2",
+          "label": "Apply via Email 📧",
+          "link_type": "email",
+          "post_id": "4047",
+          "post_url": "https://t.me/useacareercenter/4047",
+          "target_url": "mailto:hr@theheriategwalk.com",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4048_apply1": {
+          "token": "p4048_apply1",
+          "label": "Apply Now ✉",
+          "link_type": "employer",
+          "post_id": "4048",
+          "post_url": "https://t.me/useacareercenter/4048",
+          "target_url": "https://t.me/+85566711176",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4048_apply2": {
+          "token": "p4048_apply2",
+          "label": "Location 🗺",
+          "link_type": "employer",
+          "post_id": "4048",
+          "post_url": "https://t.me/useacareercenter/4048",
+          "target_url": "https://maps.app.goo.gl/hpz54emuKDwiWXxC8",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4049_apply1": {
+          "token": "p4049_apply1",
+          "label": "Apply Now",
+          "link_type": "employer",
+          "post_id": "4049",
+          "post_url": "https://t.me/useacareercenter/4049",
+          "target_url": "https://t.me/+855962080434",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "p4050_apply1": {
+          "token": "p4050_apply1",
+          "label": "Apply Now",
+          "link_type": "employer",
+          "post_id": "4050",
+          "post_url": "https://t.me/useacareercenter/4050",
+          "target_url": "https://t.me/+85569780618",
+          "clicks": 2,
+          "users": [
+            "6f749e0b9493"
+          ]
         }
       },
       "by_post": {
@@ -1420,6 +1589,70 @@
           "users": [
             "6f749e0b9493",
             "816207a460cc"
+          ]
+        },
+        "4043": {
+          "post_id": "4043",
+          "post_url": "https://t.me/useacareercenter/4043",
+          "clicks": 4,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "4044": {
+          "post_id": "4044",
+          "post_url": "https://t.me/useacareercenter/4044",
+          "clicks": 2,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "4045": {
+          "post_id": "4045",
+          "post_url": "https://t.me/useacareercenter/4045",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "4046": {
+          "post_id": "4046",
+          "post_url": "https://t.me/useacareercenter/4046",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "4047": {
+          "post_id": "4047",
+          "post_url": "https://t.me/useacareercenter/4047",
+          "clicks": 2,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "4048": {
+          "post_id": "4048",
+          "post_url": "https://t.me/useacareercenter/4048",
+          "clicks": 2,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "4049": {
+          "post_id": "4049",
+          "post_url": "https://t.me/useacareercenter/4049",
+          "clicks": 1,
+          "users": [
+            "6f749e0b9493"
+          ]
+        },
+        "4050": {
+          "post_id": "4050",
+          "post_url": "https://t.me/useacareercenter/4050",
+          "clicks": 2,
+          "users": [
+            "6f749e0b9493"
           ]
         }
       },
@@ -1904,6 +2137,171 @@
       "post_url": "",
       "target_url": "https://t.me/USEACCAD",
       "user_hash": "816207a460cc"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:05.389646",
+      "month": "2026-11",
+      "token": "p4043_admin",
+      "label": "📲 Contact Admin",
+      "link_type": "admin",
+      "post_id": "4043",
+      "post_url": "https://t.me/useacareercenter/4043",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/4043",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.132758",
+      "month": "2026-11",
+      "token": "p4043_email1",
+      "label": "Apply via Email 📩",
+      "link_type": "email",
+      "post_id": "4043",
+      "post_url": "https://t.me/useacareercenter/4043",
+      "target_url": "mailto:careers@artisansangkor.com",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.181363",
+      "month": "2026-11",
+      "token": "p4043_apply2",
+      "label": "Apply via Telegram ☎️",
+      "link_type": "employer",
+      "post_id": "4043",
+      "post_url": "https://t.me/useacareercenter/4043",
+      "target_url": "https://t.me/+85515959355",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.234156",
+      "month": "2026-11",
+      "token": "p4043_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "4043",
+      "post_url": "https://t.me/useacareercenter/4043",
+      "target_url": "https://t.me/USEACCASTbot",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.285275",
+      "month": "2026-11",
+      "token": "p4044_apply1",
+      "label": "More Information ☎️",
+      "link_type": "employer",
+      "post_id": "4044",
+      "post_url": "https://t.me/useacareercenter/4044",
+      "target_url": "https://t.me/vanhong_siemreap_careers",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.334570",
+      "month": "2026-11",
+      "token": "p4044_apply2",
+      "label": "Location 🗺",
+      "link_type": "employer",
+      "post_id": "4044",
+      "post_url": "https://t.me/useacareercenter/4044",
+      "target_url": "https://maps.app.goo.gl/SVYMNV7ysh3Hb4978",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.377129",
+      "month": "2026-11",
+      "token": "p4045_email1",
+      "label": "Apply via Email",
+      "link_type": "email",
+      "post_id": "4045",
+      "post_url": "https://t.me/useacareercenter/4045",
+      "target_url": "mailto:hr@api-school.com",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.426888",
+      "month": "2026-11",
+      "token": "p4046_apply1",
+      "label": "Apply Now ✉",
+      "link_type": "employer",
+      "post_id": "4046",
+      "post_url": "https://t.me/useacareercenter/4046",
+      "target_url": "https://t.me/umgcambodia",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.467332",
+      "month": "2026-11",
+      "token": "p4047_apply1",
+      "label": "Apply via Telegram ☎️",
+      "link_type": "employer",
+      "post_id": "4047",
+      "post_url": "https://t.me/useacareercenter/4047",
+      "target_url": "https://t.me/+85599919112",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.514921",
+      "month": "2026-11",
+      "token": "p4047_email2",
+      "label": "Apply via Email 📧",
+      "link_type": "email",
+      "post_id": "4047",
+      "post_url": "https://t.me/useacareercenter/4047",
+      "target_url": "mailto:hr@theheriategwalk.com",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.549995",
+      "month": "2026-11",
+      "token": "p4048_apply1",
+      "label": "Apply Now ✉",
+      "link_type": "employer",
+      "post_id": "4048",
+      "post_url": "https://t.me/useacareercenter/4048",
+      "target_url": "https://t.me/+85566711176",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.598544",
+      "month": "2026-11",
+      "token": "p4048_apply2",
+      "label": "Location 🗺",
+      "link_type": "employer",
+      "post_id": "4048",
+      "post_url": "https://t.me/useacareercenter/4048",
+      "target_url": "https://maps.app.goo.gl/hpz54emuKDwiWXxC8",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.640291",
+      "month": "2026-11",
+      "token": "p4049_apply1",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "4049",
+      "post_url": "https://t.me/useacareercenter/4049",
+      "target_url": "https://t.me/+855962080434",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:11:07.688235",
+      "month": "2026-11",
+      "token": "p4050_apply1",
+      "label": "Apply Now",
+      "link_type": "email",
+      "post_id": "4050",
+      "post_url": "https://t.me/useacareercenter/4050",
+      "target_url": "mailto:hr.recruitment@gaea.com.kh",
+      "user_hash": "6f749e0b9493"
+    },
+    {
+      "timestamp": "2026-11-18T09:18:10.991898",
+      "month": "2026-11",
+      "token": "p4050_apply1",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "4050",
+      "post_url": "https://t.me/useacareercenter/4050",
+      "target_url": "https://t.me/+85569780618",
+      "user_hash": "6f749e0b9493"
     }
   ],
   "published_posts": {
