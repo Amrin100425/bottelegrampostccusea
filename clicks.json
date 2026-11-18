@@ -638,6 +638,230 @@
       "token": "p3890_apply1",
       "post_id": "3890",
       "updated_at": "2026-11-03T20:00:00.000000"
+    },
+    "p4043_admin": {
+      "token": "p4043_admin",
+      "label": "📲 Contact Admin",
+      "link_type": "admin",
+      "post_id": "4043",
+      "post_url": "https://t.me/useacareercenter/4043",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/4043"
+    },
+    "p4043_email1": {
+      "token": "p4043_email1",
+      "label": "Apply via Email 📩",
+      "link_type": "email",
+      "post_id": "4043",
+      "post_url": "https://t.me/useacareercenter/4043",
+      "target_url": "mailto:careers@artisansangkor.com"
+    },
+    "p4043_apply2": {
+      "token": "p4043_apply2",
+      "label": "Apply via Telegram ☎️",
+      "link_type": "employer",
+      "post_id": "4043",
+      "post_url": "https://t.me/useacareercenter/4043",
+      "target_url": "https://t.me/+85515959355"
+    },
+    "p4043_bot": {
+      "token": "p4043_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "4043",
+      "post_url": "https://t.me/useacareercenter/4043",
+      "target_url": "https://t.me/USEACCASTbot"
+    },
+    "p4044_admin": {
+      "token": "p4044_admin",
+      "label": "📲 Contact Admin",
+      "link_type": "admin",
+      "post_id": "4044",
+      "post_url": "https://t.me/useacareercenter/4044",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/4044"
+    },
+    "p4044_apply1": {
+      "token": "p4044_apply1",
+      "label": "More Information ☎️",
+      "link_type": "employer",
+      "post_id": "4044",
+      "post_url": "https://t.me/useacareercenter/4044",
+      "target_url": "https://t.me/vanhong_siemreap_careers"
+    },
+    "p4044_apply2": {
+      "token": "p4044_apply2",
+      "label": "Location 🗺",
+      "link_type": "employer",
+      "post_id": "4044",
+      "post_url": "https://t.me/useacareercenter/4044",
+      "target_url": "https://maps.app.goo.gl/SVYMNV7ysh3Hb4978"
+    },
+    "p4044_bot": {
+      "token": "p4044_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "4044",
+      "post_url": "https://t.me/useacareercenter/4044",
+      "target_url": "https://t.me/USEACCASTbot"
+    },
+    "p4045_admin": {
+      "token": "p4045_admin",
+      "label": "📲 Contact Admin",
+      "link_type": "admin",
+      "post_id": "4045",
+      "post_url": "https://t.me/useacareercenter/4045",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/4045"
+    },
+    "p4045_email1": {
+      "token": "p4045_email1",
+      "label": "Apply via Email",
+      "link_type": "email",
+      "post_id": "4045",
+      "post_url": "https://t.me/useacareercenter/4045",
+      "target_url": "mailto:hr@api-school.com"
+    },
+    "p4045_bot": {
+      "token": "p4045_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "4045",
+      "post_url": "https://t.me/useacareercenter/4045",
+      "target_url": "https://t.me/USEACCASTbot"
+    },
+    "p4046_admin": {
+      "token": "p4046_admin",
+      "label": "📲 Contact Admin",
+      "link_type": "admin",
+      "post_id": "4046",
+      "post_url": "https://t.me/useacareercenter/4046",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/4046"
+    },
+    "p4046_apply1": {
+      "token": "p4046_apply1",
+      "label": "Apply Now ✉",
+      "link_type": "employer",
+      "post_id": "4046",
+      "post_url": "https://t.me/useacareercenter/4046",
+      "target_url": "https://t.me/umgcambodia"
+    },
+    "p4046_bot": {
+      "token": "p4046_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "4046",
+      "post_url": "https://t.me/useacareercenter/4046",
+      "target_url": "https://t.me/USEACCASTbot"
+    },
+    "p4047_admin": {
+      "token": "p4047_admin",
+      "label": "📲 Contact Admin",
+      "link_type": "admin",
+      "post_id": "4047",
+      "post_url": "https://t.me/useacareercenter/4047",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/4047"
+    },
+    "p4047_apply1": {
+      "token": "p4047_apply1",
+      "label": "Apply via Telegram ☎️",
+      "link_type": "employer",
+      "post_id": "4047",
+      "post_url": "https://t.me/useacareercenter/4047",
+      "target_url": "https://t.me/+85599919112"
+    },
+    "p4047_email2": {
+      "token": "p4047_email2",
+      "label": "Apply via Email 📧",
+      "link_type": "email",
+      "post_id": "4047",
+      "post_url": "https://t.me/useacareercenter/4047",
+      "target_url": "mailto:hr@theheriategwalk.com"
+    },
+    "p4047_bot": {
+      "token": "p4047_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "4047",
+      "post_url": "https://t.me/useacareercenter/4047",
+      "target_url": "https://t.me/USEACCASTbot"
+    },
+    "p4048_admin": {
+      "token": "p4048_admin",
+      "label": "📲 Contact Admin",
+      "link_type": "admin",
+      "post_id": "4048",
+      "post_url": "https://t.me/useacareercenter/4048",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/4048"
+    },
+    "p4048_apply1": {
+      "token": "p4048_apply1",
+      "label": "Apply Now ✉",
+      "link_type": "employer",
+      "post_id": "4048",
+      "post_url": "https://t.me/useacareercenter/4048",
+      "target_url": "https://t.me/+85566711176"
+    },
+    "p4048_apply2": {
+      "token": "p4048_apply2",
+      "label": "Location 🗺",
+      "link_type": "employer",
+      "post_id": "4048",
+      "post_url": "https://t.me/useacareercenter/4048",
+      "target_url": "https://maps.app.goo.gl/hpz54emuKDwiWXxC8"
+    },
+    "p4048_bot": {
+      "token": "p4048_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "4048",
+      "post_url": "https://t.me/useacareercenter/4048",
+      "target_url": "https://t.me/USEACCASTbot"
+    },
+    "p4049_admin": {
+      "token": "p4049_admin",
+      "label": "📲 Contact Admin",
+      "link_type": "admin",
+      "post_id": "4049",
+      "post_url": "https://t.me/useacareercenter/4049",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/4049"
+    },
+    "p4049_apply1": {
+      "token": "p4049_apply1",
+      "label": "Apply Now",
+      "link_type": "employer",
+      "post_id": "4049",
+      "post_url": "https://t.me/useacareercenter/4049",
+      "target_url": "https://t.me/+855962080434"
+    },
+    "p4049_bot": {
+      "token": "p4049_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "4049",
+      "post_url": "https://t.me/useacareercenter/4049",
+      "target_url": "https://t.me/USEACCASTbot"
+    },
+    "p4050_admin": {
+      "token": "p4050_admin",
+      "label": "📲 Contact Admin",
+      "link_type": "admin",
+      "post_id": "4050",
+      "post_url": "https://t.me/useacareercenter/4050",
+      "target_url": "https://t.me/USEACCAD?text=%E1%9E%87%E1%9E%98%E1%9F%92%E1%9E%9A%E1%9E%B6%E1%9E%94%E1%9E%9F%E1%9E%BD%E1%9E%9A%E1%9E%94%E1%9E%84%20%E1%9E%81%E1%9F%92%E1%9E%89%E1%9E%BB%E1%9F%86%E1%9E%85%E1%9E%B6%E1%9E%94%E1%9F%8B%E1%9E%A2%E1%9E%B6%E1%9E%9A%E1%9E%98%E1%9F%92%E1%9E%98%E1%9E%8E%E1%9F%8D%E1%9E%93%E1%9E%B9%E1%9E%84%E1%9E%80%E1%9E%B6%E1%9E%9A%E1%9E%84%E1%9E%B6%E1%9E%9A%E1%9E%93%E1%9F%81%E1%9F%87%3A%20%F0%9F%94%97%20https%3A//t.me/useacareercenter/4050"
+    },
+    "p4050_apply1": {
+      "token": "p4050_apply1",
+      "label": "Apply Now",
+      "link_type": "email",
+      "post_id": "4050",
+      "post_url": "https://t.me/useacareercenter/4050",
+      "target_url": "mailto:hr.recruitment@gaea.com.kh"
+    },
+    "p4050_bot": {
+      "token": "p4050_bot",
+      "label": "Career Tips, CV & Cover Letter",
+      "link_type": "bot",
+      "post_id": "4050",
+      "post_url": "https://t.me/useacareercenter/4050",
+      "target_url": "https://t.me/USEACCASTbot"
     }
   },
   "months": {
@@ -1907,6 +2131,78 @@
       "admin_id": null,
       "admin_name": "Admin",
       "caption_snippet": "Job Post #3890 (Homewood Hotel - Join Our Team (095 465 668))"
+    },
+    "4043": {
+      "post_id": "4043",
+      "post_url": "https://t.me/useacareercenter/4043",
+      "timestamp": "2026-11-17T11:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Announcement: Artisans Angkor (careers@artisansangkor.com)"
+    },
+    "4044": {
+      "post_id": "4044",
+      "post_url": "https://t.me/useacareercenter/4044",
+      "timestamp": "2026-11-17T12:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Announcement: ហាងលក់គ្រឿងអលង្ការ វណ្ណហុង សៀមរាប"
+    },
+    "4045": {
+      "post_id": "4045",
+      "post_url": "https://t.me/useacareercenter/4045",
+      "timestamp": "2026-11-17T13:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Announcement: Australia Pacific International School (hr@api-school.com)"
+    },
+    "4046": {
+      "post_id": "4046",
+      "post_url": "https://t.me/useacareercenter/4046",
+      "timestamp": "2026-11-17T14:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Announcement: UMG Cambodia (0885239800/012764937)"
+    },
+    "4047": {
+      "post_id": "4047",
+      "post_url": "https://t.me/useacareercenter/4047",
+      "timestamp": "2026-11-17T15:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Announcement: The Heritage Walk (hr@theheriategwalk.com)"
+    },
+    "4048": {
+      "post_id": "4048",
+      "post_url": "https://t.me/useacareercenter/4048",
+      "timestamp": "2026-11-17T16:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Announcement: Caltex Win Win (066 711 176)"
+    },
+    "4049": {
+      "post_id": "4049",
+      "post_url": "https://t.me/useacareercenter/4049",
+      "timestamp": "2026-11-17T17:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Announcement: សាលាវេស្ទើនប៊្រីដសៀមរាប (096 20 80 434)"
+    },
+    "4050": {
+      "post_id": "4050",
+      "post_url": "https://t.me/useacareercenter/4050",
+      "timestamp": "2026-11-17T18:00:00",
+      "month": "2026-11",
+      "admin_id": null,
+      "admin_name": "Admin",
+      "caption_snippet": "Job Announcement: GAEA PLC (hr.recruitment@gaea.com.kh)"
     }
   },
   "post_tracking_started_at": "2026-11-01T00:00:00"

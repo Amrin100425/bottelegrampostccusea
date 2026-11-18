@@ -198,6 +198,70 @@ PAST_POST_CONTACTS = {
     "3888": {"url": "https://t.me/+85577967755", "label": "Apply Now - 077967755"},
     "3889": {"url": "https://t.me/+85516499099", "label": "Apply Now - 016499099"},
     "3890": {"url": "https://t.me/+85595465668", "label": "Apply Now - 095465668"},
+    "4043": {
+        "url": "https://t.me/+85515959355",
+        "label": "Apply via Telegram ☎️",
+        "email": "mailto:careers@artisansangkor.com",
+        "tokens": {
+            "p4043_email1": {"url": "mailto:careers@artisansangkor.com", "label": "Apply via Email 📩", "link_type": "email"},
+            "p4043_apply2": {"url": "https://t.me/+85515959355", "label": "Apply via Telegram ☎️", "link_type": "employer"},
+        },
+    },
+    "4044": {
+        "url": "https://t.me/vanhong_siemreap_careers",
+        "label": "More Information ☎️",
+        "tokens": {
+            "p4044_apply1": {"url": "https://t.me/vanhong_siemreap_careers", "label": "More Information ☎️", "link_type": "employer"},
+            "p4044_apply2": {"url": "https://maps.app.goo.gl/SVYMNV7ysh3Hb4978", "label": "Location 🗺", "link_type": "employer"},
+        },
+    },
+    "4045": {
+        "url": "mailto:hr@api-school.com",
+        "label": "Apply via Email",
+        "email": "mailto:hr@api-school.com",
+        "tokens": {
+            "p4045_email1": {"url": "mailto:hr@api-school.com", "label": "Apply via Email", "link_type": "email"},
+        },
+    },
+    "4046": {
+        "url": "https://t.me/umgcambodia",
+        "label": "Apply Now ✉",
+        "tokens": {
+            "p4046_apply1": {"url": "https://t.me/umgcambodia", "label": "Apply Now ✉", "link_type": "employer"},
+        },
+    },
+    "4047": {
+        "url": "https://t.me/+85599919112",
+        "label": "Apply via Telegram ☎️",
+        "email": "mailto:hr@theheriategwalk.com",
+        "tokens": {
+            "p4047_apply1": {"url": "https://t.me/+85599919112", "label": "Apply via Telegram ☎️", "link_type": "employer"},
+            "p4047_email2": {"url": "mailto:hr@theheriategwalk.com", "label": "Apply via Email 📧", "link_type": "email"},
+        },
+    },
+    "4048": {
+        "url": "https://t.me/+85566711176",
+        "label": "Apply Now ✉",
+        "tokens": {
+            "p4048_apply1": {"url": "https://t.me/+85566711176", "label": "Apply Now ✉", "link_type": "employer"},
+            "p4048_apply2": {"url": "https://maps.app.goo.gl/hpz54emuKDwiWXxC8", "label": "Location 🗺", "link_type": "employer"},
+        },
+    },
+    "4049": {
+        "url": "https://t.me/+855962080434",
+        "label": "Apply Now",
+        "tokens": {
+            "p4049_apply1": {"url": "https://t.me/+855962080434", "label": "Apply Now", "link_type": "employer"},
+        },
+    },
+    "4050": {
+        "url": "mailto:hr.recruitment@gaea.com.kh",
+        "label": "Apply Now",
+        "email": "mailto:hr.recruitment@gaea.com.kh",
+        "tokens": {
+            "p4050_apply1": {"url": "mailto:hr.recruitment@gaea.com.kh", "label": "Apply Now", "link_type": "email"},
+        },
+    },
 }
 
 
@@ -432,6 +496,22 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
                     import urllib.parse
                     admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
                     target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
+            elif post_id in PAST_POST_CONTACTS and token in PAST_POST_CONTACTS[post_id].get("tokens", {}):
+                t_info = PAST_POST_CONTACTS[post_id]["tokens"][token]
+                target_url = t_info["url"]
+                label = t_info.get("label", "Apply Now")
+                link_type = t_info.get("link_type", link_type)
+            elif link_type.startswith("email"):
+                if post_id in PAST_POST_CONTACTS and PAST_POST_CONTACTS[post_id].get("email"):
+                    target_url = PAST_POST_CONTACTS[post_id]["email"]
+                    label = "Apply via Email"
+                else:
+                    label = "Apply Now"
+                    target_url = "https://t.me/USEACCAD"
+                    if post_id:
+                        import urllib.parse
+                        admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
+                        target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
             elif link_type in ("employer", "apply") or link_type.startswith("apply") or link_type.startswith("employer"):
                 if post_id in PAST_POST_CONTACTS:
                     info = PAST_POST_CONTACTS[post_id]
@@ -444,16 +524,6 @@ def record_click(token: str, client_ip: str = "", user_agent: str = "") -> str:
                         import urllib.parse
                         admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
                         target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
-            elif link_type == "email" or link_type.startswith("email"):
-                label = "Apply Now"
-                target_url = "https://t.me/USEACCAD"
-                if post_id:
-                    import urllib.parse
-                    admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
-                    target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
-                    import urllib.parse
-                    admin_msg = f"ជម្រាបសួរបង ខ្ញុំចាប់អារម្មណ៍នឹងការងារនេះ: 🔗 https://t.me/useacareercenter/{post_id}"
-                    target_url = f"https://t.me/USEACCAD?text={urllib.parse.quote(admin_msg)}"
 
             post_url = f"https://t.me/useacareercenter/{post_id}"
         except Exception:
