@@ -149,11 +149,37 @@ def merge_click_data(base: dict, incoming: dict) -> dict:
                 b_post[p_k]["users"] = list(b_p_users)
                 b_post[p_k]["clicks"] = max(b_post[p_k].get("clicks", 0), in_p.get("clicks", 0))
 
+        # Ensure all published_posts for this month are included in posts_published
+        for pid, pinfo in base_pub.items():
+            if pinfo.get("month") == m_key and pid not in bm["posts_published"]:
+                bm["posts_published"].append(pid)
+
+        # Ensure all published_posts for this month are assigned to an admin
+        for pid, pinfo in base_pub.items():
+            if pinfo.get("month") == m_key:
+                in_any = any(pid in a.get("posts", []) for a in bm_admin.values())
+                if not in_any:
+                    adm_id = pinfo.get("admin_id")
+                    adm_name = pinfo.get("admin_name") or "Admin"
+                    adm_key = str(adm_id) if adm_id else adm_name
+                    adm_entry = bm_admin.setdefault(
+                        adm_key,
+                        {
+                            "admin_id": adm_id,
+                            "admin_name": adm_name,
+                            "posts": [],
+                            "count": 0,
+                        },
+                    )
+                    if pid not in adm_entry["posts"]:
+                        adm_entry["posts"].append(pid)
+                    adm_entry["count"] = len(adm_entry["posts"])
+
         # Re-evaluate total clicks for month
         link_clicks_sum = sum(v.get("clicks", 0) for v in b_link.values())
         bm["total_clicks"] = max(bm.get("total_clicks", 0), in_m.get("total_clicks", 0), link_clicks_sum)
 
-    # 4. Merge recent_clicks (keep deduplicated, newest first, max 500)
+    # 4. Merge recent_clicks (keep deduplicated, newest first, max 5000)
     seen_clicks = set()
     merged_recent = []
     combined_recent = base.get("recent_clicks", []) + incoming.get("recent_clicks", [])
@@ -163,7 +189,7 @@ def merge_click_data(base: dict, incoming: dict) -> dict:
         if key not in seen_clicks:
             seen_clicks.add(key)
             merged_recent.append(c)
-        if len(merged_recent) >= 500:
+        if len(merged_recent) >= 5000:
             break
     base["recent_clicks"] = merged_recent
 
@@ -259,6 +285,34 @@ PAST_POST_CONTACTS = {
         "label": "Apply Now",
         "tokens": {
             "p4050_apply1": {"url": "https://t.me/+85569780618", "label": "Apply Now", "link_type": "employer"},
+        },
+    },
+    "4051": {
+        "url": "https://t.me/+85598859885",
+        "label": "Apply Now",
+        "tokens": {
+            "p4051_apply1": {"url": "https://t.me/+85598859885", "label": "Apply Now", "link_type": "employer"},
+        },
+    },
+    "4052": {
+        "url": "https://t.me/+855969767689",
+        "label": "Apply Now",
+        "tokens": {
+            "p4052_apply1": {"url": "https://t.me/+855969767689", "label": "Apply Now", "link_type": "employer"},
+        },
+    },
+    "4054": {
+        "url": "https://t.me/USEACCAD",
+        "label": "Contact Admin",
+        "tokens": {
+            "p4054_admin": {"url": "https://t.me/USEACCAD", "label": "📲 Contact Admin", "link_type": "admin"},
+        },
+    },
+    "4055": {
+        "url": "https://t.me/+85578262607",
+        "label": "Apply Now",
+        "tokens": {
+            "p4055_apply1": {"url": "https://t.me/+85578262607", "label": "Apply Now", "link_type": "employer"},
         },
     },
 }
