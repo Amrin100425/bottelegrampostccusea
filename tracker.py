@@ -1713,8 +1713,12 @@ class RedirectTrackerHandler(tornado.web.RequestHandler):
     Handle GET /r/{token}: Log button click with IP/User-Agent and redirect with HTTP 302.
     """
 
-    def get(self, token: str):
-        token = token.strip()
+    def get(self, token: Optional[str] = None):
+        token = (token or "").strip()
+        if not token:
+            self.redirect("https://t.me/useacareercenter", status=302)
+            return
+
         client_ip = self.request.headers.get("X-Forwarded-For", self.request.remote_ip or "")
         if "," in client_ip:
             client_ip = client_ip.split(",")[0].strip()

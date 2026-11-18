@@ -76,7 +76,11 @@ try:
     ADMIN_IDS = json.loads(admin_env) if admin_env.startswith("[") else [int(x.strip()) for x in admin_env.split(",") if x.strip()]
 except Exception:
     ADMIN_IDS = [1147056937, 468517256, 1287745757, 8824663759]
-WEBHOOK_URL = (os.getenv("RENDER_EXTERNAL_URL") or os.getenv("WEBHOOK_URL") or "https://bottelegrampostccusea.onrender.com").rstrip("/")
+WEBHOOK_URL = (
+    os.getenv("WEBHOOK_URL")
+    or os.getenv("RENDER_EXTERNAL_URL")
+    or "https://bottelegrampostccusea-m8q5.onrender.com"
+).rstrip("/")
 
 # Contact ដែលថេរ (Fixed) - វានឹងបង្ហាញជានិច្ចនៅខាងក្រោម មិនបាត់បង់ទេ
 # FIXED_CONTACT_ROWS = [
@@ -2316,7 +2320,7 @@ def setup_webhook_health_routes() -> None:
                     (r"/health(?:z)?/?", JsonHealthHandler),
                     (r"/ping/?", HealthCheckHandler),
                     (r"/favicon\.ico", FaviconHandler),
-                    (r"/r/(?P<token>[^/]+)/?", RedirectTrackerHandler),
+                    (r"/r(?:/(?P<token>[^/]+))?/?", RedirectTrackerHandler),
                     (r"/report/?", WebReportHandler),
                     (r"/report/csv/?", WebCsvExportHandler),
                     (r"/report/excel/?", WebExcelExportHandler),
@@ -2352,7 +2356,7 @@ def start_local_tracking_server_if_needed(port: int = 10000) -> None:
     import tornado.web
 
     local_app = tornado.web.Application([
-        (r"/r/(?P<token>[^/]+)/?", RedirectTrackerHandler),
+        (r"/r(?:/(?P<token>[^/]+))?/?", RedirectTrackerHandler),
         (r"/report/?", WebReportHandler),
         (r"/report/csv/?", WebCsvExportHandler),
         (r"/report/excel/?", WebExcelExportHandler),
