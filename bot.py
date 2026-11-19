@@ -23,10 +23,11 @@ import json
 import logging
 import os
 import re
+import time
 from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, InputMediaVideo, Message
 from telegram.request import HTTPXRequest
 from telegram.ext import (
     ApplicationBuilder,
@@ -1149,88 +1150,188 @@ async def post_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return CONTENT
 
 
-async def _save_and_preview_post(update: Update, context: ContextTypes.DEFAULT_TYPE, msg) -> None:
-    """Preview message for admin and store metadata for confirmation."""
-    caption_html = (msg.caption_html or "").strip() or None
-    text_html = (msg.text_html or "").strip() if msg.text else None
-    info = caption_html or text_html
+_media_group_store = {}
 
-    context.user_data["source_chat_id"] = msg.chat_id
-    context.user_data["source_message_id"] = msg.message_id
-    context.user_data["photo_id"] = msg.photo[-1].file_id if msg.photo else None
-    context.user_data["video_id"] = msg.video.file_id if msg.video else None
-    context.user_data["document_id"] = msg.document.file_id if msg.document else None
-    context.user_data["audio_id"] = msg.audio.file_id if msg.audio else None
-    context.user_data["voice_id"] = msg.voice.file_id if msg.voice else None
-    context.user_data["animation_id"] = msg.animation.file_id if msg.animation else None
-    context.user_data["sticker_id"] = msg.sticker.file_id if msg.sticker else None
-    context.user_data["info"] = info
-    raw_length = telegram_length(msg.caption or msg.text or "")
-    context.user_data["raw_length"] = raw_length
+
+async def collect_media_group(msg: Message, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Groups concurrent media updates sharing the same media_group_id into a single list of messages.
+    Returns None for secondary items so they exit without duplicating preview/confirm prompts.
+    """
+    mg_id = getattr(msg, "media_group_id", None)
+    if not mg_id:
+        return [msg]
+
+    key = (msg.chat_id, mg_id)
+    if key not in _media_group_store:
+        _media_group_store[key] = {
+            "messages": [msg],
+            "last_received": time.time(),
+        }
+        is_primary = True
+    else:
+        _media_group_store[key]["messages"].append(msg)
+        _media_group_store[key]["last_received"] = time.time()
+        is_primary = False
+
+    if not is_primary:
+        return None
+
+    # Wait briefly for all photos in the album to arrive from Telegram servers
+    await asyncio.sleep(0.4)
+    while True:
+        elapsed = time.time() - _media_group_store[key]["last_received"]
+        if elapsed >= 0.25:
+            break
+        await asyncio.sleep(0.1)
+
+    group_data = _media_group_store.pop(key, None)
+    if not group_data:
+        return [msg]
+
+    messages = group_data["messages"]
+    messages.sort(key=lambda m: m.message_id)
+    return messages
+
+
+async def _save_and_preview_post(update: Update, context: ContextTypes.DEFAULT_TYPE, msg_or_msgs) -> None:
+    """Preview message for admin and store metadata for confirmation."""
+    messages = msg_or_msgs if isinstance(msg_or_msgs, list) else [msg_or_msgs]
+    is_mg = len(messages) > 1
+
+    main_msg = next((m for m in messages if m.caption), messages[0])
+    caption_html = (main_msg.caption_html or "").strip() or None
+    text_html = (main_msg.text_html or "").strip() if main_msg.text else None
+    info = caption_html or text_html
+    raw_caption = main_msg.caption or main_msg.text or ""
+    raw_length = telegram_length(raw_caption)
 
     # Capture admin author information for post tracking
     user = update.effective_user
     context.user_data["author_id"] = user.id if user else None
     context.user_data["author_name"] = (user.full_name or user.username or "Admin") if user else "Admin"
-    context.user_data["raw_text"] = (msg.caption or msg.text or "")
+    context.user_data["raw_text"] = raw_caption
+    context.user_data["info"] = info
+    context.user_data["raw_length"] = raw_length
+    context.user_data["source_chat_id"] = messages[0].chat_id
+    context.user_data["source_message_ids"] = [m.message_id for m in messages]
+    context.user_data["source_message_id"] = messages[0].message_id
+    context.user_data["is_media_group"] = is_mg
 
     keyboard = get_contact_keyboard(post_text=info)
 
-    # Send preview: Prioritize copy_message to perfectly preserve Telegram Premium custom/animated emojis!
-    preview_copied = False
-    if not (msg.photo and _needs_split_caption(raw_length)):
+    if is_mg:
+        photo_ids = [m.photo[-1].file_id for m in messages if m.photo]
+        video_ids = [m.video.file_id for m in messages if m.video]
+        context.user_data["photo_ids"] = photo_ids
+        context.user_data["video_ids"] = video_ids
+        context.user_data["photo_id"] = photo_ids[0] if photo_ids else None
+        context.user_data["video_id"] = video_ids[0] if video_ids else None
+        context.user_data["document_id"] = None
+        context.user_data["audio_id"] = None
+        context.user_data["voice_id"] = None
+        context.user_data["animation_id"] = None
+        context.user_data["sticker_id"] = None
+
+        # Send preview to admin: try copy_messages first
+        preview_copied = False
         try:
-            await context.bot.copy_message(
-                chat_id=msg.chat_id,
-                from_chat_id=msg.chat_id,
-                message_id=msg.message_id,
-                reply_markup=keyboard,
+            await context.bot.copy_messages(
+                chat_id=messages[0].chat_id,
+                from_chat_id=messages[0].chat_id,
+                message_ids=[m.message_id for m in messages],
             )
             preview_copied = True
         except Exception as copy_err:
-            logger.warning("Preview copy_message failed (%s), falling back to standard send.", copy_err)
-            preview_copied = False
+            logger.warning("Preview copy_messages failed (%s), falling back to send_media_group.", copy_err)
 
-    if not preview_copied:
-        if msg.photo:
-            if _needs_split_caption(raw_length):
-                await update.message.reply_photo(photo=msg.photo[-1].file_id)
-                await update.message.reply_text(
-                    caption_html or "", parse_mode="HTML", reply_markup=keyboard
+        if not preview_copied and photo_ids:
+            media_items = []
+            for idx, pid in enumerate(photo_ids):
+                if idx == 0 and info and not _needs_split_caption(raw_length):
+                    media_items.append(InputMediaPhoto(media=pid, caption=info, parse_mode="HTML"))
+                else:
+                    media_items.append(InputMediaPhoto(media=pid))
+            await context.bot.send_media_group(chat_id=messages[0].chat_id, media=media_items)
+
+        # Show button preview
+        if _needs_split_caption(raw_length) and info:
+            await update.message.reply_text(info, parse_mode="HTML", reply_markup=keyboard)
+        else:
+            await update.message.reply_text("👇 **ប៊ូតុង Contact នឹងបង្ហាញដូចខាងក្រោម៖**", parse_mode="Markdown", reply_markup=keyboard)
+
+    else:
+        msg = messages[0]
+        context.user_data["photo_id"] = msg.photo[-1].file_id if msg.photo else None
+        context.user_data["video_id"] = msg.video.file_id if msg.video else None
+        context.user_data["document_id"] = msg.document.file_id if msg.document else None
+        context.user_data["audio_id"] = msg.audio.file_id if msg.audio else None
+        context.user_data["voice_id"] = msg.voice.file_id if msg.voice else None
+        context.user_data["animation_id"] = msg.animation.file_id if msg.animation else None
+        context.user_data["sticker_id"] = msg.sticker.file_id if msg.sticker else None
+
+        # Send preview: Prioritize copy_message to perfectly preserve Telegram Premium custom/animated emojis!
+        preview_copied = False
+        if not (msg.photo and _needs_split_caption(raw_length)):
+            try:
+                await context.bot.copy_message(
+                    chat_id=msg.chat_id,
+                    from_chat_id=msg.chat_id,
+                    message_id=msg.message_id,
+                    reply_markup=keyboard,
                 )
-            else:
-                await update.message.reply_photo(
-                    photo=msg.photo[-1].file_id,
+                preview_copied = True
+            except Exception as copy_err:
+                logger.warning("Preview copy_message failed (%s), falling back to standard send.", copy_err)
+                preview_copied = False
+
+        if not preview_copied:
+            if msg.photo:
+                if _needs_split_caption(raw_length):
+                    await update.message.reply_photo(photo=msg.photo[-1].file_id)
+                    await update.message.reply_text(
+                        caption_html or "", parse_mode="HTML", reply_markup=keyboard
+                    )
+                else:
+                    await update.message.reply_photo(
+                        photo=msg.photo[-1].file_id,
+                        caption=caption_html,
+                        parse_mode="HTML" if caption_html else None,
+                        reply_markup=keyboard,
+                    )
+            elif msg.text:
+                await update.message.reply_text(
+                    text_html, parse_mode="HTML", reply_markup=keyboard
+                )
+            elif msg.video:
+                await update.message.reply_video(
+                    video=msg.video.file_id,
                     caption=caption_html,
                     parse_mode="HTML" if caption_html else None,
                     reply_markup=keyboard,
                 )
-        elif msg.text:
-            await update.message.reply_text(
-                text_html, parse_mode="HTML", reply_markup=keyboard
-            )
-        elif msg.video:
-            await update.message.reply_video(
-                video=msg.video.file_id,
-                caption=caption_html,
-                parse_mode="HTML" if caption_html else None,
-                reply_markup=keyboard,
-            )
-        elif msg.document:
-            await update.message.reply_document(
-                document=msg.document.file_id,
-                caption=caption_html,
-                parse_mode="HTML" if caption_html else None,
-                reply_markup=keyboard,
-            )
-        elif msg.sticker:
-            await update.message.reply_sticker(sticker=msg.sticker.file_id)
-            await update.message.reply_text("​", reply_markup=keyboard)
+            elif msg.document:
+                await update.message.reply_document(
+                    document=msg.document.file_id,
+                    caption=caption_html,
+                    parse_mode="HTML" if caption_html else None,
+                    reply_markup=keyboard,
+                )
+            elif msg.sticker:
+                await update.message.reply_sticker(sticker=msg.sticker.file_id)
+                await update.message.reply_text("​", reply_markup=keyboard)
 
 
 async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     msg = update.message
-    if msg.text:
+    if not msg:
+        return CONTENT
+
+    messages = await collect_media_group(msg, context)
+    if messages is None:
+        return CONFIRM
+
+    if len(messages) == 1 and msg.text:
         text_len = telegram_length(msg.text)
         if text_len > TELEGRAM_MESSAGE_LIMIT:
             await update.message.reply_text(
@@ -1239,7 +1340,7 @@ async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
             )
             return CONTENT
 
-    await _save_and_preview_post(update, context, msg)
+    await _save_and_preview_post(update, context, messages)
 
     confirm_keyboard = InlineKeyboardMarkup([
         [
@@ -1275,115 +1376,188 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
     keyboard = get_contact_keyboard(post_text=info)
     source_chat_id = data.get("source_chat_id")
     source_message_id = data.get("source_message_id")
+    source_message_ids = data.get("source_message_ids") or []
     raw_length = data.get("raw_length", 0)
+    is_media_group = data.get("is_media_group", False)
     
     sent_msg_id = None
+    target_post_id = None
 
-    # 1. If photo with split caption (longer than 1024 chars)
-    if data.get("photo_id") and _needs_split_caption(raw_length):
-        await bot.send_photo(chat_id=CHANNEL_ID, photo=data["photo_id"])
-        msg = await bot.send_message(
-            chat_id=CHANNEL_ID,
-            text=info,
-            parse_mode="HTML",
-            reply_markup=keyboard,
-        )
-        sent_msg_id = msg.message_id
+    # Case A: Media Group (Multiple pictures album)
+    if is_media_group:
+        photo_ids = data.get("photo_ids") or []
+        album_first_msg_id = None
 
-    # 2. Try copy_message first (preserves native formatting, forwards, documents, etc.)
-    elif source_chat_id and source_message_id:
-        try:
-            msg_id_obj = await bot.copy_message(
-                chat_id=CHANNEL_ID,
-                from_chat_id=source_chat_id,
-                message_id=source_message_id,
-                reply_markup=keyboard,
-            )
-            sent_msg_id = msg_id_obj.message_id
-        except Exception as copy_err:
-            logger.warning("copy_message to channel failed (%s), trying fallback.", copy_err)
-            sent_msg_id = None
+        if _needs_split_caption(raw_length):
+            # Album has > 1024 chars -> send album without caption, then send full text with keyboard
+            if source_chat_id and source_message_ids:
+                try:
+                    copy_res = await bot.copy_messages(
+                        chat_id=CHANNEL_ID,
+                        from_chat_id=source_chat_id,
+                        message_ids=source_message_ids,
+                        remove_caption=True,
+                    )
+                    album_first_msg_id = copy_res[0].message_id
+                except Exception as copy_err:
+                    logger.warning("copy_messages for album without caption failed (%s), fallback to send_media_group.", copy_err)
 
-    # 3. Direct send fallbacks
-    if not sent_msg_id:
-        msg = None
-        if data.get("photo_id"):
-            msg = await bot.send_photo(
-                chat_id=CHANNEL_ID,
-                photo=data["photo_id"],
-                caption=info if info else None,
-                parse_mode="HTML" if info else None,
-                reply_markup=keyboard,
-            )
-        elif data.get("video_id"):
-            msg = await bot.send_video(
-                chat_id=CHANNEL_ID,
-                video=data["video_id"],
-                caption=info if info else None,
-                parse_mode="HTML" if info else None,
-                reply_markup=keyboard,
-            )
-        elif data.get("document_id"):
-            msg = await bot.send_document(
-                chat_id=CHANNEL_ID,
-                document=data["document_id"],
-                caption=info if info else None,
-                parse_mode="HTML" if info else None,
-                reply_markup=keyboard,
-            )
-        elif data.get("audio_id"):
-            msg = await bot.send_audio(
-                chat_id=CHANNEL_ID,
-                audio=data["audio_id"],
-                caption=info if info else None,
-                parse_mode="HTML" if info else None,
-                reply_markup=keyboard,
-            )
-        elif data.get("voice_id"):
-            msg = await bot.send_voice(
-                chat_id=CHANNEL_ID,
-                voice=data["voice_id"],
-                reply_markup=keyboard,
-            )
-        elif data.get("animation_id"):
-            msg = await bot.send_animation(
-                chat_id=CHANNEL_ID,
-                animation=data["animation_id"],
-                caption=info if info else None,
-                parse_mode="HTML" if info else None,
-                reply_markup=keyboard,
-            )
-        elif data.get("sticker_id"):
-            await bot.send_sticker(chat_id=CHANNEL_ID, sticker=data["sticker_id"])
-            msg = await bot.send_message(chat_id=CHANNEL_ID, text="​", reply_markup=keyboard)
-        elif info:
+            if not album_first_msg_id and photo_ids:
+                media_items = [InputMediaPhoto(media=pid) for pid in photo_ids]
+                sent_album = await bot.send_media_group(chat_id=CHANNEL_ID, media=media_items)
+                album_first_msg_id = sent_album[0].message_id
+
             msg = await bot.send_message(
                 chat_id=CHANNEL_ID,
                 text=info,
                 parse_mode="HTML",
                 reply_markup=keyboard,
             )
-        
-        if msg:
             sent_msg_id = msg.message_id
+            target_post_id = album_first_msg_id or sent_msg_id
+
+        else:
+            # Normal caption (<= 1024 chars) -> send grouped album with caption, then attach buttons right below!
+            if source_chat_id and source_message_ids:
+                try:
+                    copy_res = await bot.copy_messages(
+                        chat_id=CHANNEL_ID,
+                        from_chat_id=source_chat_id,
+                        message_ids=source_message_ids,
+                    )
+                    album_first_msg_id = copy_res[0].message_id
+                except Exception as copy_err:
+                    logger.warning("copy_messages for album failed (%s), fallback to send_media_group.", copy_err)
+
+            if not album_first_msg_id and photo_ids:
+                media_items = []
+                for idx, pid in enumerate(photo_ids):
+                    if idx == 0 and info:
+                        media_items.append(InputMediaPhoto(media=pid, caption=info, parse_mode="HTML"))
+                    else:
+                        media_items.append(InputMediaPhoto(media=pid))
+                sent_album = await bot.send_media_group(chat_id=CHANNEL_ID, media=media_items)
+                album_first_msg_id = sent_album[0].message_id
+
+            # Attach buttons directly below the grouped album
+            msg = await bot.send_message(
+                chat_id=CHANNEL_ID,
+                text="​",  # zero-width space
+                reply_markup=keyboard,
+            )
+            sent_msg_id = msg.message_id
+            target_post_id = album_first_msg_id or sent_msg_id
+
+    # Case B: Single message flow
+    else:
+        # 1. If photo with split caption (longer than 1024 chars)
+        if data.get("photo_id") and _needs_split_caption(raw_length):
+            await bot.send_photo(chat_id=CHANNEL_ID, photo=data["photo_id"])
+            msg = await bot.send_message(
+                chat_id=CHANNEL_ID,
+                text=info,
+                parse_mode="HTML",
+                reply_markup=keyboard,
+            )
+            sent_msg_id = msg.message_id
+
+        # 2. Try copy_message first (preserves native formatting, forwards, documents, etc.)
+        elif source_chat_id and source_message_id:
+            try:
+                msg_id_obj = await bot.copy_message(
+                    chat_id=CHANNEL_ID,
+                    from_chat_id=source_chat_id,
+                    message_id=source_message_id,
+                    reply_markup=keyboard,
+                )
+                sent_msg_id = msg_id_obj.message_id
+            except Exception as copy_err:
+                logger.warning("copy_message to channel failed (%s), trying fallback.", copy_err)
+                sent_msg_id = None
+
+        # 3. Direct send fallbacks
+        if not sent_msg_id:
+            msg = None
+            if data.get("photo_id"):
+                msg = await bot.send_photo(
+                    chat_id=CHANNEL_ID,
+                    photo=data["photo_id"],
+                    caption=info if info else None,
+                    parse_mode="HTML" if info else None,
+                    reply_markup=keyboard,
+                )
+            elif data.get("video_id"):
+                msg = await bot.send_video(
+                    chat_id=CHANNEL_ID,
+                    video=data["video_id"],
+                    caption=info if info else None,
+                    parse_mode="HTML" if info else None,
+                    reply_markup=keyboard,
+                )
+            elif data.get("document_id"):
+                msg = await bot.send_document(
+                    chat_id=CHANNEL_ID,
+                    document=data["document_id"],
+                    caption=info if info else None,
+                    parse_mode="HTML" if info else None,
+                    reply_markup=keyboard,
+                )
+            elif data.get("audio_id"):
+                msg = await bot.send_audio(
+                    chat_id=CHANNEL_ID,
+                    audio=data["audio_id"],
+                    caption=info if info else None,
+                    parse_mode="HTML" if info else None,
+                    reply_markup=keyboard,
+                )
+            elif data.get("voice_id"):
+                msg = await bot.send_voice(
+                    chat_id=CHANNEL_ID,
+                    voice=data["voice_id"],
+                    reply_markup=keyboard,
+                )
+            elif data.get("animation_id"):
+                msg = await bot.send_animation(
+                    chat_id=CHANNEL_ID,
+                    animation=data["animation_id"],
+                    caption=info if info else None,
+                    parse_mode="HTML" if info else None,
+                    reply_markup=keyboard,
+                )
+            elif data.get("sticker_id"):
+                await bot.send_sticker(chat_id=CHANNEL_ID, sticker=data["sticker_id"])
+                msg = await bot.send_message(chat_id=CHANNEL_ID, text="​", reply_markup=keyboard)
+            elif info:
+                msg = await bot.send_message(
+                    chat_id=CHANNEL_ID,
+                    text=info,
+                    parse_mode="HTML",
+                    reply_markup=keyboard,
+                )
             
-    # Now that we have the sent_msg_id, we can append it to the contact button URLs
+            if msg:
+                sent_msg_id = msg.message_id
+
+        target_post_id = sent_msg_id
+
+    # Now that we have the sent_msg_id and target_post_id, register tracking and update buttons
     if sent_msg_id:
+        target_id = target_post_id if target_post_id else sent_msg_id
         post_url = ""
         channel_str = str(CHANNEL_ID)
         if channel_str == "-1001535612806" or "useacareercenter" in channel_str:
-            post_url = f"https://t.me/useacareercenter/{sent_msg_id}"
+            post_url = f"https://t.me/useacareercenter/{target_id}"
         elif channel_str.startswith("-100"):
-            post_url = f"https://t.me/c/{channel_str[4:]}/{sent_msg_id}"
+            post_url = f"https://t.me/c/{channel_str[4:]}/{target_id}"
         elif channel_str.startswith("@"):
-            post_url = f"https://t.me/{channel_str[1:]}/{sent_msg_id}"
+            post_url = f"https://t.me/{channel_str[1:]}/{target_id}"
         else:
-            post_url = f"https://t.me/useacareercenter/{sent_msg_id}"
+            post_url = f"https://t.me/useacareercenter/{target_id}"
 
         new_keyboard = get_contact_keyboard(
             post_url=post_url,
             post_text=info,
-            post_id=str(sent_msg_id),
+            post_id=str(target_id),
             enable_tracking=True,
         )
         if new_keyboard:
@@ -1403,13 +1577,13 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
             raw_text = data.get("raw_text") or (data.get("info") or "")
             snippet = raw_text[:150].strip()
             record_published_post(
-                post_id=str(sent_msg_id),
+                post_id=str(target_id),
                 post_url=post_url,
                 admin_id=author_id,
                 admin_name=author_name,
                 caption_snippet=snippet,
             )
-            logger.info("Recorded post #%s published to channel by %s (%s)", sent_msg_id, author_name, author_id)
+            logger.info("Recorded post #%s published to channel by %s (%s)", target_id, author_name, author_id)
         except Exception as e_pub:
             logger.warning("Failed to record published post to tracker: %s", e_pub)
 
@@ -1481,7 +1655,11 @@ async def handle_standalone_message(update: Update, context: ContextTypes.DEFAUL
         if ok:
             return
 
-    await _save_and_preview_post(update, context, msg)
+    messages = await collect_media_group(msg, context)
+    if messages is None:
+        return
+
+    await _save_and_preview_post(update, context, messages)
 
     confirm_keyboard = InlineKeyboardMarkup([
         [
@@ -1506,7 +1684,7 @@ async def standalone_confirm_callback(update: Update, context: ContextTypes.DEFA
         context.user_data.clear()
         return
 
-    if not context.user_data.get("source_message_id") and not context.user_data.get("info"):
+    if not context.user_data.get("source_message_id") and not context.user_data.get("info") and not context.user_data.get("photo_ids"):
         await query.edit_message_text("⚠️ ព័ត៌មានសារនេះហួសសុពលភាពហើយ។ សូមផ្ញើសារថ្មីម្តងទៀត។")
         return
 
