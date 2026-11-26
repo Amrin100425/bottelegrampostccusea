@@ -1128,6 +1128,33 @@ def _needs_split_caption(raw_length: int) -> bool:
     return raw_length > TELEGRAM_CAPTION_LIMIT
 
 
+def split_caption_text(text: str, max_len: int = TELEGRAM_CAPTION_LIMIT) -> tuple[str, str]:
+    """
+    Splits text so the first part fits within Telegram's photo caption limit (max_len UTF-16 code units),
+    preferring to break cleanly at a newline or space.
+    Returns (first_part, remainder). If text fits within max_len, remainder is empty.
+    """
+    if not text:
+        return "", ""
+    if telegram_length(text) <= max_len:
+        return text, ""
+
+    char_len = len(text)
+    cut_idx = min(max_len, char_len)
+    while cut_idx > 0 and telegram_length(text[:cut_idx]) > max_len:
+        cut_idx -= 10
+
+    best_cut = text.rfind("\n", 0, cut_idx)
+    if best_cut == -1 or best_cut < int(cut_idx * 0.6):
+        best_cut = text.rfind(" ", 0, cut_idx)
+    if best_cut == -1 or best_cut < int(cut_idx * 0.5):
+        best_cut = cut_idx
+
+    first_part = text[:best_cut].rstrip()
+    remainder = text[best_cut:].lstrip()
+    return first_part, remainder
+
+
 async def post_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user = update.effective_user
     if not is_admin(user.id):
@@ -1284,12 +1311,21 @@ async def _send_preview_from_user_data(
         if not preview_copied:
             if photo_id:
                 if _needs_split_caption(raw_length):
-                    p_msg = await context.bot.send_photo(chat_id=chat_id, photo=photo_id)
+                    cap_part, overflow_part = split_caption_text(raw_caption or info or "")
+                    try:
+                        p_msg = await context.bot.send_photo(
+                            chat_id=chat_id,
+                            photo=photo_id,
+                            caption=cap_part or None,
+                        )
+                    except Exception:
+                        p_msg = await context.bot.send_photo(chat_id=chat_id, photo=photo_id)
                     preview_msg_ids.append(p_msg.message_id)
+
                     t_msg = await context.bot.send_message(
                         chat_id=chat_id,
-                        text=info or "",
-                        parse_mode="HTML",
+                        text=overflow_part or info or "",
+                        parse_mode="HTML" if not overflow_part else None,
                         reply_markup=keyboard,
                     )
                     preview_msg_ids.append(t_msg.message_id)
@@ -1663,11 +1699,20 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
     else:
         # 1. If photo with split caption (longer than 1024 chars)
         if data.get("photo_id") and _needs_split_caption(raw_length):
-            await bot.send_photo(chat_id=CHANNEL_ID, photo=data["photo_id"])
+            cap_part, overflow_part = split_caption_text(data.get("raw_text") or info or "")
+            try:
+                await bot.send_photo(
+                    chat_id=CHANNEL_ID,
+                    photo=data["photo_id"],
+                    caption=cap_part if cap_part else None,
+                )
+            except Exception:
+                await bot.send_photo(chat_id=CHANNEL_ID, photo=data["photo_id"])
+
             msg = await bot.send_message(
                 chat_id=CHANNEL_ID,
-                text=info,
-                parse_mode="HTML",
+                text=overflow_part or info,
+                parse_mode="HTML" if not overflow_part else None,
                 reply_markup=keyboard,
             )
             sent_msg_id = msg.message_id
