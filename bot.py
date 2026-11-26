@@ -1136,8 +1136,8 @@ async def post_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     context.user_data.clear()
     await update.message.reply_text(
-        "📝 សូមផ្ញើ *ព័ត៌មានអំពីការងារ និង/ឬ រូបភាព* ក្នុងសារតែមួយ (ឬ forward មកក៏បាន)៖\n\n"
-        "🔸 ផ្ញើរូបភាព ជាមួយ Caption (ព័ត៌មានការងារ) — ល្អបំផុត\n"
+        "📝 សូមផ្ញើ *ព័ត៌មានអំពីការងារ និង/ឬ រូបភាព*៖\n\n"
+        "🔸 ផ្ញើរូបភាព ជាមួយ Caption (ក្នុងសារតែមួយ ឬផ្ញើរូប រួចផ្ញើអត្ថបទដាច់ដោយឡែកពីគ្នាក៏បាន — Bot នឹងបញ្ចូលគ្នាដោយស្វ័យប្រវត្តិ)\n"
         "🔸 ឬផ្ញើតែអត្ថបទ (គ្មានរូបភាព)\n"
         "🔸 ឬផ្ញើតែរូបភាព (គ្មាន Caption)\n\n"
         "ព័ត៌មានវែងៗគាំទ្របានដល់ប្រហែល 4000 តួ — បើវែងជាង Caption limit "
@@ -1150,63 +1150,280 @@ async def post_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return CONTENT
 
 
-_media_group_store = {}
+_incoming_batch_store = {}
 
 
-async def collect_media_group(msg: Message, context: ContextTypes.DEFAULT_TYPE):
+async def collect_incoming_messages(msg: Message, context: ContextTypes.DEFAULT_TYPE):
     """
-    Groups concurrent media updates sharing the same media_group_id into a single list of messages.
+    Groups concurrent incoming messages from the same chat (e.g. albums, or forwarded
+    photo + text, or rapid sequential messages) into a single batch list.
     Returns None for secondary items so they exit without duplicating preview/confirm prompts.
     """
-    mg_id = getattr(msg, "media_group_id", None)
-    if not mg_id:
-        return [msg]
-
-    key = (msg.chat_id, mg_id)
-    if key not in _media_group_store:
-        _media_group_store[key] = {
+    key = msg.chat_id
+    if key not in _incoming_batch_store:
+        _incoming_batch_store[key] = {
             "messages": [msg],
             "last_received": time.time(),
         }
         is_primary = True
     else:
-        _media_group_store[key]["messages"].append(msg)
-        _media_group_store[key]["last_received"] = time.time()
+        _incoming_batch_store[key]["messages"].append(msg)
+        _incoming_batch_store[key]["last_received"] = time.time()
         is_primary = False
 
     if not is_primary:
         return None
 
-    # Wait briefly for all photos in the album to arrive from Telegram servers
-    await asyncio.sleep(0.4)
+    # Wait briefly for all items (album photos or separate forwarded caption) to arrive
+    await asyncio.sleep(0.35)
     while True:
-        elapsed = time.time() - _media_group_store[key]["last_received"]
-        if elapsed >= 0.25:
+        elapsed = time.time() - _incoming_batch_store[key]["last_received"]
+        if elapsed >= 0.2:
             break
-        await asyncio.sleep(0.1)
+        await asyncio.sleep(0.08)
 
-    group_data = _media_group_store.pop(key, None)
-    if not group_data:
+    batch_data = _incoming_batch_store.pop(key, None)
+    if not batch_data:
         return [msg]
 
-    messages = group_data["messages"]
+    messages = batch_data["messages"]
     messages.sort(key=lambda m: m.message_id)
     return messages
 
 
-async def _save_and_preview_post(update: Update, context: ContextTypes.DEFAULT_TYPE, msg_or_msgs) -> None:
+async def _send_preview_from_user_data(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    is_standalone: bool = False,
+) -> None:
+    """
+    Renders and sends the preview and confirmation prompt using state stored in context.user_data.
+    Cleans up any previously sent preview messages to avoid stale/duplicate prompts.
+    """
+    chat_id = update.effective_chat.id
+    # Clean up previous preview messages if any
+    old_preview_ids = context.user_data.get("preview_msg_ids") or []
+    for mid in old_preview_ids:
+        try:
+            await context.bot.delete_message(chat_id=chat_id, message_id=mid)
+        except Exception:
+            pass
+    context.user_data["preview_msg_ids"] = []
+
+    info = context.user_data.get("info")
+    raw_caption = context.user_data.get("raw_text") or ""
+    raw_length = context.user_data.get("raw_length", 0)
+    is_mg = context.user_data.get("is_media_group", False)
+    is_combined = context.user_data.get("is_combined", False)
+    photo_ids = context.user_data.get("photo_ids") or []
+    video_ids = context.user_data.get("video_ids") or []
+    photo_id = context.user_data.get("photo_id")
+    video_id = context.user_data.get("video_id")
+    document_id = context.user_data.get("document_id")
+    sticker_id = context.user_data.get("sticker_id")
+    source_message_id = context.user_data.get("source_message_id")
+    source_message_ids = context.user_data.get("source_message_ids") or []
+
+    keyboard = get_contact_keyboard(post_text=info)
+    preview_msg_ids = []
+
+    if is_mg:
+        preview_copied = False
+        if not is_combined and not _needs_split_caption(raw_length) and source_message_ids:
+            try:
+                copied_msgs = await context.bot.copy_messages(
+                    chat_id=chat_id,
+                    from_chat_id=chat_id,
+                    message_ids=source_message_ids,
+                )
+                preview_copied = True
+                preview_msg_ids.extend([m.message_id for m in copied_msgs])
+            except Exception as copy_err:
+                logger.warning("Preview copy_messages failed (%s), falling back to send_media_group.", copy_err)
+
+        if not preview_copied and photo_ids:
+            media_items = []
+            for idx, pid in enumerate(photo_ids):
+                if idx == 0 and info and not _needs_split_caption(raw_length):
+                    media_items.append(InputMediaPhoto(media=pid, caption=info, parse_mode="HTML"))
+                else:
+                    media_items.append(InputMediaPhoto(media=pid))
+            try:
+                sent_mg = await context.bot.send_media_group(chat_id=chat_id, media=media_items)
+                preview_msg_ids.extend([m.message_id for m in sent_mg])
+            except Exception as err:
+                logger.warning("Preview send_media_group HTML failed (%s), falling back to plain", err)
+                media_items[0] = InputMediaPhoto(media=photo_ids[0], caption=raw_caption if not _needs_split_caption(raw_length) else "")
+                sent_mg = await context.bot.send_media_group(chat_id=chat_id, media=media_items)
+                preview_msg_ids.extend([m.message_id for m in sent_mg])
+
+        # Show button preview
+        if _needs_split_caption(raw_length) and info:
+            b_msg = await update.message.reply_text(info, parse_mode="HTML", reply_markup=keyboard)
+            preview_msg_ids.append(b_msg.message_id)
+        else:
+            b_msg = await update.message.reply_text("👇 **ប៊ូតុង Contact នឹងបង្ហាញដូចខាងក្រោម៖**", parse_mode="Markdown", reply_markup=keyboard)
+            preview_msg_ids.append(b_msg.message_id)
+
+    else:
+        preview_copied = False
+        if not is_combined and not (photo_id and _needs_split_caption(raw_length)) and source_message_id:
+            try:
+                cp_msg = await context.bot.copy_message(
+                    chat_id=chat_id,
+                    from_chat_id=chat_id,
+                    message_id=source_message_id,
+                    reply_markup=keyboard,
+                )
+                preview_copied = True
+                preview_msg_ids.append(cp_msg.message_id)
+            except Exception as copy_err:
+                logger.warning("Preview copy_message failed (%s), falling back to standard send.", copy_err)
+                preview_copied = False
+
+        if not preview_copied:
+            if photo_id:
+                if _needs_split_caption(raw_length):
+                    p_msg = await context.bot.send_photo(chat_id=chat_id, photo=photo_id)
+                    preview_msg_ids.append(p_msg.message_id)
+                    t_msg = await context.bot.send_message(
+                        chat_id=chat_id,
+                        text=info or "",
+                        parse_mode="HTML",
+                        reply_markup=keyboard,
+                    )
+                    preview_msg_ids.append(t_msg.message_id)
+                else:
+                    try:
+                        p_msg = await context.bot.send_photo(
+                            chat_id=chat_id,
+                            photo=photo_id,
+                            caption=info,
+                            parse_mode="HTML" if info else None,
+                            reply_markup=keyboard,
+                        )
+                        preview_msg_ids.append(p_msg.message_id)
+                    except Exception as err:
+                        logger.warning("Preview send_photo HTML failed (%s), fallback plain text", err)
+                        p_msg = await context.bot.send_photo(
+                            chat_id=chat_id,
+                            photo=photo_id,
+                            caption=raw_caption or None,
+                            reply_markup=keyboard,
+                        )
+                        preview_msg_ids.append(p_msg.message_id)
+            elif video_id:
+                try:
+                    v_msg = await context.bot.send_video(
+                        chat_id=chat_id,
+                        video=video_id,
+                        caption=info,
+                        parse_mode="HTML" if info else None,
+                        reply_markup=keyboard,
+                    )
+                    preview_msg_ids.append(v_msg.message_id)
+                except Exception as err:
+                    logger.warning("Preview send_video HTML failed (%s), fallback plain text", err)
+                    v_msg = await context.bot.send_video(
+                        chat_id=chat_id,
+                        video=video_id,
+                        caption=raw_caption or None,
+                        reply_markup=keyboard,
+                    )
+                    preview_msg_ids.append(v_msg.message_id)
+            elif document_id:
+                try:
+                    d_msg = await context.bot.send_document(
+                        chat_id=chat_id,
+                        document=document_id,
+                        caption=info,
+                        parse_mode="HTML" if info else None,
+                        reply_markup=keyboard,
+                    )
+                    preview_msg_ids.append(d_msg.message_id)
+                except Exception as err:
+                    logger.warning("Preview send_document HTML failed (%s), fallback plain text", err)
+                    d_msg = await context.bot.send_document(
+                        chat_id=chat_id,
+                        document=document_id,
+                        caption=raw_caption or None,
+                        reply_markup=keyboard,
+                    )
+                    preview_msg_ids.append(d_msg.message_id)
+            elif sticker_id:
+                s_msg = await context.bot.send_sticker(chat_id=chat_id, sticker=sticker_id)
+                preview_msg_ids.append(s_msg.message_id)
+                b_msg = await context.bot.send_message(chat_id=chat_id, text="​", reply_markup=keyboard)
+                preview_msg_ids.append(b_msg.message_id)
+            elif info:
+                t_msg = await context.bot.send_message(
+                    chat_id=chat_id,
+                    text=info,
+                    parse_mode="HTML",
+                    reply_markup=keyboard,
+                )
+                preview_msg_ids.append(t_msg.message_id)
+
+    confirm_keyboard = InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(
+                "✅ YES — បញ្ជូនទៅ Channel",
+                callback_data="standalone_confirm_yes" if is_standalone else "confirm_yes",
+                api_kwargs={"style": "success"}
+            ),
+            InlineKeyboardButton(
+                "❌ NO — បោះបង់",
+                callback_data="standalone_confirm_no" if is_standalone else "confirm_no",
+                api_kwargs={"style": "danger"}
+            ),
+        ]
+    ])
+    prompt_msg = await context.bot.send_message(
+        chat_id=chat_id,
+        text="✅ **មើលទម្រង់សារមុនបង្ហោះ (Preview)**\n❓ តើអ្នកពិតជាចង់បង្ហោះសារនេះទៅកាន់ Channel ដែរឬទេ?",
+        reply_markup=confirm_keyboard,
+        parse_mode="Markdown",
+    )
+    preview_msg_ids.append(prompt_msg.message_id)
+    context.user_data["preview_msg_ids"] = preview_msg_ids
+
+
+async def _save_and_preview_post(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    msg_or_msgs,
+    is_standalone: bool = False,
+) -> None:
     """Preview message for admin and store metadata for confirmation."""
     messages = msg_or_msgs if isinstance(msg_or_msgs, list) else [msg_or_msgs]
-    is_mg = len(messages) > 1
 
-    main_msg = next((m for m in messages if m.caption), messages[0])
-    caption_html = (main_msg.caption_html or "").strip() or None
-    text_html = (main_msg.text_html or "").strip() if main_msg.text else None
-    info = caption_html or text_html
-    raw_caption = main_msg.caption or main_msg.text or ""
+    photo_ids = [m.photo[-1].file_id for m in messages if m.photo]
+    video_ids = [m.video.file_id for m in messages if m.video]
+    doc_ids = [m.document.file_id for m in messages if m.document]
+    audio_ids = [m.audio.file_id for m in messages if m.audio]
+    voice_ids = [m.voice.file_id for m in messages if m.voice]
+    anim_ids = [m.animation.file_id for m in messages if m.animation]
+    sticker_ids = [m.sticker.file_id for m in messages if m.sticker]
+
+    caption_parts = []
+    raw_caption_parts = []
+    for m in messages:
+        if m.caption_html and m.caption_html.strip():
+            caption_parts.append(m.caption_html.strip())
+            raw_caption_parts.append((m.caption or "").strip())
+        elif m.text_html and m.text_html.strip():
+            caption_parts.append(m.text_html.strip())
+            raw_caption_parts.append((m.text or "").strip())
+
+    info = "\n\n".join(caption_parts) if caption_parts else None
+    raw_caption = "\n\n".join(raw_caption_parts) if raw_caption_parts else ""
     raw_length = telegram_length(raw_caption)
 
-    # Capture admin author information for post tracking
+    is_mg = len(photo_ids) > 1 or len(video_ids) > 1 or any(getattr(m, "media_group_id", None) for m in messages)
+    has_media = bool(photo_ids or video_ids or doc_ids or anim_ids)
+    has_text = bool(info)
+    is_combined = bool(has_media and has_text and (len(messages) > 1 or any(m.text for m in messages)))
+
     user = update.effective_user
     context.user_data["author_id"] = user.id if user else None
     context.user_data["author_name"] = (user.full_name or user.username or "Admin") if user else "Admin"
@@ -1217,109 +1434,109 @@ async def _save_and_preview_post(update: Update, context: ContextTypes.DEFAULT_T
     context.user_data["source_message_ids"] = [m.message_id for m in messages]
     context.user_data["source_message_id"] = messages[0].message_id
     context.user_data["is_media_group"] = is_mg
+    context.user_data["is_combined"] = is_combined
+    context.user_data["photo_ids"] = photo_ids
+    context.user_data["video_ids"] = video_ids
+    context.user_data["photo_id"] = photo_ids[0] if photo_ids else None
+    context.user_data["video_id"] = video_ids[0] if video_ids else None
+    context.user_data["document_id"] = doc_ids[0] if doc_ids else None
+    context.user_data["audio_id"] = audio_ids[0] if audio_ids else None
+    context.user_data["voice_id"] = voice_ids[0] if voice_ids else None
+    context.user_data["animation_id"] = anim_ids[0] if anim_ids else None
+    context.user_data["sticker_id"] = sticker_ids[0] if sticker_ids else None
 
-    keyboard = get_contact_keyboard(post_text=info)
+    await _send_preview_from_user_data(update, context, is_standalone=is_standalone)
 
-    if is_mg:
-        photo_ids = [m.photo[-1].file_id for m in messages if m.photo]
-        video_ids = [m.video.file_id for m in messages if m.video]
-        context.user_data["photo_ids"] = photo_ids
-        context.user_data["video_ids"] = video_ids
-        context.user_data["photo_id"] = photo_ids[0] if photo_ids else None
-        context.user_data["video_id"] = video_ids[0] if video_ids else None
-        context.user_data["document_id"] = None
-        context.user_data["audio_id"] = None
-        context.user_data["voice_id"] = None
-        context.user_data["animation_id"] = None
-        context.user_data["sticker_id"] = None
 
-        # Send preview to admin: try copy_messages first
-        preview_copied = False
-        try:
-            await context.bot.copy_messages(
-                chat_id=messages[0].chat_id,
-                from_chat_id=messages[0].chat_id,
-                message_ids=[m.message_id for m in messages],
-            )
-            preview_copied = True
-        except Exception as copy_err:
-            logger.warning("Preview copy_messages failed (%s), falling back to send_media_group.", copy_err)
+async def _update_pending_post_with_messages(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+    messages: list[Message],
+    is_standalone: bool = False,
+) -> None:
+    """
+    Merges incoming message(s) into an existing pending post (e.g. caption for photo,
+    photo for caption, or updating text/photo) and refreshes the preview.
+    """
+    incoming_photo_ids = [m.photo[-1].file_id for m in messages if m.photo]
+    incoming_video_ids = [m.video.file_id for m in messages if m.video]
+    incoming_doc_ids = [m.document.file_id for m in messages if m.document]
 
-        if not preview_copied and photo_ids:
-            media_items = []
-            for idx, pid in enumerate(photo_ids):
-                if idx == 0 and info and not _needs_split_caption(raw_length):
-                    media_items.append(InputMediaPhoto(media=pid, caption=info, parse_mode="HTML"))
-                else:
-                    media_items.append(InputMediaPhoto(media=pid))
-            await context.bot.send_media_group(chat_id=messages[0].chat_id, media=media_items)
+    incoming_text_parts = []
+    incoming_raw_parts = []
+    for m in messages:
+        if m.caption_html and m.caption_html.strip():
+            incoming_text_parts.append(m.caption_html.strip())
+            incoming_raw_parts.append((m.caption or "").strip())
+        elif m.text_html and m.text_html.strip():
+            incoming_text_parts.append(m.text_html.strip())
+            incoming_raw_parts.append((m.text or "").strip())
 
-        # Show button preview
-        if _needs_split_caption(raw_length) and info:
-            await update.message.reply_text(info, parse_mode="HTML", reply_markup=keyboard)
-        else:
-            await update.message.reply_text("👇 **ប៊ូតុង Contact នឹងបង្ហាញដូចខាងក្រោម៖**", parse_mode="Markdown", reply_markup=keyboard)
+    incoming_info = "\n\n".join(incoming_text_parts) if incoming_text_parts else None
+    incoming_raw = "\n\n".join(incoming_raw_parts) if incoming_raw_parts else ""
 
-    else:
-        msg = messages[0]
-        context.user_data["photo_id"] = msg.photo[-1].file_id if msg.photo else None
-        context.user_data["video_id"] = msg.video.file_id if msg.video else None
-        context.user_data["document_id"] = msg.document.file_id if msg.document else None
-        context.user_data["audio_id"] = msg.audio.file_id if msg.audio else None
-        context.user_data["voice_id"] = msg.voice.file_id if msg.voice else None
-        context.user_data["animation_id"] = msg.animation.file_id if msg.animation else None
-        context.user_data["sticker_id"] = msg.sticker.file_id if msg.sticker else None
+    if incoming_photo_ids:
+        context.user_data["photo_ids"] = incoming_photo_ids
+        context.user_data["photo_id"] = incoming_photo_ids[0]
+        context.user_data["is_media_group"] = len(incoming_photo_ids) > 1
+        context.user_data["is_combined"] = True
 
-        # Send preview: Prioritize copy_message to perfectly preserve Telegram Premium custom/animated emojis!
-        preview_copied = False
-        if not (msg.photo and _needs_split_caption(raw_length)):
-            try:
-                await context.bot.copy_message(
-                    chat_id=msg.chat_id,
-                    from_chat_id=msg.chat_id,
-                    message_id=msg.message_id,
-                    reply_markup=keyboard,
-                )
-                preview_copied = True
-            except Exception as copy_err:
-                logger.warning("Preview copy_message failed (%s), falling back to standard send.", copy_err)
-                preview_copied = False
+    if incoming_video_ids:
+        context.user_data["video_ids"] = incoming_video_ids
+        context.user_data["video_id"] = incoming_video_ids[0]
+        context.user_data["is_combined"] = True
 
-        if not preview_copied:
-            if msg.photo:
-                if _needs_split_caption(raw_length):
-                    await update.message.reply_photo(photo=msg.photo[-1].file_id)
-                    await update.message.reply_text(
-                        caption_html or "", parse_mode="HTML", reply_markup=keyboard
-                    )
-                else:
-                    await update.message.reply_photo(
-                        photo=msg.photo[-1].file_id,
-                        caption=caption_html,
-                        parse_mode="HTML" if caption_html else None,
-                        reply_markup=keyboard,
-                    )
-            elif msg.text:
-                await update.message.reply_text(
-                    text_html, parse_mode="HTML", reply_markup=keyboard
-                )
-            elif msg.video:
-                await update.message.reply_video(
-                    video=msg.video.file_id,
-                    caption=caption_html,
-                    parse_mode="HTML" if caption_html else None,
-                    reply_markup=keyboard,
-                )
-            elif msg.document:
-                await update.message.reply_document(
-                    document=msg.document.file_id,
-                    caption=caption_html,
-                    parse_mode="HTML" if caption_html else None,
-                    reply_markup=keyboard,
-                )
-            elif msg.sticker:
-                await update.message.reply_sticker(sticker=msg.sticker.file_id)
-                await update.message.reply_text("​", reply_markup=keyboard)
+    if incoming_doc_ids:
+        context.user_data["document_id"] = incoming_doc_ids[0]
+        context.user_data["is_combined"] = True
+
+    if incoming_info:
+        context.user_data["info"] = incoming_info
+        context.user_data["raw_text"] = incoming_raw
+        context.user_data["raw_length"] = telegram_length(incoming_raw)
+        context.user_data["is_combined"] = True
+
+    user = update.effective_user
+    if user:
+        context.user_data["author_id"] = user.id
+        context.user_data["author_name"] = user.full_name or user.username or "Admin"
+    context.user_data["source_chat_id"] = update.effective_chat.id
+
+    await _send_preview_from_user_data(update, context, is_standalone=is_standalone)
+
+
+async def _refresh_pending_preview_keyboard(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Refreshes the buttons of a pending preview after contact settings change."""
+    if context.user_data.get("photo_id") or context.user_data.get("info") or context.user_data.get("photo_ids"):
+        is_standalone = any(
+            "standalone" in str(mid) for mid in (context.user_data.get("source_message_ids") or [])
+        )
+        await _send_preview_from_user_data(update, context, is_standalone=is_standalone)
+
+
+async def handle_confirm_additional_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Handles extra/sequential messages sent while waiting in CONFIRM state."""
+    msg = update.message
+    if not msg:
+        return CONFIRM
+
+    # Plain text cancel check
+    if msg.text and not msg.photo and msg.text.strip().lower() in ("cancel", "/cancel", "cancel contact", "/cancelcontact", "បោះបង់"):
+        return await cancel(update, context)
+
+    # Contact setting check
+    if msg.text and not msg.photo and is_contact_setting_text(msg.text):
+        ok = await apply_contacts_and_reply(update, msg.text)
+        if ok:
+            await _refresh_pending_preview_keyboard(update, context)
+            return CONFIRM
+
+    messages = await collect_incoming_messages(msg, context)
+    if messages is None:
+        return CONFIRM
+
+    await _update_pending_post_with_messages(update, context, messages, is_standalone=False)
+    return CONFIRM
 
 
 async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -1327,7 +1544,7 @@ async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     if not msg:
         return CONTENT
 
-    messages = await collect_media_group(msg, context)
+    messages = await collect_incoming_messages(msg, context)
     if messages is None:
         return CONFIRM
 
@@ -1340,19 +1557,7 @@ async def get_content(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
             )
             return CONTENT
 
-    await _save_and_preview_post(update, context, messages)
-
-    confirm_keyboard = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("✅ YES — បញ្ជូនទៅ Channel", callback_data="confirm_yes", api_kwargs={"style": "success"}),
-            InlineKeyboardButton("❌ NO — បោះបង់", callback_data="confirm_no", api_kwargs={"style": "danger"}),
-        ]
-    ])
-    await update.message.reply_text(
-        "✅ **មើលទម្រង់សារមុនបង្ហោះ (Preview)**\n❓ តើអ្នកពិតជាចង់បង្ហោះសារនេះទៅកាន់ Channel ដែរឬទេ?",
-        reply_markup=confirm_keyboard,
-        parse_mode="Markdown",
-    )
+    await _save_and_preview_post(update, context, messages, is_standalone=False)
     return CONFIRM
 
 
@@ -1390,7 +1595,7 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
 
         if _needs_split_caption(raw_length):
             # Album has > 1024 chars -> send album without caption, then send full text with keyboard
-            if source_chat_id and source_message_ids:
+            if not data.get("is_combined") and source_chat_id and source_message_ids:
                 try:
                     copy_res = await bot.copy_messages(
                         chat_id=CHANNEL_ID,
@@ -1418,7 +1623,7 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
 
         else:
             # Normal caption (<= 1024 chars) -> send grouped album with caption, then attach buttons right below!
-            if source_chat_id and source_message_ids:
+            if not data.get("is_combined") and source_chat_id and source_message_ids:
                 try:
                     copy_res = await bot.copy_messages(
                         chat_id=CHANNEL_ID,
@@ -1436,8 +1641,14 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
                         media_items.append(InputMediaPhoto(media=pid, caption=info, parse_mode="HTML"))
                     else:
                         media_items.append(InputMediaPhoto(media=pid))
-                sent_album = await bot.send_media_group(chat_id=CHANNEL_ID, media=media_items)
-                album_first_msg_id = sent_album[0].message_id
+                try:
+                    sent_album = await bot.send_media_group(chat_id=CHANNEL_ID, media=media_items)
+                    album_first_msg_id = sent_album[0].message_id
+                except Exception as err:
+                    logger.warning("send_media_group failed with HTML (%s), fallback to plain text", err)
+                    media_items[0] = InputMediaPhoto(media=photo_ids[0], caption=data.get("raw_text") or "")
+                    sent_album = await bot.send_media_group(chat_id=CHANNEL_ID, media=media_items)
+                    album_first_msg_id = sent_album[0].message_id
 
             # Attach buttons directly below the grouped album
             msg = await bot.send_message(
@@ -1462,7 +1673,7 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
             sent_msg_id = msg.message_id
 
         # 2. Try copy_message first (preserves native formatting, forwards, documents, etc.)
-        elif source_chat_id and source_message_id:
+        elif not data.get("is_combined") and source_chat_id and source_message_id:
             try:
                 msg_id_obj = await bot.copy_message(
                     chat_id=CHANNEL_ID,
@@ -1479,29 +1690,56 @@ async def _publish_data_to_channel(bot, data: dict) -> None:
         if not sent_msg_id:
             msg = None
             if data.get("photo_id"):
-                msg = await bot.send_photo(
-                    chat_id=CHANNEL_ID,
-                    photo=data["photo_id"],
-                    caption=info if info else None,
-                    parse_mode="HTML" if info else None,
-                    reply_markup=keyboard,
-                )
+                try:
+                    msg = await bot.send_photo(
+                        chat_id=CHANNEL_ID,
+                        photo=data["photo_id"],
+                        caption=info if info else None,
+                        parse_mode="HTML" if info else None,
+                        reply_markup=keyboard,
+                    )
+                except Exception as parse_err:
+                    logger.warning("send_photo to channel failed with HTML (%s), falling back to plain text", parse_err)
+                    msg = await bot.send_photo(
+                        chat_id=CHANNEL_ID,
+                        photo=data["photo_id"],
+                        caption=data.get("raw_text") or None,
+                        reply_markup=keyboard,
+                    )
             elif data.get("video_id"):
-                msg = await bot.send_video(
-                    chat_id=CHANNEL_ID,
-                    video=data["video_id"],
-                    caption=info if info else None,
-                    parse_mode="HTML" if info else None,
-                    reply_markup=keyboard,
-                )
+                try:
+                    msg = await bot.send_video(
+                        chat_id=CHANNEL_ID,
+                        video=data["video_id"],
+                        caption=info if info else None,
+                        parse_mode="HTML" if info else None,
+                        reply_markup=keyboard,
+                    )
+                except Exception as parse_err:
+                    logger.warning("send_video to channel failed with HTML (%s), falling back to plain text", parse_err)
+                    msg = await bot.send_video(
+                        chat_id=CHANNEL_ID,
+                        video=data["video_id"],
+                        caption=data.get("raw_text") or None,
+                        reply_markup=keyboard,
+                    )
             elif data.get("document_id"):
-                msg = await bot.send_document(
-                    chat_id=CHANNEL_ID,
-                    document=data["document_id"],
-                    caption=info if info else None,
-                    parse_mode="HTML" if info else None,
-                    reply_markup=keyboard,
-                )
+                try:
+                    msg = await bot.send_document(
+                        chat_id=CHANNEL_ID,
+                        document=data["document_id"],
+                        caption=info if info else None,
+                        parse_mode="HTML" if info else None,
+                        reply_markup=keyboard,
+                    )
+                except Exception as parse_err:
+                    logger.warning("send_document to channel failed with HTML (%s), falling back to plain text", parse_err)
+                    msg = await bot.send_document(
+                        chat_id=CHANNEL_ID,
+                        document=data["document_id"],
+                        caption=data.get("raw_text") or None,
+                        reply_markup=keyboard,
+                    )
             elif data.get("audio_id"):
                 msg = await bot.send_audio(
                     chat_id=CHANNEL_ID,
@@ -1627,6 +1865,11 @@ async def confirm_post(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    for mid in context.user_data.get("preview_msg_ids", []):
+        try:
+            await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=mid)
+        except Exception:
+            pass
     context.user_data.clear()
     await update.message.reply_text("❌ បានបោះបង់ដំណើរការ។")
     return ConversationHandler.END
@@ -1642,9 +1885,16 @@ async def handle_standalone_message(update: Update, context: ContextTypes.DEFAUL
         return
 
     msg = update.message
+    if not msg:
+        return
 
     # Check if this plain text message is intended to cancel
     if msg.text and not msg.photo and msg.text.strip().lower() in ("cancel", "/cancel", "cancel contact", "/cancelcontact", "បោះបង់"):
+        for mid in context.user_data.get("preview_msg_ids", []):
+            try:
+                await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=mid)
+            except Exception:
+                pass
         context.user_data.clear()
         await update.message.reply_text("❌ បានបោះបង់ដំណើរការ (Cancelled)។")
         return
@@ -1653,25 +1903,23 @@ async def handle_standalone_message(update: Update, context: ContextTypes.DEFAUL
     if msg.text and not msg.photo and is_contact_setting_text(msg.text):
         ok = await apply_contacts_and_reply(update, msg.text)
         if ok:
+            await _refresh_pending_preview_keyboard(update, context)
             return
 
-    messages = await collect_media_group(msg, context)
+    has_pending = bool(
+        context.user_data.get("photo_id")
+        or context.user_data.get("photo_ids")
+        or context.user_data.get("info")
+    )
+
+    messages = await collect_incoming_messages(msg, context)
     if messages is None:
         return
 
-    await _save_and_preview_post(update, context, messages)
-
-    confirm_keyboard = InlineKeyboardMarkup([
-        [
-            InlineKeyboardButton("✅ YES — បញ្ជូនទៅ Channel", callback_data="standalone_confirm_yes", api_kwargs={"style": "success"}),
-            InlineKeyboardButton("❌ NO — បោះបង់", callback_data="standalone_confirm_no", api_kwargs={"style": "danger"}),
-        ]
-    ])
-    await update.message.reply_text(
-        "✅ **មើលទម្រង់សារមុនបង្ហោះ (Preview)**\n❓ តើអ្នកពិតជាចង់បង្ហោះសារនេះទៅកាន់ Channel ដែរឬទេ?",
-        reply_markup=confirm_keyboard,
-        parse_mode="Markdown",
-    )
+    if has_pending:
+        await _update_pending_post_with_messages(update, context, messages, is_standalone=True)
+    else:
+        await _save_and_preview_post(update, context, messages, is_standalone=True)
 
 
 async def standalone_confirm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -2596,7 +2844,10 @@ def main() -> None:
                     get_content,
                 ),
             ],
-            CONFIRM: [CallbackQueryHandler(confirm_post, pattern="^(confirm|standalone_confirm)_(yes|no)$")],
+            CONFIRM: [
+                CallbackQueryHandler(confirm_post, pattern="^(confirm|standalone_confirm)_(yes|no)$"),
+                MessageHandler(filters.ALL & ~filters.COMMAND, handle_confirm_additional_content),
+            ],
         },
         fallbacks=[
             CommandHandler("cancel", cancel),
